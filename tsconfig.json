@@ -1,0 +1,22 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "isolatedModules": true,
+    "moduleResolution": "bundler",
+    "strict": true,
+    // 未使用的导入和局部变量按错误处理：本轮清理死代码时全仓库只有 6 处，
+    // 成本极低，但能挡住「删了调用方却留下 import」这类回潮。
+    // 刻意保留的形参用 `_` 前缀显式标注意图。
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "types": ["@cloudflare/workers-types", "svelte"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.svelte", "worker/**/*.ts", "shared/**/*.ts"]
+}

@@ -1,0 +1,8 @@
+{
+  "_comment": "复制为 verify.local.json 后填入真实值。该文件被 Git 忽略，不会进入提交。环境变量优先级高于此文件。管理员凭据不要写入文件，只在当前验证任务中通过 ADMIN_USER / ADMIN_PASS 环境变量提供。",
+
+  "baseUrl": "https://your-cf-navs-domain.example",
+  "chromeDebugPort": "9223",
+  "chromeExe": "",
+  "chromeProfileRoot": ""
+}
