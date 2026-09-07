@@ -17,22 +17,18 @@ export type AppThemeState = {
 export function resolveAppThemeState({
   preferredThemeMode,
   configuredThemeMode,
-  systemPrefersDark,
+  systemPrefersDark: _systemPrefersDark,
 }: AppThemeStateInput): AppThemeState {
-  const configuredTheme = configuredThemeMode ?? 'auto'
-  const themeMode = preferredThemeMode ?? configuredTheme
+  const configuredTheme = configuredThemeMode === 'dark' ? 'dark' : 'light'
+  const themeMode = preferredThemeMode === 'dark' ? 'dark' : 'light'
 
   return {
     configuredThemeMode: configuredTheme,
     themeMode,
-    activeTheme: themeMode === 'auto'
-      ? systemPrefersDark ? 'dark' : 'light'
-      : themeMode,
+    activeTheme: themeMode,
   }
 }
 
 export function getNextThemePreference(themeMode: ThemeMode): ThemeMode {
-  if (themeMode === 'light') return 'dark'
-  if (themeMode === 'dark') return 'auto'
-  return 'light'
+  return themeMode === 'dark' ? 'light' : 'dark'
 }

@@ -187,7 +187,7 @@
   $: publicData = $publicStore.data
   $: adminData = $adminStore.data
   $: canSeeHome = canSeeHomeView({ publicMode: config?.public_mode, authenticated: $isAuthenticated })
-  $: homeTitle = publicData?.settings.site_title ?? config?.site_title ?? 'CF-Navs'
+  $: homeTitle = publicData?.settings.site_title ?? config?.site_title ?? 'HubNav'
 
   $: adminCategories = toAdminCategories(adminData.categories, adminData.bookmarks)
   $: adminBookmarks = toAdminBookmarks(adminData.bookmarks)
@@ -200,8 +200,6 @@
   }
 
   let systemPrefersDark = false
-  let mediaQuery: MediaQueryList | null = null
-  let handleSystemThemeChange: ((event: MediaQueryListEvent) => void) | null = null
 
   $: resolvedThemeState = resolveAppThemeState({
     preferredThemeMode,
@@ -919,12 +917,6 @@
 
     if (typeof window !== 'undefined' && window.matchMedia) {
       prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      systemPrefersDark = mediaQuery.matches
-      handleSystemThemeChange = (event: MediaQueryListEvent) => {
-        systemPrefersDark = event.matches
-      }
-      mediaQuery.addEventListener('change', handleSystemThemeChange)
     }
 
     void initializeApp()
@@ -932,9 +924,6 @@
   })
 
   onDestroy(() => {
-    if (mediaQuery && handleSystemThemeChange) {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange)
-    }
     // 不 revoke 的话每次重建都会漏一个 blob URL。
     customScriptController?.destroy()
   })
@@ -950,36 +939,8 @@
     onInstall={handleInstall}
     onRetryStatus={initializeApp}
   />
-{:else if booting}
-  <div class="app-splash">
-    <div class="app-splash-card app-splash-card--loading" role="status" aria-live="polite" aria-busy="true">
-      <div class="app-splash-mark" aria-hidden="true">
-        <svg class="app-splash-spinner" viewBox="0 0 50 50">
-          <circle class="ring" cx="25" cy="25" r="20" fill="none" stroke="url(#splash-spinner-grad-boot)" stroke-width="3.5"></circle>
-          <circle class="dot" cx="25" cy="25" r="4.5" fill="#2dd4bf"></circle>
-          <defs>
-            <linearGradient id="splash-spinner-grad-boot" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#38bdf8"></stop>
-              <stop offset="60%" stop-color="#2dd4bf"></stop>
-              <stop offset="100%" stop-color="#bef264"></stop>
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-      <p class="eyebrow">CF-Navs</p>
-      <h1>正在加载项目数据...</h1>
-      <p>前端状态与后端接口正在初始化，请稍候。</p>
-      <div class="app-splash-progress" aria-hidden="true">
-        <div class="app-splash-progress-meta">
-          <span>初始化数据</span>
-          <span>同步中</span>
-        </div>
-        <div class="app-splash-track">
-          <span class="app-splash-bar"></span>
-        </div>
-      </div>
-    </div>
-  </div>
+  {:else if booting}
+    <div class="app-shell" aria-busy="true"></div>
 {:else}
   <div class="app-shell" in:fade={{ duration: prefersReducedMotion ? 0 : 260, delay: prefersReducedMotion ? 0 : 60 }}>
     <Toast />
@@ -1003,7 +964,6 @@
           onLogout={handleLogout}
           onOpenLogin={handleOpenLogin}
           activeTheme={activeTheme}
-          activeThemeMode={themeMode}
           onToggleTheme={handleToggleTheme}
         />
       </div>
@@ -1023,7 +983,7 @@
               </defs>
             </svg>
           </div>
-          <p class="eyebrow">CF-Navs</p>
+          <p class="eyebrow">HubNav</p>
           <h1>请先登录管理员账号</h1>
           <p>当前站点未公开，登录后再加载后台管理界面。</p>
         </div>
@@ -1090,7 +1050,7 @@
               </defs>
             </svg>
           </div>
-          <p class="eyebrow">CF-Navs</p>
+          <p class="eyebrow">HubNav</p>
           <h1>正在加载后台...</h1>
           <p>管理界面分包正在按需载入。</p>
           <div class="app-splash-progress" aria-hidden="true">

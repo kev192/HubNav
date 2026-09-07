@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="public/icon.png" alt="CF-Navs 项目图标" width="112" height="112">
-  <h1>CF-Navs</h1>
+  <img src="public/icon.png" alt="HubNav 项目图标" width="112" height="112">
+  <h1>HubNav</h1>
   <p>运行在 Cloudflare Workers 上的轻量个人导航面板</p>
   <p>在一个清爽、响应式的界面中管理分类、书签、主题、搜索服务与数据备份。</p>
 
@@ -19,7 +19,7 @@
     <a href="docs/README.md">项目文档</a>
   </p>
 
-  <a href="https://github.com/lbjxr/CF-Navs/fork">
+  <a href="https://github.com/lbjxr/HubNav/fork">
     <img src="https://img.shields.io/badge/Fork_on_GitHub-181717?logo=github&logoColor=white" alt="Fork on GitHub">
   </a>
 </div>
@@ -58,28 +58,28 @@
   <tr>
     <td align="center" width="50%">
       <strong>亮色首页</strong><br>
-      <img src="docs/screenshots/cf-navs-light.jpg" alt="CF-Navs 亮色首页">
+      <img src="docs/screenshots/cf-navs-light.jpg" alt="HubNav 亮色首页">
     </td>
     <td align="center" width="50%">
       <strong>暗色首页</strong><br>
-      <img src="docs/screenshots/cf-navs-dark.jpg" alt="CF-Navs 暗色首页">
+      <img src="docs/screenshots/cf-navs-dark.jpg" alt="HubNav 暗色首页">
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
       <strong>移动端亮色</strong><br>
-      <img src="docs/screenshots/cf-navs-light-mobile.jpg" alt="CF-Navs 移动端亮色首页" width="260">
+      <img src="docs/screenshots/cf-navs-light-mobile.jpg" alt="HubNav 移动端亮色首页" width="260">
     </td>
     <td align="center" width="50%">
       <strong>移动端暗色</strong><br>
-      <img src="docs/screenshots/cf-navs-dark-mobile.jpg" alt="CF-Navs 移动端暗色首页" width="260">
+      <img src="docs/screenshots/cf-navs-dark-mobile.jpg" alt="HubNav 移动端暗色首页" width="260">
     </td>
   </tr>
 </table>
 
 <p align="center">
   <strong>主题与站点设置</strong><br>
-  <img src="docs/screenshots/cf-navs-admin-setting.jpg" alt="CF-Navs 主题与站点设置">
+  <img src="docs/screenshots/cf-navs-admin-setting.jpg" alt="HubNav 主题与站点设置">
 </p>
 
 更多界面截图位于 [`docs/screenshots`](docs/screenshots)。
@@ -88,7 +88,7 @@
 
 如果你第一次使用 Cloudflare，建议先选择一种部署方式并完整走完，不要混用两套流程。两种方式最终都会通过 `/install` 初始化数据库和管理员账号。
 
-CF-Navs 需要以下 Cloudflare 资源：
+HubNav 需要以下 Cloudflare 资源：
 
 | 资源 | 绑定名 | 用途 |
 |---|---|---|
@@ -100,7 +100,7 @@ CF-Navs 需要以下 Cloudflare 资源：
 
 适合不想在本地安装 Wrangler 的用户。Cloudflare 会从 GitHub 的 `main` 分支自动构建和部署。
 
-1. [Fork 本仓库](https://github.com/lbjxr/CF-Navs/fork)，并确认 Fork 的默认分支为 `main`。
+1. [Fork 本仓库](https://github.com/lbjxr/HubNav/fork)，并确认 Fork 的默认分支为 `main`。
 2. 在 Cloudflare 控制台打开 **Workers & Pages → Create application → Import a repository**，授权 Cloudflare 访问 GitHub，并选择你的 Fork。
 3. 在构建配置中填写：
    - 生产分支：`main`
@@ -126,8 +126,8 @@ CF-Navs 需要以下 Cloudflare 资源：
 前置条件：Node.js 18+、npm 和 Cloudflare 账号。所有资源命令都会作用于当前 Wrangler 登录的账号；如果你有多个 Cloudflare 账号，先用 `npx wrangler whoami` 确认账号。
 
 ```bash
-git clone https://github.com/lbjxr/CF-Navs.git
-cd CF-Navs
+git clone https://github.com/lbjxr/HubNav.git
+cd HubNav
 npm install
 
 npx wrangler login
@@ -205,7 +205,7 @@ git diff --check
 ## 项目结构
 
 ```text
-CF-Navs/
+HubNav/
 ├── src/                 # Svelte 页面、组件与浏览器端逻辑
 ├── worker/              # Worker 路由、中间件与 D1 数据访问
 ├── shared/              # 前后端共享类型与设置契约
@@ -238,7 +238,7 @@ CF-Navs/
 
 后台支持以下数据格式：
 
-- CF-Navs JSON 备份：保存两层分类关系，支持按完整路径追加合并或覆盖恢复。
+- HubNav JSON 备份：保存两层分类关系，支持按完整路径追加合并或覆盖恢复。
 - Sun-Panel 数据：分类按一级导入，并转换书签与兼容图标字段。
 - 浏览器书签 HTML：导入浏览器导出的标准文件，有效文件夹映射为两层分类，更深路径压平到二级标题。
 
@@ -254,11 +254,11 @@ CF-Navs/
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=lbjxr%2FCF-Navs&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=lbjxr%2FHubNav&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lbjxr/CF-Navs&type=date&theme=dark&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lbjxr/CF-Navs&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lbjxr/CF-Navs&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lbjxr/HubNav&type=date&theme=dark&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lbjxr/HubNav&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lbjxr/HubNav&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
  </picture>
 </a>
 
@@ -272,7 +272,7 @@ CF-Navs/
 <div align="center">
 
 <details>
-  <summary><b>☕️ 喜欢 CF-Navs？请作者喝杯咖啡 / Sponsor</b></summary>
+  <summary><b>☕️ 喜欢 HubNav？请作者喝杯咖啡 / Sponsor</b></summary>
   <br>
   <p>如果这个项目对你有帮助，欢迎赞助支持！你的支持是维持项目持续更新和维护的最大动力 ❤️</p>
   <a href="https://afdian.com/a/benjian" target="_blank">
@@ -282,3 +282,4 @@ CF-Navs/
 </details>
 
 </div>
+

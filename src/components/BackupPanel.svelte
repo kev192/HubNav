@@ -223,7 +223,7 @@
         <label class="import-source-field" for="import-source">
           <span>导入来源</span>
           <select class="native-select" id="import-source" bind:value={importSource} on:change={() => { if (importSource === 'browser-html') importMode = 'merge' }} disabled={!isAuthenticated || importing}>
-            <option value="cf-navs">CF-Navs 备份</option>
+            <option value="cf-navs">HubNav 备份</option>
             <option value="sunpanel">SunPanel 导出</option>
             <option value="browser-html">浏览器书签 HTML</option>
           </select>

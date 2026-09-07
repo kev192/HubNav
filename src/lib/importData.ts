@@ -120,7 +120,7 @@ function prepareCFNavsImport(parsed: unknown): PreparedImport {
     },
     categories: data.categories.length,
     bookmarks: data.bookmarks.length,
-    sourceLabel: 'CF-Navs backup',
+    sourceLabel: 'HubNav backup',
   }
 }
 

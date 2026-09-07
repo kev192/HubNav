@@ -8,7 +8,7 @@
   import HomeEmptyPanel from '../components/HomeEmptyPanel.svelte'
   import HomeFloatingActions from '../components/HomeFloatingActions.svelte'
   import HomeHeroSearch from '../components/HomeHeroSearch.svelte'
-  import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCategory, PublicSettings, ThemeMode } from '../../shared/types'
+  import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCategory, PublicSettings } from '../../shared/types'
   import {
     bookmarkMatchesSearch,
     clampTitleFontSize,
@@ -57,7 +57,6 @@
   export let onLogout: (() => AsyncVoid) | undefined = undefined
   export let onOpenLogin: (() => AsyncVoid) | undefined = undefined
   export let activeTheme: 'light' | 'dark' = 'light'
-  export let activeThemeMode: ThemeMode = 'auto'
   export let onToggleTheme: (() => AsyncVoid) | undefined = undefined
 
   let searchQuery = ''
@@ -145,6 +144,17 @@
     ))
   }
 
+  function replaceScopeOrder(
+    draft: PublicBookmark[],
+    categoryIds: Set<number>,
+    orderedIds: Array<string | number>,
+  ): PublicBookmark[] {
+    const scopeItems = draft.filter((bookmark) => categoryIds.has(bookmark.category_id))
+    const orderedItems = reorderByIds(scopeItems, orderedIds)
+    let index = 0
+    return draft.map((bookmark) => categoryIds.has(bookmark.category_id) ? orderedItems[index++] : bookmark)
+  }
+
   function startHomeSort(): void {
     if (homeSortMode) return
     homeSortError = ''
@@ -160,6 +170,12 @@
 
   function handleHomeSortDraft(categoryId: number, orderedIds: number[]): void {
     if (!homeSortMode) return
+    const root = categoryForest.find((candidate) => candidate.id === categoryId)
+    if (root && root.children.length > 0) {
+      const scopeIds = new Set([root.id, ...root.children.map((child) => child.id)])
+      homeSortDraft = replaceScopeOrder(homeSortDraft, scopeIds, orderedIds)
+      return
+    }
     homeSortDraft = replaceCategoryOrder(homeSortDraft, categoryId, orderedIds)
   }
 
@@ -326,9 +342,13 @@
   }
 
   function handleScopeSelect(rootId: number, categoryId: string | number): void {
+    const currentScroll = typeof window !== 'undefined' ? window.scrollY : 0
     setSelectedCategory(rootId, categoryId)
     activeId = normalizeSectionId(categoryId)
     scrollSpySuppressedUntil = performance.now() + 600
+    if (typeof window !== 'undefined') {
+      void tick().then(() => window.scrollTo({ top: currentScroll, behavior: 'auto' }))
+    }
   }
 
   onMount(() => {
@@ -363,7 +383,6 @@
     {isAuthenticated}
     {authLoading}
     {activeTheme}
-    {activeThemeMode}
     {onToggleTheme}
     {onSwitchToAdmin}
     {onLogout}

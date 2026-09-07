@@ -46,7 +46,7 @@ settingsRoutes.put('/', async (c) => {
     return badRequest(c, 'invalid settings payload')
   }
 
-  if (body.theme !== undefined && !['light', 'dark', 'auto'].includes(body.theme)) {
+  if (body.theme !== undefined && !['light', 'dark'].includes(body.theme)) {
     return badRequest(c, 'invalid theme')
   }
   if (

@@ -145,8 +145,11 @@
   />
 
   <button class="search-button" type="submit" disabled={preview || !currentEngine || !query.trim()}>
+    <svg class="search-button-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" />
+    </svg>
     <span class="search-button-text">搜索</span>
-    <span class="search-button-mobile-text" aria-hidden="true">搜</span>
   </button>
 </form>
 
@@ -211,8 +214,11 @@
     opacity: 0.86;
   }
 
-  .search-button-mobile-text {
-    display: none;
+  .search-button-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: block;
+    margin: auto;
   }
 
   .engine-icon-button,
@@ -518,11 +524,7 @@
       border: 0;
     }
 
-    .search-button-mobile-text {
-      display: inline;
-      font-size: 0.86rem;
-      font-weight: 700;
-    }
+    .search-button-icon { width: 1.15rem; height: 1.15rem; }
   }
 
   @media (max-width: 420px) {

@@ -1,6 +1,6 @@
 {
-  "name": "CF-Navs 导航面板",
-  "short_name": "CF-Navs",
+  "name": "HubNav 导航面板",
+  "short_name": "HubNav",
   "description": "部署在 Cloudflare Workers 上的轻量个人导航面板",
   "start_url": "/",
   "scope": "/",

@@ -1,5 +1,5 @@
 {
-  "name": "cf-navs",
+  "name": "hubnav",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,7 +18,7 @@
     "db:init:remote": "node scripts/wrangler-config.mjs d1 execute DB --remote --file=./schema.sql"
   },
   "cloudflare": {
-    "label": "CF-Navs",
+    "label": "HubNav",
     "products": [
       "Workers",
       "D1",
@@ -51,3 +51,4 @@
     "sortablejs": "^1.15.3"
   }
 }
+

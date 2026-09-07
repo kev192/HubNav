@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS settings (
 
 -- 默认设置（仅当不存在时插入）
 INSERT OR IGNORE INTO settings (key, value) VALUES
-  ('site_title', '"CF-Navs"'),
+  ('site_title', '"HubNav"'),
   ('site_title_color', '""'),
   ('site_title_font_size', '32'),
   ('public_mode', 'true'),

@@ -6,7 +6,7 @@
 // - /api/icon/* and /api/iconify/*: do not write to Cache Storage; rely on HTTP and edge caching.
 // - Other /api/* requests: network only.
 
-const CACHE = 'cf-navs-v15'
+const CACHE = 'cf-navs-v16'
 const RUNTIME_CACHE_PREFIX = 'cf-navs-v'
 const APP_SHELL = ['/index.html', '/manifest.webmanifest', '/icon.ico', '/icon.png']
 const ICON_FALLBACK_TTL_MS = 5 * 60 * 1000
@@ -226,3 +226,4 @@ function notifyClients(message) {
     for (const client of clients) client.postMessage(message)
   }).catch(() => undefined)
 }
+
