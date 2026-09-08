@@ -14,11 +14,11 @@ const CONTENT_SECURITY_POLICY = [
   //
   // 保持没有 'unsafe-inline' 的直接效果：footer_html 里的 onerror= 之类内联事件
   // 处理器、javascript: 链接、任意内联 <script> 全部仍然被阻断。
-  "script-src 'self' blob:",
+  "script-src 'self' blob: https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' https: data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  "connect-src 'self' https://challenges.cloudflare.com",
   // 书签的「当前页弹层」打开方式要嵌入外站。不声明 frame-src 会回落到
   // default-src 'self'，跨源 iframe 全被拦掉，那个打开方式点开只有空白弹层。
   // 只放开 iframe，不影响脚本；能不能嵌仍由目标站点自己的 X-Frame-Options 决定。

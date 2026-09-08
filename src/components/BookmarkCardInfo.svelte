@@ -66,7 +66,7 @@
   <div class="bookmark-text">
     <h3 class="bookmark-title">{bookmark.title}</h3>
       {#if showDescription && descriptionMode === 'always' && bookmark.description}
-      <p class="bookmark-description">{bookmark.description}</p>
+      <p class="bookmark-description" title={bookmark.description}>{bookmark.description}</p>
     {/if}
   </div>
 </a>

@@ -2,14 +2,23 @@
   export let open = false
   export let loading = false
   export let error = ''
+  export let turnstileSiteKey: string | null = null
   export let onSubmit:
-    | ((payload: { username: string; password: string }) => void | Promise<void>)
+    | ((payload: { username: string; password: string; turnstile_token?: string }) => void | Promise<void>)
     | undefined = undefined
   export let onCancel: (() => void) | undefined = undefined
 
   let username = ''
   let password = ''
   let formKey = ''
+  let turnstileToken = ''
+  let turnstileContainer: HTMLDivElement | null = null
+  let turnstileWidgetId: string | null = null
+
+  type TurnstileApi = { render: (element: HTMLElement, options: Record<string, unknown>) => string; reset: (id?: string) => void }
+  function getTurnstile(): TurnstileApi | undefined {
+    return (window as Window & { turnstile?: TurnstileApi }).turnstile
+  }
 
   $: nextKey = open ? 'open' : 'closed'
   $: if (nextKey !== formKey) {
@@ -17,6 +26,7 @@
     if (open) {
       username = ''
       password = ''
+      turnstileToken = ''
     }
   }
 
@@ -24,8 +34,37 @@
     await onSubmit?.({
       username: username.trim(),
       password,
+      ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
     })
   }
+
+  function renderTurnstile(): void {
+    const turnstile = getTurnstile()
+    if (!turnstileSiteKey || !turnstileContainer || !turnstile || turnstileWidgetId) return
+    turnstileWidgetId = turnstile.render(turnstileContainer, {
+      sitekey: turnstileSiteKey,
+      callback: (token: string) => { turnstileToken = token },
+      'expired-callback': () => { turnstileToken = '' },
+      'error-callback': () => { turnstileToken = '' },
+      theme: 'auto',
+    })
+  }
+
+  function loadTurnstile(): void {
+    if (!turnstileSiteKey || typeof document === 'undefined') return
+    if (getTurnstile()) { renderTurnstile(); return }
+    const existing = document.querySelector<HTMLScriptElement>('script[data-turnstile-api]')
+    if (existing) { existing.addEventListener('load', renderTurnstile, { once: true }); return }
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+    script.async = true
+    script.defer = true
+    script.dataset.turnstileApi = 'true'
+    script.addEventListener('load', renderTurnstile, { once: true })
+    document.head.appendChild(script)
+  }
+
+  $: if (open && turnstileSiteKey) loadTurnstile()
 
   function handleCancel() {
     if (loading) {
@@ -53,6 +92,10 @@
           <input bind:value={username} type="text" placeholder="请输入用户名" autocomplete="username" required />
         </label>
 
+        {#if turnstileSiteKey}
+          <div bind:this={turnstileContainer} class="turnstile-container" aria-label="人机验证"></div>
+        {/if}
+
         <label>
           <span>密码</span>
           <input
@@ -70,7 +113,7 @@
 
         <div class="modal-actions">
           <button type="button" class="ghost-button" on:click={handleCancel} disabled={loading}>取消</button>
-          <button type="submit" class="primary-button" disabled={loading || !username.trim() || !password}>
+          <button type="submit" class="primary-button" disabled={loading || !username.trim() || !password || (Boolean(turnstileSiteKey) && !turnstileToken)}>
             {#if loading}登录中...{:else}登录{/if}
           </button>
         </div>
@@ -160,6 +203,8 @@
     color: #dc2626;
     font-size: 13px;
   }
+
+  .turnstile-container { min-height: 65px; }
 
   .modal-actions {
     display: flex;

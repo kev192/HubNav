@@ -146,11 +146,11 @@ function createAuthStore() {
     applySession(getStoredAuthSession())
   }
 
-  async function login(username: string, password: string): Promise<LoginResp> {
+  async function login(username: string, password: string, turnstileToken?: string): Promise<LoginResp> {
     update((state) => ({ ...state, loading: true, error: null }))
 
     try {
-      const session = await authApi.login({ username, password })
+      const session = await authApi.login({ username, password, ...(turnstileToken ? { turnstile_token: turnstileToken } : {}) })
       applySession(session)
       return session
     } catch (error) {

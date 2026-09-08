@@ -197,6 +197,7 @@ export interface ErrorReportEntry {
 export interface LoginReq {
   username: string
   password: string
+  turnstile_token?: string
 }
 export interface LoginResp {
   token: string
@@ -283,6 +284,7 @@ export interface PublicSettings {
 export interface SiteConfig {
   site_title: string
   public_mode: boolean
+  turnstile_site_key?: string | null
 }
 
 // POST/PUT 分类

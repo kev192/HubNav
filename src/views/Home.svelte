@@ -67,8 +67,6 @@
   let persistentLeftExpanded = true
   let contentAnchor: HTMLElement | null = null
   let rootSectionNodes = new Map<number, HTMLElement>()
-  let scopePanelNodes = new Map<number, HTMLElement>()
-  let scopePanelMinHeights = new Map<number, number>()
   let scrollFrame: number | null = null
   let scrollSpySuppressedUntil = 0
   let homeSortMode = false
@@ -285,15 +283,6 @@
     }
   }
 
-  function registerScopePanel(node: HTMLElement, rootId: number) {
-    scopePanelNodes.set(rootId, node)
-    return {
-      destroy() {
-        scopePanelNodes.delete(rootId)
-      },
-    }
-  }
-
   function scheduleActiveRootUpdate(): void {
     if (typeof window === 'undefined' || scrollFrame != null) return
     scrollFrame = window.requestAnimationFrame(() => {
@@ -363,12 +352,6 @@
   }
 
   function handleScopeSelect(rootId: number, categoryId: string | number): void {
-    const panel = scopePanelNodes.get(rootId)
-    if (panel) {
-      const next = new Map(scopePanelMinHeights)
-      next.set(rootId, Math.max(next.get(rootId) ?? 0, panel.getBoundingClientRect().height))
-      scopePanelMinHeights = next
-    }
     setSelectedCategory(rootId, categoryId)
     activeId = normalizeSectionId(categoryId)
     scrollSpySuppressedUntil = performance.now() + 600
@@ -475,7 +458,7 @@
                       cardIconShowTitle={settings?.card_icon_show_title ?? true}
                       canSort={false}
                       onAddBookmark={onOpenCreateBookmark}
-                      onEditBookmark={onEditBookmark}
+                      onEditBookmark={isAuthenticated ? onEditBookmark : undefined}
                     />
                   {/if}
 
@@ -495,7 +478,7 @@
                       cardIconShowTitle={settings?.card_icon_show_title ?? true}
                       canSort={false}
                       onAddBookmark={onOpenCreateBookmark}
-                      onEditBookmark={onEditBookmark}
+                      onEditBookmark={isAuthenticated ? onEditBookmark : undefined}
                     />
                   {/each}
                 </div>
@@ -519,7 +502,7 @@
             cardDescriptionMode={settings?.card_description_mode ?? (settings?.card_show_description === false ? 'hidden' : 'always')}
             cardIconShowTitle={settings?.card_icon_show_title ?? true}
             canSort={false}
-            onEditBookmark={onEditBookmark}
+            onEditBookmark={isAuthenticated ? onEditBookmark : undefined}
           />
         {/if}
         {#if categoryGroups.length > 0}
@@ -558,8 +541,6 @@
               <div
                 id={panelId}
                 class="scope-section-list"
-                style:min-height={scopePanelMinHeights.get(category.id) ? `${scopePanelMinHeights.get(category.id)}px` : undefined}
-                use:registerScopePanel={category.id}
                 role={category.children.length > 0 ? 'tabpanel' : undefined}
                 aria-labelledby={category.children.length > 0 ? `home-category-tab-${selectedCategory.id}` : undefined}
               >
@@ -584,7 +565,7 @@
                   sortCategoryId={selectedCategory.id}
                   showSortActions={false}
                   onAddBookmark={onOpenCreateBookmark}
-                  onEditBookmark={onEditBookmark}
+                  onEditBookmark={isAuthenticated ? onEditBookmark : undefined}
                   onRequestSort={startHomeSort}
                   onCancelSortSession={cancelHomeSort}
                   onSaveSortSession={saveHomeSort}
