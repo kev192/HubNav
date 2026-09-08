@@ -177,7 +177,7 @@
     <div class="admin-list-panel-header">
       <div>
         <p class="admin-panel-eyebrow">分类</p>
-        <div class="admin-title-row"><h2>分类列表</h2><div class="admin-bookmark-search-bar"><input type="text" data-testid="admin-category-search" placeholder="搜索分类…" value={search} on:input={handleSearchInput} /></div></div>
+        <div class="admin-title-row"><h2>分类列表</h2><label class="admin-bookmark-search-bar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg><input type="text" data-testid="admin-category-search" placeholder="搜索分类…" value={search} on:input={handleSearchInput} /></label></div>
       </div>
       <div class="admin-header-actions-row">
         {#if !sortMode}
@@ -380,14 +380,35 @@
     box-sizing: border-box;
     height: 38px;
     padding: 0 14px;
-    border: 1px solid var(--admin-input-border);
-    border-radius: 12px;
+    border: 0;
+    border-radius: 0;
     background: var(--admin-input-bg);
     color: var(--admin-text);
     font: inherit;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    box-shadow: none;
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
   }
+
+  .admin-bookmark-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: min(280px, 32vw);
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--admin-input-border);
+    border-radius: 12px;
+    background: var(--admin-input-bg);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .admin-bookmark-search-bar:focus-within {
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent) 18%, transparent);
+  }
+
+  .admin-bookmark-search-bar svg { width: 16px; height: 16px; flex: 0 0 auto; fill: none; stroke: var(--admin-subtle); stroke-width: 2; stroke-linecap: round; }
 
   .admin-bookmark-search-bar input:focus {
     outline: none;

@@ -168,7 +168,7 @@
     <div class="admin-list-panel-header">
       <div>
         <p class="admin-panel-eyebrow">书签</p>
-        <div class="admin-title-row"><h2>书签列表</h2><div class="admin-bookmark-search-bar"><input type="text" data-testid="admin-bookmark-search" placeholder="搜索标题、链接或分类…" value={search} on:input={handleSearchInput} /></div></div>
+        <div class="admin-title-row"><h2>书签列表</h2><label class="admin-bookmark-search-bar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg><input type="text" data-testid="admin-bookmark-search" placeholder="搜索标题、链接或分类…" value={search} on:input={handleSearchInput} /></label></div>
       </div>
       <div class="admin-header-actions-row">
         <button
@@ -435,16 +435,33 @@
     width: 100%;
     box-sizing: border-box;
     height: 38px;
-    border: 1px solid var(--admin-input-border);
-    border-radius: 12px;
+    border: 0;
+    border-radius: 0;
     padding: 0 14px;
     font-size: 13px;
     color: var(--admin-text);
     background: var(--admin-input-bg);
     font-family: inherit;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    box-shadow: none;
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
   }
+
+  .admin-bookmark-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: min(360px, 32vw);
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--admin-input-border);
+    border-radius: 12px;
+    background: var(--admin-input-bg);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .admin-bookmark-search-bar:focus-within { border-color: var(--admin-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent) 18%, transparent); }
+  .admin-bookmark-search-bar svg { width: 16px; height: 16px; flex: 0 0 auto; fill: none; stroke: var(--admin-subtle); stroke-width: 2; stroke-linecap: round; }
 
   .admin-bookmark-search-bar input:focus {
     outline: none;
