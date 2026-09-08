@@ -66,10 +66,7 @@ publicRoutes.get('/config', async (c) => {
     if (cached) return cached
   }
 
-  const data: SiteConfig = {
-    ...await getSiteConfig(c.env.DB),
-    turnstile_site_key: c.env.TURNSTILE_SITE_KEY?.trim() || null,
-  }
+  const data: SiteConfig = await getSiteConfig(c.env.DB)
   const response = c.json(ok(data), 200, {
     'Cache-Control': bypassCache ? 'no-store' : 'public, max-age=15, s-maxage=60, stale-while-revalidate=300',
   })

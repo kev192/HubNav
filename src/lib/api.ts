@@ -23,7 +23,6 @@ import {
   type PublicData,
   type Settings,
   type SettingsUpdateReq,
-  type SiteConfig,
   type SiteMetaResp,
   type SortReq,
 } from '../../shared/types'
@@ -339,7 +338,6 @@ export const installApi = {
 }
 
 export const publicApi = {
-  getConfig: () => request<SiteConfig>('/config', { cache: 'no-store', headers: NO_CACHE_HEADERS }),
   getData: (auth = false) =>
     request<PublicData>('/public/data', { auth, cache: 'no-store', headers: NO_CACHE_HEADERS }),
   registerClick: (id: number) => {

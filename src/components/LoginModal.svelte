@@ -2,23 +2,14 @@
   export let open = false
   export let loading = false
   export let error = ''
-  export let turnstileSiteKey: string | null = null
   export let onSubmit:
-    | ((payload: { username: string; password: string; turnstile_token?: string }) => void | Promise<void>)
+    | ((payload: { username: string; password: string }) => void | Promise<void>)
     | undefined = undefined
   export let onCancel: (() => void) | undefined = undefined
 
   let username = ''
   let password = ''
   let formKey = ''
-  let turnstileToken = ''
-  let turnstileContainer: HTMLDivElement | null = null
-  let turnstileWidgetId: string | null = null
-
-  type TurnstileApi = { render: (element: HTMLElement, options: Record<string, unknown>) => string; reset: (id?: string) => void }
-  function getTurnstile(): TurnstileApi | undefined {
-    return (window as Window & { turnstile?: TurnstileApi }).turnstile
-  }
 
   $: nextKey = open ? 'open' : 'closed'
   $: if (nextKey !== formKey) {
@@ -26,10 +17,6 @@
     if (open) {
       username = ''
       password = ''
-      turnstileToken = ''
-    } else {
-      turnstileToken = ''
-      turnstileWidgetId = null
     }
   }
 
@@ -37,37 +24,8 @@
     await onSubmit?.({
       username: username.trim(),
       password,
-      ...(turnstileToken ? { turnstile_token: turnstileToken } : {}),
     })
   }
-
-  function renderTurnstile(): void {
-    const turnstile = getTurnstile()
-    if (!turnstileSiteKey || !turnstileContainer || !turnstile || turnstileWidgetId) return
-    turnstileWidgetId = turnstile.render(turnstileContainer, {
-      sitekey: turnstileSiteKey,
-      callback: (token: string) => { turnstileToken = token },
-      'expired-callback': () => { turnstileToken = '' },
-      'error-callback': () => { turnstileToken = '' },
-      theme: 'auto',
-    })
-  }
-
-  function loadTurnstile(): void {
-    if (!turnstileSiteKey || typeof document === 'undefined') return
-    if (getTurnstile()) { renderTurnstile(); return }
-    const existing = document.querySelector<HTMLScriptElement>('script[data-turnstile-api]')
-    if (existing) { existing.addEventListener('load', renderTurnstile, { once: true }); return }
-    const script = document.createElement('script')
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
-    script.async = true
-    script.defer = true
-    script.dataset.turnstileApi = 'true'
-    script.addEventListener('load', renderTurnstile, { once: true })
-    document.head.appendChild(script)
-  }
-
-  $: if (open && turnstileSiteKey) loadTurnstile()
 
   function handleCancel() {
     if (loading) {
@@ -105,17 +63,13 @@
           />
         </label>
 
-        {#if turnstileSiteKey}
-          <div bind:this={turnstileContainer} class="turnstile-container" aria-label="人机验证"></div>
-        {/if}
-
         {#if error}
           <p class="error-text">{error}</p>
         {/if}
 
         <div class="modal-actions">
           <button type="button" class="ghost-button" on:click={handleCancel} disabled={loading}>取消</button>
-          <button type="submit" class="primary-button" disabled={loading || !username.trim() || !password || (Boolean(turnstileSiteKey) && !turnstileToken)}>
+          <button type="submit" class="primary-button" disabled={loading || !username.trim() || !password}>
             {#if loading}登录中...{:else}登录{/if}
           </button>
         </div>
@@ -133,7 +87,9 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: rgba(15, 23, 42, 0.56);
+    background: color-mix(in srgb, var(--home-background-mask-color, #0f172a) 56%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .modal-backdrop::before {
@@ -146,9 +102,15 @@
     position: relative;
     width: min(100%, 420px);
     border-radius: var(--radius-xl);
-    background: #ffffff;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
-    padding: 20px;
+    background:
+      linear-gradient(145deg, color-mix(in srgb, var(--card-bg-rgb, 255 255 255) 92%, transparent), color-mix(in srgb, var(--card-bg-rgb, 255 255 255) 70%, transparent)),
+      rgb(var(--card-bg-rgb, 255 255 255) / var(--card-bg-opacity, 0.82));
+    color: var(--card-text-color, #0f172a);
+    border: 1px solid color-mix(in srgb, var(--home-accent-color, #2563eb) 22%, transparent);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(24px) saturate(145%);
+    -webkit-backdrop-filter: blur(24px) saturate(145%);
+    padding: 24px;
   }
 
   .modal-header {
@@ -162,13 +124,14 @@
   .modal-eyebrow {
     margin: 0 0 6px;
     font-size: 12px;
-    color: #64748b;
+    color: var(--home-accent-color, #2563eb);
+    font-weight: 700;
   }
 
   h2 {
     margin: 0;
     font-size: 20px;
-    color: #0f172a;
+    color: var(--card-title-color, var(--card-text-color, #0f172a));
   }
 
   .modal-form {
@@ -179,24 +142,24 @@
   label {
     display: grid;
     gap: 8px;
-    color: #334155;
+    color: var(--card-text-color, #334155);
     font-size: 14px;
   }
 
   input {
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid #cbd5e1;
+    border: 1px solid color-mix(in srgb, var(--card-text-color, #64748b) 24%, transparent);
     border-radius: var(--radius-lg);
     padding: var(--control-padding-input);
     font-size: var(--font-size-base);
-    color: #0f172a;
-    background: #ffffff;
+    color: var(--card-text-color, #0f172a);
+    background: rgb(var(--card-bg-rgb, 255 255 255) / 0.55);
   }
 
   input:focus {
     outline: none;
-    border-color: #2563eb;
+    border-color: var(--home-accent-color, #2563eb);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
   }
 
@@ -206,7 +169,6 @@
     font-size: 13px;
   }
 
-  .turnstile-container { min-height: 65px; }
 
   .modal-actions {
     display: flex;
@@ -226,14 +188,14 @@
 
   .primary-button {
     border: none;
-    background: #2563eb;
+    background: var(--home-accent-color, #2563eb);
     color: #ffffff;
   }
 
   .ghost-button {
-    border: 1px solid #cbd5e1;
-    background: #ffffff;
-    color: #0f172a;
+    border: 1px solid color-mix(in srgb, var(--card-text-color, #64748b) 24%, transparent);
+    background: rgb(var(--card-bg-rgb, 255 255 255) / 0.48);
+    color: var(--card-text-color, #0f172a);
   }
 
   .primary-button:disabled,

@@ -10,8 +10,6 @@ export interface Env {
   INIT_ADMIN_PASSWORD: string
   RESET_ADMIN_CREDENTIALS?: string
   SETUP_TOKEN?: string
-  TURNSTILE_SITE_KEY?: string
-  TURNSTILE_SECRET_KEY?: string
   SESSION_TTL: string
 }
 

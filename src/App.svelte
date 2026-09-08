@@ -563,9 +563,9 @@
     currentView = 'admin'
   }
 
-  async function handleLogin(payload: { username: string; password: string; turnstile_token?: string }): Promise<void> {
+  async function handleLogin(payload: { username: string; password: string }): Promise<void> {
     try {
-      await authStore.login(payload.username, payload.password, payload.turnstile_token)
+      await authStore.login(payload.username, payload.password)
       loginModalOpen = false
       rootError = ''
       await refreshLoggedInData(true)
@@ -1072,7 +1072,6 @@
         open={loginModalOpen}
         loading={$authStore.loading}
         error={$authStore.error ?? ''}
-        turnstileSiteKey={config?.turnstile_site_key ?? null}
         onSubmit={handleLogin}
         onCancel={handleCloseLogin}
       />

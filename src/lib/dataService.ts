@@ -68,11 +68,9 @@ export function isLoggedIn(): boolean {
 }
 
 export function applyConfigFromSettings(settings: Pick<Settings, 'site_title' | 'public_mode'>): void {
-  const current = get(configStore).data
   configStore.setData({
     site_title: settings.site_title,
     public_mode: settings.public_mode,
-    turnstile_site_key: current?.turnstile_site_key ?? null,
   })
 }
 
@@ -80,7 +78,6 @@ function applyConfigFromPublicData(data: PublicData): void {
   configStore.setData({
     site_title: data.settings.site_title,
     public_mode: true,
-    turnstile_site_key: get(configStore).data?.turnstile_site_key ?? null,
   })
 }
 
@@ -103,14 +100,7 @@ export function applyPublicData(data: PublicData, version = getDataVersion(data)
 }
 
 export async function refreshPublicData(progressive = false): Promise<PublicData | null> {
-  let config = get(configStore).data
-  try {
-    const remoteConfig = await api.public.getConfig()
-    configStore.setData(remoteConfig)
-    config = remoteConfig
-  } catch {
-    // 公共数据请求仍可依靠缓存/后续请求继续工作；Turnstile 只在配置成功时显示。
-  }
+  const config = get(configStore).data
   if (config?.public_mode === false && !isLoggedIn()) {
     publicStore.reset()
     return null
@@ -128,7 +118,6 @@ export async function refreshPublicData(progressive = false): Promise<PublicData
       configStore.setData({
         site_title: remoteVersion.site_title,
         public_mode: remoteVersion.public_mode,
-        turnstile_site_key: get(configStore).data?.turnstile_site_key ?? null,
       })
       currentDataVersion = remoteVersion.version
 
@@ -155,7 +144,6 @@ export async function refreshPublicData(progressive = false): Promise<PublicData
             configStore.setData({
               site_title: data.settings.site_title || forbiddenConfig.site_title,
               public_mode: false,
-              turnstile_site_key: get(configStore).data?.turnstile_site_key ?? null,
             })
           return data
         } catch (authError) {

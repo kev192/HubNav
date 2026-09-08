@@ -20,20 +20,6 @@ import type { HonoEnv } from '../types'
 const ADMIN_PASSWORD_KEY = 'admin_password'
 const MIN_PASSWORD_LENGTH = 8
 const MAX_PASSWORD_LENGTH = 256
-const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
-
-async function verifyTurnstile(secret: string, token: string, remoteIp: string): Promise<boolean> {
-  const body = new URLSearchParams({ secret, response: token })
-  if (remoteIp) body.set('remoteip', remoteIp)
-  try {
-    const response = await fetch(TURNSTILE_VERIFY_URL, { method: 'POST', body })
-    if (!response.ok) return false
-    const result = await response.json<{ success?: boolean }>()
-    return result.success === true
-  } catch {
-    return false
-  }
-}
 
 export { getSessionTtlSeconds } from '../lib/session'
 
@@ -65,13 +51,6 @@ authRoutes.post('/login', loginRateLimit, async (c) => {
   }
 
   const ip = getClientIp(c)
-  const turnstileSecret = c.env.TURNSTILE_SECRET_KEY?.trim()
-  if (turnstileSecret) {
-    const turnstileToken = body.turnstile_token?.trim()
-    if (!turnstileToken || !await verifyTurnstile(turnstileSecret, turnstileToken, ip)) {
-      return c.json(fail(ErrCode.BAD_REQUEST, 'human verification failed'))
-    }
-  }
   const passwordOk = username === credentials.username && (await verifyPassword(password, credentials.passwordHash))
   if (!passwordOk) {
     await recordLoginFailure(c.env, ip, c.get('loginRateLimitState'))
