@@ -8,7 +8,7 @@
   import HomeEmptyPanel from '../components/HomeEmptyPanel.svelte'
   import HomeFloatingActions from '../components/HomeFloatingActions.svelte'
   import HomeHeroSearch from '../components/HomeHeroSearch.svelte'
-  import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCategory, PublicSettings } from '../../shared/types'
+import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCategory, PublicSettings, ThemeMode } from '../../shared/types'
   import {
     bookmarkMatchesSearch,
     clampTitleFontSize,
@@ -57,6 +57,7 @@
   export let onLogout: (() => AsyncVoid) | undefined = undefined
   export let onOpenLogin: (() => AsyncVoid) | undefined = undefined
   export let activeTheme: 'light' | 'dark' = 'light'
+  export let themeMode: ThemeMode = 'light'
   export let onToggleTheme: (() => AsyncVoid) | undefined = undefined
 
   let searchQuery = ''
@@ -389,6 +390,7 @@
     {isAuthenticated}
     {authLoading}
     {activeTheme}
+    {themeMode}
     {onToggleTheme}
     {onSwitchToAdmin}
     {onLogout}

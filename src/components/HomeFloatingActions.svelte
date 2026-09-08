@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import type { ThemeMode } from '../../shared/types'
 
   type AsyncVoid<T = void> = T | Promise<T>
   const BACK_TO_TOP_VISIBILITY_OFFSET = 320
@@ -7,6 +8,7 @@
   export let isAuthenticated = false
   export let authLoading = false
   export let activeTheme: 'light' | 'dark' = 'light'
+  export let themeMode: ThemeMode = 'light'
   export let onToggleTheme: (() => AsyncVoid) | undefined = undefined
   export let onSwitchToAdmin: (() => AsyncVoid) | undefined = undefined
   export let onLogout: (() => AsyncVoid) | undefined = undefined
@@ -15,8 +17,8 @@
 
   let showBackToTop = false
 
-  $: currentThemeLabel = activeTheme === 'dark' ? '暗色模式' : '浅色模式'
-  $: nextThemeLabel = activeTheme === 'dark' ? '浅色模式' : '暗色模式'
+  $: nextThemeLabel = themeMode === 'light' ? '暗色模式' : themeMode === 'dark' ? '跟随系统' : '浅色模式'
+  $: currentThemeLabel = themeMode === 'auto' ? `跟随系统（当前${activeTheme === 'dark' ? '暗色' : '浅色'}）` : activeTheme === 'dark' ? '暗色模式' : '浅色模式'
   $: themeToggleLabel = `当前${currentThemeLabel}，点击切换到${nextThemeLabel}`
   $: themeToggleIcon = activeTheme === 'dark' ? '☾' : '☀'
 

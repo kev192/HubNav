@@ -430,24 +430,26 @@
   }
 
   .admin-bookmark-search-bar input {
+    display: block;
+    appearance: none;
     width: 100%;
     box-sizing: border-box;
     height: 38px;
-    border: 1px solid color-mix(in srgb, var(--admin-accent) 22%, var(--admin-input-border));
-    border-radius: 10px;
+    border: 1px solid var(--admin-input-border);
+    border-radius: 12px;
     padding: 0 14px;
     font-size: 13px;
     color: var(--admin-text);
     background: var(--admin-input-bg);
     font-family: inherit;
-    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
   }
 
   .admin-bookmark-search-bar input:focus {
     outline: none;
     border-color: var(--admin-accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent) 16%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent) 18%, transparent);
   }
 
   .admin-bookmark-search-bar input::placeholder {

@@ -974,6 +974,7 @@
           onLogout={handleLogout}
           onOpenLogin={handleOpenLogin}
           activeTheme={activeTheme}
+          themeMode={themeMode}
           onToggleTheme={handleToggleTheme}
         />
       </div>
