@@ -27,6 +27,9 @@
       username = ''
       password = ''
       turnstileToken = ''
+    } else {
+      turnstileToken = ''
+      turnstileWidgetId = null
     }
   }
 
