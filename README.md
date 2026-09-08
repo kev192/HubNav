@@ -101,7 +101,7 @@ npx wrangler login
 npx wrangler whoami
 
 # 下面两个 create 命令只在资源尚不存在时执行一次
-npx wrangler d1 create cf-navs-db
+npx wrangler d1 create HubNav-db
 npx wrangler kv namespace create SESSION
 
 npm run setup:wrangler
@@ -110,7 +110,7 @@ npx wrangler secret put SETUP_TOKEN
 npm run deploy                 # Secret 生效后重新部署
 ```
 
-如果 D1 数据库或 KV 命名空间已经存在，不要再次执行 `create` 命令；先使用 `npx wrangler d1 list` 和 `npx wrangler kv namespace list` 确认当前账号中的资源，再运行 `npm run setup:wrangler`。D1 数据库名应为 `cf-navs-db`，Worker 的 KV 绑定名应为 `SESSION`。
+如果 D1 数据库或 KV 命名空间已经存在，不要再次执行 `create` 命令；先使用 `npx wrangler d1 list` 和 `npx wrangler kv namespace list` 确认当前账号中的资源，再运行 `npm run setup:wrangler`。D1 数据库名应为 `HubNav-db`，Worker 的 KV 绑定名应为 `SESSION`。
 
 `npm run setup:wrangler` 会把真实资源 ID 写入 Git 忽略的 `wrangler.local.toml`。部署完成后访问 `/install`，由安装器初始化数据库结构并创建管理员。首次部署完成前不要执行 `wrangler secret put`，因为 Worker 尚未创建。
 
