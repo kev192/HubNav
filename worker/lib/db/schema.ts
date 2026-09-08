@@ -55,6 +55,10 @@ export async function ensureSchema(db: D1Database, force = false): Promise<void>
   if (!bookmarkColNames.has("click_count")) {
     stmts.push(db.prepare("ALTER TABLE bookmarks ADD COLUMN click_count INTEGER DEFAULT 0"))
   }
+  if (!bookmarkColNames.has("all_sort")) {
+    stmts.push(db.prepare("ALTER TABLE bookmarks ADD COLUMN all_sort INTEGER"))
+    stmts.push(db.prepare("UPDATE bookmarks SET all_sort = sort WHERE all_sort IS NULL"))
+  }
   if (!categoryColNames.has("parent_id")) {
     stmts.push(db.prepare("ALTER TABLE categories ADD COLUMN parent_id INTEGER"))
   }
@@ -62,6 +66,7 @@ export async function ensureSchema(db: D1Database, force = false): Promise<void>
     stmts.push(db.prepare("ALTER TABLE categories ADD COLUMN is_private INTEGER NOT NULL DEFAULT 0"))
   }
   stmts.push(db.prepare("CREATE INDEX IF NOT EXISTS idx_bookmarks_sort_global ON bookmarks(sort, id)"))
+  stmts.push(db.prepare("CREATE INDEX IF NOT EXISTS idx_bookmarks_all_sort ON bookmarks(all_sort, id)"))
   stmts.push(db.prepare("CREATE INDEX IF NOT EXISTS idx_categories_sort_id ON categories(sort, id)"))
   stmts.push(db.prepare("CREATE INDEX IF NOT EXISTS idx_categories_parent_sort_id ON categories(parent_id, sort, id)"))
 

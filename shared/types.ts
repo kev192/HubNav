@@ -28,6 +28,7 @@ export interface Bookmark {
   open_method: 1 | 2 | 3 // 1=新窗口 2=当前页 3=当前页弹层
   is_private?: boolean | number // 公开书签为 0/false，私密书签为 1/true
   sort: number
+  all_sort?: number | null
   click_count?: number
   created_at: number
 }
@@ -362,6 +363,10 @@ export interface SortReq {
 export interface BookmarkReorganizeReq {
   category_orders: Array<{
     category_id: number
+    ids: number[]
+  }>
+  all_orders?: Array<{
+    root_id: number
     ids: number[]
   }>
 }

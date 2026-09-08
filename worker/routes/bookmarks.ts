@@ -105,6 +105,7 @@ bookmarksRoutes.post('/batch-delete', async (c) => {
 bookmarksRoutes.post('/reorganize', async (c) => {
   const body = await readJson<BookmarkReorganizeReq>(c)
   const categoryOrders = body?.category_orders
+  const allOrders = body?.all_orders ?? []
   if (
     !Array.isArray(categoryOrders) ||
     !categoryOrders.every((order) => (
@@ -113,13 +114,16 @@ bookmarksRoutes.post('/reorganize', async (c) => {
       order.category_id > 0 &&
       Array.isArray(order.ids) &&
       order.ids.every((id) => Number.isInteger(id) && id > 0)
+    )) || !Array.isArray(allOrders) || !allOrders.every((order) => (
+      order && Number.isInteger(order.root_id) && order.root_id > 0 && Array.isArray(order.ids) &&
+      order.ids.every((id) => Number.isInteger(id) && id > 0)
     ))
   ) {
     return badRequest(c, 'invalid reorganize payload')
   }
 
   try {
-    await reorganizeBookmarks(c.env.DB, categoryOrders)
+    await reorganizeBookmarks(c.env.DB, categoryOrders, allOrders)
     await touchDataVersion(c.env.DB)
     invalidateRuntimeDataCache()
     invalidatePublicDataCache(c, c.req.url)

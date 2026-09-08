@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import { get } from 'svelte/store'
-  import { fade } from 'svelte/transition'
   import {
     type Bookmark,
     type BookmarkReorganizeReq,
@@ -880,9 +879,10 @@
   // 先按兄弟排序处理器的约定回滚到服务端数据，再把原始错误交给首页展示。
   async function handleReorganizeBookmarks(
     categoryOrders: BookmarkReorganizeReq['category_orders'],
+    allOrders: BookmarkReorganizeReq['all_orders'] = [],
   ): Promise<void> {
     try {
-      await api.bookmarks.reorganize(categoryOrders)
+      await api.bookmarks.reorganize(categoryOrders, allOrders)
     } catch (error) {
       await refreshLoggedInData(true)
       throw error
@@ -942,7 +942,7 @@
   {:else if booting}
     <div class="app-shell" aria-busy="true"></div>
 {:else}
-  <div class="app-shell" in:fade={{ duration: prefersReducedMotion ? 0 : 260, delay: prefersReducedMotion ? 0 : 60 }}>
+  <div class="app-shell">
     <Toast />
     {#if rootError}
       <div class="app-alert">{rootError}</div>

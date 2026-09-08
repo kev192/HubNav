@@ -91,6 +91,7 @@ export function toPublicBookmark(bookmark: Bookmark): PublicBookmark {
     description_mode: bookmark.description_mode ?? null,
     open_method: bookmark.open_method,
     sort: bookmark.sort,
+    all_sort: bookmark.all_sort ?? bookmark.sort,
     click_count: bookmark.click_count ?? 0,
     is_private: bookmark.is_private === true || bookmark.is_private === 1,
   }

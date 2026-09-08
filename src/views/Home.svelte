@@ -52,7 +52,7 @@
   export let authLoading = false
   export let onOpenCreateBookmark: ((categoryId?: string | number) => AsyncVoid) | undefined = undefined
   export let onEditBookmark: ((bookmark: PublicBookmark) => AsyncVoid) | undefined = undefined
-  export let onReorganizeBookmarks: ((categoryOrders: BookmarkReorganizeReq['category_orders']) => AsyncVoid) | undefined = undefined
+  export let onReorganizeBookmarks: ((categoryOrders: BookmarkReorganizeReq['category_orders'], allOrders?: BookmarkReorganizeReq['all_orders']) => AsyncVoid) | undefined = undefined
   export let onSwitchToAdmin: (() => AsyncVoid) | undefined = undefined
   export let onLogout: (() => AsyncVoid) | undefined = undefined
   export let onOpenLogin: (() => AsyncVoid) | undefined = undefined
@@ -67,6 +67,8 @@
   let persistentLeftExpanded = true
   let contentAnchor: HTMLElement | null = null
   let rootSectionNodes = new Map<number, HTMLElement>()
+  let scopePanelNodes = new Map<number, HTMLElement>()
+  let scopePanelMinHeights = new Map<number, number>()
   let scrollFrame: number | null = null
   let scrollSpySuppressedUntil = 0
   let homeSortMode = false
@@ -79,6 +81,7 @@
   $: sortedBookmarks = homeData.getSortedBookmarks(bookmarks)
   $: allCategoryBookmarks = groupBookmarksByCategory(sortedBookmarks)
   $: displayCategoryBookmarks = homeSortMode ? groupBookmarksByCategory(homeSortDraft) : allCategoryBookmarks
+  $: allOrderSource = homeSortMode ? homeSortDraft : sortedBookmarks
   $: navigationSections = getHomeSections(categoryForest, allCategoryBookmarks)
   $: categoryGroups = getHomeCategoryGroups(categoryForest, selectedCategoryIds)
   $: activeId = resolveHomeActiveSectionId(navigationSections, activeId)
@@ -144,15 +147,22 @@
     ))
   }
 
-  function replaceScopeOrder(
+  function assignOrderField(
     draft: PublicBookmark[],
-    categoryIds: Set<number>,
     orderedIds: Array<string | number>,
+    field: 'sort' | 'all_sort',
   ): PublicBookmark[] {
-    const scopeItems = draft.filter((bookmark) => categoryIds.has(bookmark.category_id))
-    const orderedItems = reorderByIds(scopeItems, orderedIds)
-    let index = 0
-    return draft.map((bookmark) => categoryIds.has(bookmark.category_id) ? orderedItems[index++] : bookmark)
+    const order = new Map(orderedIds.map((id, index) => [Number(id), index]))
+    return draft.map((bookmark) => order.has(bookmark.id)
+      ? { ...bookmark, [field]: order.get(bookmark.id) }
+      : bookmark)
+  }
+
+  function getAllOrderedBookmarks(items: PublicBookmark[], root: typeof categoryForest[number]): PublicBookmark[] {
+    const ids = new Set([root.id, ...root.children.map((child) => child.id)])
+    return items
+      .filter((bookmark) => ids.has(bookmark.category_id))
+      .sort((a, b) => (a.all_sort ?? a.sort) - (b.all_sort ?? b.sort) || a.id - b.id)
   }
 
   function startHomeSort(): void {
@@ -172,11 +182,10 @@
     if (!homeSortMode) return
     const root = categoryForest.find((candidate) => candidate.id === categoryId)
     if (root && root.children.length > 0) {
-      const scopeIds = new Set([root.id, ...root.children.map((child) => child.id)])
-      homeSortDraft = replaceScopeOrder(homeSortDraft, scopeIds, orderedIds)
+      homeSortDraft = assignOrderField(homeSortDraft, orderedIds, 'all_sort')
       return
     }
-    homeSortDraft = replaceCategoryOrder(homeSortDraft, categoryId, orderedIds)
+    homeSortDraft = assignOrderField(replaceCategoryOrder(homeSortDraft, categoryId, orderedIds), orderedIds, 'sort')
   }
 
   function handleHomeSortTransfer(transfer: SortTransfer): void {
@@ -210,7 +219,10 @@
         category_id: categoryId,
         ids: items.map((item) => item.id),
       }))
-      await onReorganizeBookmarks(categoryOrders)
+      const allOrders: BookmarkReorganizeReq['all_orders'] = categoryForest
+        .filter((root) => root.children.length > 0)
+        .map((root) => ({ root_id: root.id, ids: getAllOrderedBookmarks(homeSortDraft, root).map((item) => item.id) }))
+      await onReorganizeBookmarks(categoryOrders, allOrders)
       cancelHomeSort()
     } catch (error) {
       // 整理接口是全量提交，失败说明草稿与服务端集合已不一致：
@@ -269,6 +281,15 @@
       },
       destroy() {
         rootSectionNodes.delete(rootId)
+      },
+    }
+  }
+
+  function registerScopePanel(node: HTMLElement, rootId: number) {
+    scopePanelNodes.set(rootId, node)
+    return {
+      destroy() {
+        scopePanelNodes.delete(rootId)
       },
     }
   }
@@ -342,13 +363,15 @@
   }
 
   function handleScopeSelect(rootId: number, categoryId: string | number): void {
-    const currentScroll = typeof window !== 'undefined' ? window.scrollY : 0
+    const panel = scopePanelNodes.get(rootId)
+    if (panel) {
+      const next = new Map(scopePanelMinHeights)
+      next.set(rootId, Math.max(next.get(rootId) ?? 0, panel.getBoundingClientRect().height))
+      scopePanelMinHeights = next
+    }
     setSelectedCategory(rootId, categoryId)
     activeId = normalizeSectionId(categoryId)
     scrollSpySuppressedUntil = performance.now() + 600
-    if (typeof window !== 'undefined') {
-      void tick().then(() => window.scrollTo({ top: currentScroll, behavior: 'auto' }))
-    }
   }
 
   onMount(() => {
@@ -505,10 +528,7 @@
             {@const category = group.root}
             {@const selectedCategory = group.selected}
             {@const selectedBookmarks = selectedCategory.id === category.id && category.children.length > 0
-              ? [
-                  ...(displayCategoryBookmarks.get(category.id) ?? []),
-                  ...category.children.flatMap((child) => displayCategoryBookmarks.get(child.id) ?? []),
-                ]
+              ? getAllOrderedBookmarks(allOrderSource, category)
               : displayCategoryBookmarks.get(selectedCategory.id) ?? []}
             {@const panelId = `home-category-panel-${category.id}`}
             <section
@@ -538,6 +558,8 @@
               <div
                 id={panelId}
                 class="scope-section-list"
+                style:min-height={scopePanelMinHeights.get(category.id) ? `${scopePanelMinHeights.get(category.id)}px` : undefined}
+                use:registerScopePanel={category.id}
                 role={category.children.length > 0 ? 'tabpanel' : undefined}
                 aria-labelledby={category.children.length > 0 ? `home-category-tab-${selectedCategory.id}` : undefined}
               >

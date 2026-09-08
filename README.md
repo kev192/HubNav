@@ -13,7 +13,6 @@
 
   <p>
     <a href="#功能">功能</a> ·
-    <a href="#界面预览">界面预览</a> ·
     <a href="#快速部署">快速部署</a> ·
     <a href="#本地开发">本地开发</a> ·
     <a href="docs/README.md">项目文档</a>
@@ -51,38 +50,6 @@
 - **私密分类**：管理员在后台编辑分类时勾选“访客不可见（仅登录可见）”。未登录访客不会收到该分类、其子分类及其中书签的数据；管理员登录后仍可正常查看和管理。旧分类默认保持访客可见。
 - **跨分类拖拽**：管理员登录后，在首页任意分类点击“排序”，页面会进入统一排序会话。将书签拖入其他分类即可完成归类，同时可以调整目标分类中的位置；点击底部“保存排序”后一次性保存分类和顺序，点击“取消”则放弃本次修改。
 - **浏览器书签同步**：在后台“设置 → 站点设置”开启“浏览器书签同步”后，会自动创建“浏览器新增收藏”分类。安装 [`browser-extension`](browser-extension/) 中的 Chrome/Edge 扩展并登录后，浏览器之后新增的网页书签会统一同步到该分类，并按默认图标策略保存 `https://favicon.im/<hostname>?larger=true` 图标候选。扩展不按浏览器收藏夹文件夹创建导航分类，只做“浏览器 → 导航页”单向新增，不删除或反向覆盖导航页已有书签；整理时可直接在首页排序模式中拖到其他分类。
-
-## 界面预览
-
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <strong>亮色首页</strong><br>
-      <img src="docs/screenshots/cf-navs-light.jpg" alt="HubNav 亮色首页">
-    </td>
-    <td align="center" width="50%">
-      <strong>暗色首页</strong><br>
-      <img src="docs/screenshots/cf-navs-dark.jpg" alt="HubNav 暗色首页">
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
-      <strong>移动端亮色</strong><br>
-      <img src="docs/screenshots/cf-navs-light-mobile.jpg" alt="HubNav 移动端亮色首页" width="260">
-    </td>
-    <td align="center" width="50%">
-      <strong>移动端暗色</strong><br>
-      <img src="docs/screenshots/cf-navs-dark-mobile.jpg" alt="HubNav 移动端暗色首页" width="260">
-    </td>
-  </tr>
-</table>
-
-<p align="center">
-  <strong>主题与站点设置</strong><br>
-  <img src="docs/screenshots/cf-navs-admin-setting.jpg" alt="HubNav 主题与站点设置">
-</p>
-
-更多界面截图位于 [`docs/screenshots`](docs/screenshots)。
 
 ## 快速部署
 

@@ -39,11 +39,11 @@ export async function createBookmark(db: D1Database, req: BookmarkUpsertReq): Pr
    .prepare(
     `INSERT INTO bookmarks (
            category_id, title, url, icon, icon_source, icon_background_color,
-           description, description_mode, open_method, is_private, sort, created_at
+           description, description_mode, open_method, is_private, sort, all_sort, created_at
          )
-         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT MAX(sort) FROM bookmarks WHERE category_id = ?), -1) + 1, ?
+         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT MAX(sort) FROM bookmarks WHERE category_id = ?), -1) + 1, COALESCE((SELECT MAX(all_sort) FROM bookmarks), -1) + 1, ?
          WHERE EXISTS (SELECT 1 FROM categories WHERE id = ?)
-         RETURNING id, category_id, title, url, icon, icon_source, icon_background_color, icon_blob, description, description_mode, open_method, is_private, sort, click_count, created_at`,
+           RETURNING id, category_id, title, url, icon, icon_source, icon_background_color, icon_blob, description, description_mode, open_method, is_private, sort, all_sort, click_count, created_at`,
    )
    .bind(
     req.category_id,
@@ -95,7 +95,7 @@ export async function updateBookmark(
              open_method = COALESCE(?, open_method),
              is_private = ?
          WHERE id = ? AND EXISTS (SELECT 1 FROM categories WHERE id = ?)
-         RETURNING id, category_id, title, url, icon, icon_source, icon_background_color, icon_blob, description, description_mode, open_method, is_private, sort, click_count, created_at`,
+          RETURNING id, category_id, title, url, icon, icon_source, icon_background_color, icon_blob, description, description_mode, open_method, is_private, sort, all_sort, click_count, created_at`,
    )
    .bind(
     req.category_id,
@@ -142,6 +142,7 @@ export class BookmarkReorganizeError extends Error { }
 export async function reorganizeBookmarks(
  db: D1Database,
  categoryOrders: Array<{ category_id: number; ids: number[] }>,
+ allOrders: Array<{ root_id: number; ids: number[] }> = [],
 ): Promise<void> {
  const categoryIds = new Set<number>()
  const bookmarkToCategory = new Map<number, number>()
@@ -187,9 +188,19 @@ export async function reorganizeBookmarks(
  }
 
  const categoryEntries: RowUpdateEntry[] = [...bookmarkToCategory]
+ const allSortEntries: RowUpdateEntry[] = []
+ const allIds = new Set<number>()
+ for (const order of allOrders) {
+  for (const id of order.ids) {
+   if (allIds.has(id)) throw new BookmarkReorganizeError('duplicate all-order bookmark')
+   allIds.add(id)
+   allSortEntries.push([id, allSortEntries.length])
+  }
+ }
  await runUpdateChunks(db, [
   ...buildColumnUpdateChunks('bookmarks', 'category_id', categoryEntries),
   ...buildColumnUpdateChunks('bookmarks', 'sort', sortEntries),
+  ...buildColumnUpdateChunks('bookmarks', 'all_sort', allSortEntries),
  ])
 }
 

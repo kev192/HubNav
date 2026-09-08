@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   open_method  INTEGER NOT NULL DEFAULT 1,-- 1=新窗口 2=当前页 3=当前页弹层
   is_private   INTEGER NOT NULL DEFAULT 0,-- 0=公开 1=仅登录可见
   sort         INTEGER NOT NULL DEFAULT 0,
+  all_sort     INTEGER NOT NULL DEFAULT 0,
   click_count  INTEGER NOT NULL DEFAULT 0,
   created_at   INTEGER NOT NULL
 );
@@ -39,6 +40,7 @@ CREATE TABLE IF NOT EXISTS error_report_rate_limits (
 CREATE INDEX IF NOT EXISTS idx_bookmarks_category ON bookmarks(category_id);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_sort ON bookmarks(category_id, sort);
 CREATE INDEX IF NOT EXISTS idx_bookmarks_sort_global ON bookmarks(sort, id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_all_sort ON bookmarks(all_sort, id);
 CREATE INDEX IF NOT EXISTS idx_categories_sort ON categories(sort);
 CREATE INDEX IF NOT EXISTS idx_categories_sort_id ON categories(sort, id);
 CREATE INDEX IF NOT EXISTS idx_categories_parent_sort_id ON categories(parent_id, sort, id);

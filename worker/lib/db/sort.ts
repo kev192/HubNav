@@ -7,7 +7,7 @@ export const SORT_UPDATE_CHUNK_SIZE = 30
 export type SortTable = 'categories' | 'bookmarks'
 
 // 只允许按 id 定位改写的整数列，防止列名拼接成为注入面。
-export type RowUpdateColumn = 'sort' | 'category_id'
+export type RowUpdateColumn = 'sort' | 'all_sort' | 'category_id'
 
 export type RowUpdateEntry = readonly [id: number, value: number]
 

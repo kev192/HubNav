@@ -149,7 +149,7 @@
       <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
       <path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" />
     </svg>
-    <span class="search-button-text">搜索</span>
+    <span class="sr-only">提交搜索</span>
   </button>
 </form>
 
@@ -157,13 +157,13 @@
   .search-box {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 80px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.6rem;
     align-items: center;
   }
 
   .search-box.has-engine-selector {
-    grid-template-columns: 140px minmax(0, 1fr) 80px;
+    grid-template-columns: 140px minmax(0, 1fr);
   }
 
   .search-input,
@@ -176,7 +176,7 @@
   }
 
   .search-input {
-    padding: 0 0.8rem;
+    padding: 0 3rem 0 0.8rem;
     background-color: rgba(255, 255, 255, 0.82);
     color: inherit;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -197,6 +197,15 @@
   }
 
   .search-button {
+    position: absolute;
+    right: 0.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.15rem;
+    height: 2.15rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.55rem;
     cursor: pointer;
     background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
     color: #fff;
@@ -466,12 +475,12 @@
   @media (max-width: 720px) {
     .search-box {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 2.5rem;
+      grid-template-columns: minmax(0, 1fr);
       gap: 0.45rem;
     }
 
     .search-box.has-engine-selector {
-      grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+      grid-template-columns: 2.5rem minmax(0, 1fr);
     }
 
     .search-input,
@@ -491,9 +500,9 @@
     }
 
     .search-button {
-      width: 2.5rem;
+      width: 2rem;
+      height: 2rem;
       padding: 0;
-      font-size: 0.82rem;
     }
 
     .engine-icon-button {
@@ -512,18 +521,6 @@
       min-width: 9.5rem;
     }
 
-    .search-button-text {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
     .search-button-icon { width: 1.15rem; height: 1.15rem; }
   }
 
@@ -533,11 +530,11 @@
     }
 
     .search-box.has-engine-selector {
-      grid-template-columns: 2.4rem minmax(0, 1fr) 2.4rem;
+      grid-template-columns: 2.4rem minmax(0, 1fr);
     }
 
     .search-box:not(.has-engine-selector) {
-      grid-template-columns: minmax(0, 1fr) 2.4rem;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .search-input,
@@ -552,7 +549,8 @@
     }
 
     .search-button {
-      width: 2.4rem;
+      width: 1.9rem;
+      height: 1.9rem;
     }
   }
 </style>
