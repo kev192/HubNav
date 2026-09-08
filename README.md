@@ -18,7 +18,7 @@
     <a href="docs/README.md">项目文档</a>
   </p>
 
-  <a href="https://github.com/lbjxr/HubNav/fork">
+  <a href="https://github.com/kev192/HubNav/fork">
     <img src="https://img.shields.io/badge/Fork_on_GitHub-181717?logo=github&logoColor=white" alt="Fork on GitHub">
   </a>
 </div>
