@@ -163,6 +163,8 @@
   let importExportState = createImportExportState()
   let preferredThemeMode: ThemeMode | null = null
   let prefersReducedMotion = false
+  let colorSchemeMedia: MediaQueryList | null = null
+  let colorSchemeChangeHandler: ((event: MediaQueryListEvent) => void) | null = null
   // 只在浏览器里创建：SSR/测试环境没有 document 和 URL.createObjectURL。
   let customScriptController: CustomScriptController | null = null
   const categorySortState = createOptimisticSortState()
@@ -821,7 +823,7 @@
     try {
       const settings = await api.settings.update(payload)
       await applyLocalSettings(settings)
-      setPreferredThemeMode(settings.theme === 'dark' ? 'dark' : 'light')
+      setPreferredThemeMode(settings.theme === 'auto' ? 'auto' : settings.theme === 'dark' ? 'dark' : 'light')
       toastStore.addToast('设置已保存', 'success')
    } catch (error) {
      settingsError = getErrorMessage(error)
@@ -918,11 +920,10 @@
 
     if (typeof window !== 'undefined' && window.matchMedia) {
       prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      const colorScheme = window.matchMedia('(prefers-color-scheme: dark)')
-      systemPrefersDark = colorScheme.matches
-      const updateSystemTheme = (event: MediaQueryListEvent) => { systemPrefersDark = event.matches }
-      colorScheme.addEventListener?.('change', updateSystemTheme)
-      onDestroy(() => colorScheme.removeEventListener?.('change', updateSystemTheme))
+      colorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)')
+      systemPrefersDark = colorSchemeMedia.matches
+      colorSchemeChangeHandler = (event: MediaQueryListEvent) => { systemPrefersDark = event.matches }
+      colorSchemeMedia.addEventListener?.('change', colorSchemeChangeHandler)
     }
 
     void initializeApp()
@@ -930,6 +931,9 @@
   })
 
   onDestroy(() => {
+    if (colorSchemeMedia && colorSchemeChangeHandler) {
+      colorSchemeMedia.removeEventListener?.('change', colorSchemeChangeHandler)
+    }
     // 不 revoke 的话每次重建都会漏一个 blob URL。
     customScriptController?.destroy()
   })
