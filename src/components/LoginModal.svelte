@@ -86,7 +86,6 @@
           <p class="modal-eyebrow">管理员登录</p>
           <h2 id="login-modal-title">请输入账号信息</h2>
         </div>
-        <button type="button" class="ghost-button" on:click={handleCancel} disabled={loading}>取消</button>
       </div>
 
       <form class="modal-form" on:submit|preventDefault={handleSubmit}>
@@ -94,10 +93,6 @@
           <span>用户名</span>
           <input bind:value={username} type="text" placeholder="请输入用户名" autocomplete="username" required />
         </label>
-
-        {#if turnstileSiteKey}
-          <div bind:this={turnstileContainer} class="turnstile-container" aria-label="人机验证"></div>
-        {/if}
 
         <label>
           <span>密码</span>
@@ -109,6 +104,10 @@
             required
           />
         </label>
+
+        {#if turnstileSiteKey}
+          <div bind:this={turnstileContainer} class="turnstile-container" aria-label="人机验证"></div>
+        {/if}
 
         {#if error}
           <p class="error-text">{error}</p>
