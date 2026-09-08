@@ -376,17 +376,21 @@
   .admin-bookmark-search-bar input {
     width: 100%;
     box-sizing: border-box;
-    padding: 8px 12px;
-    border: 1px solid var(--admin-input-border);
-    border-radius: 9px;
+    height: 38px;
+    padding: 0 14px;
+    border: 1px solid color-mix(in srgb, var(--admin-accent) 22%, var(--admin-input-border));
+    border-radius: 10px;
     background: var(--admin-input-bg);
     color: var(--admin-text);
     font: inherit;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
   }
 
   .admin-bookmark-search-bar input:focus {
-    outline: 2px solid color-mix(in srgb, var(--admin-accent) 32%, transparent);
-    outline-offset: 1px;
+    outline: none;
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent) 16%, transparent);
   }
 
   @media (max-width: 760px) {

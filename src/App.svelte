@@ -918,6 +918,11 @@
 
     if (typeof window !== 'undefined' && window.matchMedia) {
       prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const colorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+      systemPrefersDark = colorScheme.matches
+      const updateSystemTheme = (event: MediaQueryListEvent) => { systemPrefersDark = event.matches }
+      colorScheme.addEventListener?.('change', updateSystemTheme)
+      onDestroy(() => colorScheme.removeEventListener?.('change', updateSystemTheme))
     }
 
     void initializeApp()

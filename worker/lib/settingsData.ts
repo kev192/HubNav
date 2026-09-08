@@ -148,6 +148,7 @@ export function settingsFromRawMap(raw: Map<string, unknown>): Settings {
     }
   }
   for (const key of SETTINGS_KEYS) assignSetting(key)
+  out.theme = out.theme === 'dark' || out.theme === 'auto' ? out.theme : 'light'
   out.background_preset_id = normalizeBackgroundPresetId(out.background_preset_id)
   const rawMode = raw.get('card_description_mode')
   const rawLegacy = raw.get('card_show_description')

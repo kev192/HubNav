@@ -12,6 +12,7 @@ export type SettingsFormModel = SettingsFormValue
 export const themeOptions: Array<{ value: ThemeMode; label: string; hint: string }> = [
   { value: 'light', label: '浅色', hint: '始终使用浅色主题。' },
   { value: 'dark', label: '深色', hint: '始终使用深色主题。' },
+  { value: 'auto', label: '跟随系统', hint: '读取设备的浅色/深色模式设置。' },
 ]
 
 export const backgroundTypeOptions: Array<{ value: BackgroundSetting['type']; label: string; hint: string }> = [
@@ -169,7 +170,7 @@ export function createSettingsFormState(
     site_title_font_size: typeof source?.site_title_font_size === 'number' ? source.site_title_font_size : 32,
     public_mode: source?.public_mode ?? true,
     browser_sync_enabled: source?.browser_sync_enabled ?? false,
-    theme: source?.theme === 'dark' ? 'dark' : 'light',
+    theme: source?.theme === 'dark' || source?.theme === 'auto' ? source.theme : 'light',
     background_preset_id: resolveBackgroundPresetId(source, lightBackground, darkBackground),
     custom_css: source?.custom_css ?? '',
     custom_js: source?.custom_js ?? '',
@@ -277,7 +278,7 @@ export function normalizeSettingsForm(source: SettingsFormModel): SettingsFormMo
     site_title_font_size: clampNumber(source.site_title_font_size, 16, 72),
     public_mode: source.public_mode,
     browser_sync_enabled: Boolean(source.browser_sync_enabled),
-    theme: source.theme === 'dark' ? 'dark' : 'light',
+    theme: source.theme === 'dark' || source.theme === 'auto' ? source.theme : 'light',
     background_preset_id: source.background_preset_id,
     custom_css: source.custom_css?.trim() ?? '',
     custom_js: source.custom_js?.trim() ?? '',
