@@ -163,6 +163,10 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
   }
 
+  input::placeholder {
+    color: #94a3b8;
+  }
+
   .error-text {
     margin: 0;
     color: #dc2626;
@@ -202,5 +206,57 @@
   .ghost-button:disabled {
     cursor: not-allowed;
     opacity: 0.6;
+  }
+
+  :global(html[data-theme='dark']) .modal-backdrop {
+    background: rgba(2, 6, 23, 0.68);
+  }
+
+  :global(html[data-theme='dark']) .modal-card {
+    background:
+      radial-gradient(circle at 12% 0%, rgba(56, 189, 248, 0.14), transparent 42%),
+      linear-gradient(145deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.97));
+    color: #e5eefb;
+    border-color: rgba(125, 211, 252, 0.25);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  }
+
+  :global(html[data-theme='dark']) .modal-eyebrow {
+    color: #7dd3fc;
+  }
+
+  :global(html[data-theme='dark']) h2,
+  :global(html[data-theme='dark']) label {
+    color: #e5eefb;
+  }
+
+  :global(html[data-theme='dark']) input {
+    color: #f8fafc;
+    background: rgba(2, 6, 23, 0.52);
+    border-color: rgba(148, 163, 184, 0.34);
+  }
+
+  :global(html[data-theme='dark']) input::placeholder {
+    color: #94a3b8;
+  }
+
+  :global(html[data-theme='dark']) input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+  }
+
+  :global(html[data-theme='dark']) .ghost-button {
+    color: #e5eefb;
+    background: rgba(30, 41, 59, 0.76);
+    border-color: rgba(148, 163, 184, 0.36);
+  }
+
+  :global(html[data-theme='dark']) .primary-button {
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    color: #ffffff;
+  }
+
+  :global(html[data-theme='dark']) .error-text {
+    color: #fca5a5;
   }
 </style>

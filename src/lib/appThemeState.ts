@@ -20,7 +20,10 @@ export function resolveAppThemeState({
   systemPrefersDark: _systemPrefersDark,
 }: AppThemeStateInput): AppThemeState {
   const configuredTheme = configuredThemeMode === 'dark' ? 'dark' : 'light'
-  const themeMode = preferredThemeMode === 'dark' ? 'dark' : 'light'
+  // 用户在首页手动切换后的本地偏好优先；没有本地偏好时使用后台保存的默认主题。
+  const themeMode = preferredThemeMode === 'dark' || preferredThemeMode === 'light'
+    ? preferredThemeMode
+    : configuredTheme
 
   return {
     configuredThemeMode: configuredTheme,

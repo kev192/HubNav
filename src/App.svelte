@@ -820,7 +820,8 @@
 
     try {
       const settings = await api.settings.update(payload)
-     await applyLocalSettings(settings)
+      await applyLocalSettings(settings)
+      setPreferredThemeMode(settings.theme === 'dark' ? 'dark' : 'light')
       toastStore.addToast('设置已保存', 'success')
    } catch (error) {
      settingsError = getErrorMessage(error)

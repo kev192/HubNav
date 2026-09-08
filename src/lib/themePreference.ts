@@ -5,7 +5,7 @@ const THEME_STORAGE_KEY = 'cf-navs.theme-mode'
 export function readPreferredThemeMode(): ThemeMode | null {
   if (typeof localStorage === 'undefined') return null
   const stored = localStorage.getItem(THEME_STORAGE_KEY)
-  return stored === 'light' || stored === 'dark' || stored === 'auto' ? stored : null
+  return stored === 'light' || stored === 'dark' ? stored : null
 }
 
 export function writePreferredThemeMode(mode: ThemeMode): void {
