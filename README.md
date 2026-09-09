@@ -18,7 +18,7 @@
     <a href="docs/README.md">项目文档</a>
   </p>
 
-  <a href="https://github.com/kev192/HubNav/fork">
+  <a href="https://github.com/kev192/NavHub/fork">
     <img src="https://img.shields.io/badge/Fork_on_GitHub-181717?logo=github&logoColor=white" alt="Fork on GitHub">
   </a>
 </div>
@@ -67,7 +67,7 @@ NavHub 需要以下 Cloudflare 资源：
 
 适合不想在本地安装 Wrangler 的用户。Cloudflare 会从 GitHub 的 `main` 分支自动构建和部署。
 
-1. [Fork 本仓库](https://github.com/lbjxr/HubNav/fork)，并确认 Fork 的默认分支为 `main`。
+1. [Fork 本仓库](https://github.com/kev192/NavHub/fork)，并确认 Fork 的默认分支为 `main`。
 2. 在 Cloudflare 控制台打开 **Workers & Pages → Create application → Import a repository**，授权 Cloudflare 访问 GitHub，并选择你的 Fork。
 3. 在构建配置中填写：
    - 生产分支：`main`
@@ -93,7 +93,7 @@ NavHub 需要以下 Cloudflare 资源：
 前置条件：Node.js 18+、npm 和 Cloudflare 账号。所有资源命令都会作用于当前 Wrangler 登录的账号；如果你有多个 Cloudflare 账号，先用 `npx wrangler whoami` 确认账号。
 
 ```bash
-git clone https://github.com/lbjxr/HubNav.git
+git clone https://github.com/kev192/NavHub.git
 cd NavHub
 npm install
 
@@ -221,11 +221,11 @@ NavHub/
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=lbjxr%2FHubNav&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=kev192%2FNavHub&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lbjxr/HubNav&type=date&theme=dark&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lbjxr/HubNav&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lbjxr/HubNav&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=kev192/NavHub&type=date&theme=dark&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=kev192/NavHub&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=kev192/NavHub&type=date&legend=top-left&sealed_token=7kyATdN3x5tJ6WJAhA5MwxWL93j-C9ZnSxJli_vTqztkkZF54Sp95nJzSMW-Xggc19KoraDrqDNjCWN6VuQrSEmOX8CAbyYqMi0I_6K3DS2GEr0x1rgf8VDa2kBJIgOP74JqDldlCFRRbGGNjvrDVJ12e4SIShmH78leu6Vxg6WQzidKg4PULPCzlwi-" />
  </picture>
 </a>
 
