@@ -93,7 +93,7 @@
 </script>
 
 <svelte:head>
-  <title>安装 HubNav</title>
+  <title>安装 NavHub</title>
 </svelte:head>
 
 <main class="install-page" aria-labelledby="install-title">
@@ -104,7 +104,7 @@
         <span></span>
         <span></span>
       </div>
-      <p class="install-kicker">HubNav · 首次运行</p>
+      <p class="install-kicker">NavHub · 首次运行</p>
       <h1 id="install-title">建立你的导航站</h1>
       <p class="install-lead">创建第一个管理员账号。安装完成后，当前浏览器会直接进入已登录状态。</p>
 

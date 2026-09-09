@@ -134,7 +134,7 @@ export async function refreshPublicData(progressive = false): Promise<PublicData
   } catch (error) {
     if (isPublicModeForbidden(error)) {
       const forbiddenConfig = siteConfigFromForbiddenError(error) ?? {
-        site_title: config?.site_title ?? 'HubNav',
+        site_title: config?.site_title ?? 'NavHub',
         public_mode: false,
       }
 

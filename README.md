@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="public/icon.png" alt="HubNav 项目图标" width="112" height="112">
-  <h1>HubNav</h1>
+  <img src="public/icon.png" alt="NavHub 项目图标" width="112" height="112">
+  <h1>NavHub</h1>
   <p>运行在 Cloudflare Workers 上的轻量个人导航面板</p>
   <p>在一个清爽、响应式的界面中管理分类、书签、主题、搜索服务与数据备份。</p>
 
@@ -55,7 +55,7 @@
 
 如果你第一次使用 Cloudflare，建议先选择一种部署方式并完整走完，不要混用两套流程。两种方式最终都会通过 `/install` 初始化数据库和管理员账号。
 
-HubNav 需要以下 Cloudflare 资源：
+NavHub 需要以下 Cloudflare 资源：
 
 | 资源 | 绑定名 | 用途 |
 |---|---|---|
@@ -94,7 +94,7 @@ HubNav 需要以下 Cloudflare 资源：
 
 ```bash
 git clone https://github.com/lbjxr/HubNav.git
-cd HubNav
+cd NavHub
 npm install
 
 npx wrangler login
@@ -172,7 +172,7 @@ git diff --check
 ## 项目结构
 
 ```text
-HubNav/
+NavHub/
 ├── src/                 # Svelte 页面、组件与浏览器端逻辑
 ├── worker/              # Worker 路由、中间件与 D1 数据访问
 ├── shared/              # 前后端共享类型与设置契约
@@ -205,7 +205,7 @@ HubNav/
 
 后台支持以下数据格式：
 
-- HubNav JSON 备份：保存两层分类关系，支持按完整路径追加合并或覆盖恢复。
+- NavHub JSON 备份：保存两层分类关系，支持按完整路径追加合并或覆盖恢复。
 - Sun-Panel 数据：分类按一级导入，并转换书签与兼容图标字段。
 - 浏览器书签 HTML：导入浏览器导出的标准文件，有效文件夹映射为两层分类，更深路径压平到二级标题。
 
@@ -239,7 +239,7 @@ HubNav/
 <div align="center">
 
 <details>
-  <summary><b>☕️ 喜欢 HubNav？请作者喝杯咖啡 / Sponsor</b></summary>
+  <summary><b>☕️ 喜欢 NavHub？请作者喝杯咖啡 / Sponsor</b></summary>
   <br>
   <p>如果这个项目对你有帮助，欢迎赞助支持！你的支持是维持项目持续更新和维护的最大动力 ❤️</p>
   <a href="https://afdian.com/a/benjian" target="_blank">
@@ -249,4 +249,3 @@ HubNav/
 </details>
 
 </div>
-

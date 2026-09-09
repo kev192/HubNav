@@ -20,7 +20,7 @@
     <textarea
       bind:value={form.footer_html}
       rows="4"
-      placeholder='<div style="text-align:center;color:#cbd5e1">Powered by HubNav</div>'
+      placeholder='<div style="text-align:center;color:#cbd5e1">Powered by NavHub</div>'
     ></textarea>
     <small>支持自定义 HTML（如备案号、版权信息、友情链接）。请仅填写可信内容，页面安全策略会阻止脚本和内联事件执行。</small>
   </label>
@@ -40,7 +40,7 @@
     <textarea
       bind:value={form.custom_js}
       rows="7"
-      placeholder="例如：console.log('Hello HubNav!');"
+      placeholder="例如：console.log('Hello NavHub!');"
     ></textarea>
     <small class="warn">为保护管理会话，JavaScript 不会在预览中执行。请仅保存你完全信任的脚本。</small>
   </label>

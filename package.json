@@ -1,5 +1,5 @@
 {
-  "name": "hubnav",
+  "name": "navhub",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,7 +18,7 @@
     "db:init:remote": "node scripts/wrangler-config.mjs d1 execute DB --remote --file=./schema.sql"
   },
   "cloudflare": {
-    "label": "HubNav",
+    "label": "NavHub",
     "products": [
       "Workers",
       "D1",

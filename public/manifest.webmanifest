@@ -1,6 +1,6 @@
 {
-  "name": "HubNav 导航面板",
-  "short_name": "HubNav",
+  "name": "NavHub 导航面板",
+  "short_name": "NavHub",
   "description": "部署在 Cloudflare Workers 上的轻量个人导航面板",
   "start_url": "/",
   "scope": "/",

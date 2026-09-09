@@ -115,7 +115,7 @@
 
 <svelte:head>
   <title>管理后台</title>
-  <meta name="description" content="HubNav 管理后台" />
+  <meta name="description" content="NavHub 管理后台" />
 </svelte:head>
 
 <div class="admin-page">

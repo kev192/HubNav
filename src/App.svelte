@@ -188,7 +188,7 @@
   $: publicData = $publicStore.data
   $: adminData = $adminStore.data
   $: canSeeHome = canSeeHomeView({ publicMode: config?.public_mode, authenticated: $isAuthenticated })
-  $: homeTitle = publicData?.settings.site_title ?? config?.site_title ?? 'HubNav'
+  $: homeTitle = publicData?.settings.site_title ?? config?.site_title ?? 'NavHub'
 
   $: adminCategories = toAdminCategories(adminData.categories, adminData.bookmarks)
   $: adminBookmarks = toAdminBookmarks(adminData.bookmarks)
@@ -994,7 +994,7 @@
               </defs>
             </svg>
           </div>
-          <p class="eyebrow">HubNav</p>
+          <p class="eyebrow">NavHub</p>
           <h1>请先登录管理员账号</h1>
           <p>当前站点未公开，登录后再加载后台管理界面。</p>
         </div>
@@ -1061,7 +1061,7 @@
               </defs>
             </svg>
           </div>
-          <p class="eyebrow">HubNav</p>
+          <p class="eyebrow">NavHub</p>
           <h1>正在加载后台...</h1>
           <p>管理界面分包正在按需载入。</p>
           <div class="app-splash-progress" aria-hidden="true">
