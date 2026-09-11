@@ -62,7 +62,7 @@
   })
 </script>
 
-<div class="network-switch"><button type="button" class="icon-button network-mode-button" on:click={toggleNetworkMode} title={`网络模式：${networkLabel}`} aria-label={`网络模式：${networkLabel}`}><span class="network-icon">{networkMode === "external" ? "↗" : networkMode === "internal" ? "⌂" : "⇄"}</span></button><span class="network-status-dot" class:online={networkOnline === true} class:offline={networkOnline === false}></span><span>{networkLabel}</span>{#if probing}<small>检测中</small>{/if}</div>
+{#if isAuthenticated}<div class="network-switch"><button type="button" class="icon-button network-mode-button" on:click={toggleNetworkMode} title={`网络模式：${networkLabel}`} aria-label={`网络模式：${networkLabel}`}><span class="network-icon">{networkMode === "external" ? "↗" : networkMode === "internal" ? "⌂" : "⇄"}</span></button><span class="network-status-dot" class:online={networkOnline === true} class:offline={networkOnline === false}></span><span>{networkLabel}</span>{#if probing}<small>检测中</small>{/if}</div>{/if}
 <div class="floating-actions" class:below-top-navigation={topNavigation}>
   <button
     type="button"

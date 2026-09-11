@@ -54,6 +54,8 @@
   let shellElement: HTMLDivElement | null = null
   let stopIconVisibilityObserver: (() => void) | null = null
   let contextMenuOpen = false
+  let contextMenuX = 0
+  let contextMenuY = 0
   let modalOpen = false
   let iconStateKey = ''
   let windowListenersAttached = false
@@ -326,7 +328,7 @@
   {/if}
 
   {#if contextMenuOpen}
-    <BookmarkContextMenu onEdit={canEdit ? handleEditClick : undefined} hasInternal={Boolean(bookmark.internal_url)} onOpenExternal={() => openBookmarkUrl(bookmark.url)} onOpenInternal={() => openBookmarkUrl(bookmark.internal_url ?? bookmark.url)} />
+    <BookmarkContextMenu menuX={contextMenuX} menuY={contextMenuY} onEdit={canEdit ? handleEditClick : undefined} hasInternal={Boolean(bookmark.internal_url)} onOpenExternal={() => openBookmarkUrl(bookmark.url)} onOpenInternal={() => openBookmarkUrl(bookmark.internal_url ?? bookmark.url)} />
   {/if}
 
   {#if modalOpen}

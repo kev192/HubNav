@@ -5,13 +5,15 @@
   export let onOpenExternal: (() => AsyncVoid) | undefined = undefined
   export let onOpenInternal: (() => AsyncVoid) | undefined = undefined
   export let hasInternal = false
+  export let menuX = 0
+  export let menuY = 0
 
   function handleEditClick() {
     void onEdit?.()
   }
 </script>
 
-<div class="bookmark-context-menu">
+<div class="bookmark-context-menu" style={`left:${menuX}px; top:${menuY}px;`}>
   <button type="button" disabled={!hasInternal} on:click={() => void onOpenInternal?.()}>打开内网地址</button>
   <button type="button" on:click={() => void onOpenExternal?.()}>打开外网地址</button>
   {#if onEdit}<button type="button" data-testid="bookmark-context-edit" on:click={handleEditClick}>编辑</button>{/if}
@@ -19,9 +21,7 @@
 
 <style>
   .bookmark-context-menu {
-    position: absolute;
-    top: 8px;
-    right: 8px;
+    position: fixed;
     z-index: 80;
     min-width: 88px;
     padding: 6px;

@@ -25,6 +25,9 @@
   </div>
 </fieldset>
 <style>
+  .form-grid { align-items: end; gap: 18px; }
+  .field { min-width: 0; }
+  .field input, .field select { min-height: 42px; }
   .probe-row { grid-column: 1 / -1; display:flex; align-items:center; gap:12px; }
   .probe-button { border:1px solid var(--sp-toggle-border); border-radius:10px; padding:9px 15px; background:var(--sp-toggle-bg); color:var(--sp-label); cursor:pointer; }
   .probe-button:disabled { opacity:.55; cursor:not-allowed; }
