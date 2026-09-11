@@ -52,7 +52,9 @@
   }
 
   onMount(() => {
-    networkMode = document.documentElement.dataset.networkMode || "external"
+    networkMode = localStorage.getItem("navhub-network-mode") || document.documentElement.dataset.networkMode || "external"
+    document.documentElement.dataset.networkMode = networkMode
+    document.documentElement.dataset.networkResolvedMode = networkMode === "auto" ? (document.documentElement.dataset.networkResolvedMode || "external") : networkMode
     updateBackToTopVisibility()
     window.addEventListener('scroll', updateBackToTopVisibility, { passive: true })
 
@@ -149,13 +151,12 @@
 {/if}
 
 <style>
-  .network-switch { position: fixed; left: 1.25rem; top: 1.25rem; z-index: 70; display: flex; align-items: center; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
+  .network-switch { position: fixed; left: 1.25rem; top: 1.25rem; z-index: 70; display: flex; align-items: center; flex-wrap: nowrap; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
   .network-switch .icon-button { font-size: 1.2rem; }
   .network-mode-button { border-radius: 999px; background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(14,165,233,.12)); box-shadow: 0 4px 14px rgba(37,99,235,.16); }
   .network-icon { font-size: 1.25rem; font-weight: 700; }
-  .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #94a3b8; margin-left: .05rem; }
+  .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #22c55e; margin-left: .05rem; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
   .network-status-dot.online { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
-  .network-status-dot.offline { background: #ef4444; }
 
   .floating-actions {
     position: fixed;
@@ -260,13 +261,12 @@
   }
 
   @media (max-width: 799px) {
-    .network-switch { position: fixed; left: 1.25rem; top: 1.25rem; z-index: 70; display: flex; align-items: center; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
+    .network-switch { position: fixed; left: 1.25rem; top: 1.25rem; z-index: 70; display: flex; align-items: center; flex-wrap: nowrap; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
   .network-switch .icon-button { font-size: 1.2rem; }
   .network-mode-button { border-radius: 999px; background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(14,165,233,.12)); box-shadow: 0 4px 14px rgba(37,99,235,.16); }
   .network-icon { font-size: 1.25rem; font-weight: 700; }
-  .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #94a3b8; margin-left: .05rem; }
+  .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #22c55e; margin-left: .05rem; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
   .network-status-dot.online { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
-  .network-status-dot.offline { background: #ef4444; }
 
   .floating-actions {
       top: 1rem;
