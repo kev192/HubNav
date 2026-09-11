@@ -181,6 +181,8 @@
     event.preventDefault()
     event.stopPropagation()
     notifyContextMenuOpen()
+    contextMenuX = Math.min(event.clientX + 12, window.innerWidth - 190)
+    contextMenuY = Math.min(event.clientY + 12, window.innerHeight - 150)
     contextMenuOpen = true
   }
 
