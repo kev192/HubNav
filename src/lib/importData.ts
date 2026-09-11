@@ -168,6 +168,7 @@ function prepareSunPanelImport(parsed: unknown): PreparedImport {
         category_id: categoryId,
         title: readString(rawBookmark.title, `Bookmark ${nextBookmarkId}`).trim() || `Bookmark ${nextBookmarkId}`,
         url,
+        internal_url: normalizeUrl(rawBookmark.internalUrl ?? rawBookmark.internal_url) || url,
         icon: normalizedIcon.icon,
         icon_source: normalizedIcon.icon_source,
         icon_background_color: normalizedIcon.icon_background_color,
@@ -301,6 +302,7 @@ export function prepareBrowserBookmarkHtml(text: string): PreparedImport {
     bookmarks.push({
       id: nextBookmarkId++, category_id: categoryId,
       title: titleFallback(decode(title.replace(/<[^>]+>/g, '')), url), url,
+      internal_url: url,
       icon: safeIcon?.startsWith('data:') ? null : safeIcon,
       icon_source: safeIcon?.startsWith('data:') ? 'custom' : null,
       icon_background_color: null, icon_blob: safeIcon?.startsWith('data:') ? safeIcon : null,

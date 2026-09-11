@@ -2,6 +2,8 @@ import type { PublicSettings, Settings } from './types'
 
 export const SETTINGS_KEYS = [
   'site_title',
+  'network_mode',
+  'network_probe_url',
   'site_title_color',
   'site_title_font_size',
   'public_mode',
@@ -70,6 +72,8 @@ export const PUBLIC_DATA_SETTINGS_KEYS = [
 export function toPublicSettings(settings: Settings): PublicSettings {
   return {
     site_title: settings.site_title,
+    network_mode: settings.network_mode,
+    network_probe_url: settings.network_probe_url,
     site_title_color: settings.site_title_color,
     site_title_font_size: settings.site_title_font_size,
     theme: settings.theme,

@@ -6,6 +6,7 @@
   export let categoryId: string | number | undefined = undefined
   export let title = ''
   export let url = ''
+  export let internalUrl = ''
   export let openMethod: BookmarkFormValue['open_method'] = 'new_tab'
   export let isPrivate = false
   export let description = ''
@@ -37,7 +38,7 @@
 </label>
 
 <label class="field-compact">
-  <span>链接地址</span>
+  <span>外网地址</span>
   <input
     bind:value={url}
     type="url"
@@ -45,6 +46,11 @@
     required
     on:blur={() => onUrlBlur?.()}
   />
+</label>
+
+<label class="field-compact">
+  <span>内网地址 <small>可选</small></span>
+  <input bind:value={internalUrl} type="url" placeholder="http://内网地址" />
 </label>
 
 <label class="field-compact">

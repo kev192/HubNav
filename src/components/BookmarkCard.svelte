@@ -60,6 +60,7 @@
   let contextMenuInstanceId = Math.random().toString(36).slice(2)
 
   $: openInNewTab = bookmark.open_method === 1
+  $: selectedBookmarkUrl = bookmark.url
   $: iconBaseState = deriveBookmarkCardIconBase({
     bookmark,
     iconInView,
@@ -174,7 +175,7 @@
       event.preventDefault()
       return
     }
-    if (!canOpenBookmarkContextMenu({ sortMode, canEdit, hasEditHandler: Boolean(onEdit) })) return
+    if (!canOpenBookmarkContextMenu({ sortMode, canEdit, hasEditHandler: Boolean(onEdit) })) { event.preventDefault(); return }
     event.preventDefault()
     event.stopPropagation()
     notifyContextMenuOpen()
@@ -186,6 +187,8 @@
     await onEdit?.(bookmark)
   }
 
+  function openBookmarkUrl(url: string) { if (!url) return; if (openInNewTab) window.open(url, "_blank", "noopener,noreferrer"); else window.location.href = url }
+  async function resolveBookmarkUrl(): Promise<string> { const mode = document.documentElement.dataset.networkMode || "external"; if (mode === "internal" && bookmark.internal_url) return bookmark.internal_url; if (mode === "auto" && bookmark.internal_url) { const probe = document.documentElement.dataset.networkProbeUrl; if (probe) { try { await fetch(probe, { method: "HEAD", mode: "no-cors", cache: "no-store" }); return bookmark.internal_url } catch {} } } return bookmark.url }
   function handleLinkClick(event: MouseEvent) {
     if (preview) {
       event.preventDefault()
@@ -196,6 +199,8 @@
       return
     }
 
+    event.preventDefault()
+    void resolveBookmarkUrl().then(openBookmarkUrl)
     // Register click both locally and on server
     publicStore.incrementClick(bookmark.id)
     void api.public.registerClick(bookmark.id)
@@ -321,7 +326,7 @@
   {/if}
 
   {#if contextMenuOpen}
-    <BookmarkContextMenu onEdit={handleEditClick} />
+    <BookmarkContextMenu onEdit={canEdit ? handleEditClick : undefined} hasInternal={Boolean(bookmark.internal_url)} onOpenExternal={() => openBookmarkUrl(bookmark.url)} onOpenInternal={() => openBookmarkUrl(bookmark.internal_url ?? bookmark.url)} />
   {/if}
 
   {#if modalOpen}

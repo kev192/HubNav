@@ -13,6 +13,7 @@ import {
 export const emptyBookmarkForm: BookmarkFormValue = {
   title: '',
   url: '',
+  internal_url: '',
   icon: '',
   icon_source: '',
   icon_background_color: '',
@@ -32,6 +33,7 @@ export function createBookmarkFormValue(
     category_id: value?.category_id ?? fallbackCategoryId,
     title: value?.title ?? '',
     url: value?.url ?? '',
+    internal_url: value?.internal_url ?? '',
     icon: value?.icon ?? '',
     icon_source: value?.icon_source ?? '',
     icon_background_color: value?.icon_background_color ?? '',

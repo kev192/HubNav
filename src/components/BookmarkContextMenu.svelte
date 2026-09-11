@@ -2,6 +2,9 @@
   type AsyncVoid<T = void> = T | Promise<T>
 
   export let onEdit: (() => AsyncVoid) | undefined = undefined
+  export let onOpenExternal: (() => AsyncVoid) | undefined = undefined
+  export let onOpenInternal: (() => AsyncVoid) | undefined = undefined
+  export let hasInternal = false
 
   function handleEditClick() {
     void onEdit?.()
@@ -9,7 +12,7 @@
 </script>
 
 <div class="bookmark-context-menu">
-  <button type="button" data-testid="bookmark-context-edit" on:click={handleEditClick}>编辑</button>
+  {#if hasInternal}<button type="button" on:click={() => void onOpenInternal?.()}>内网地址</button>{/if}<button type="button" on:click={() => void onOpenExternal?.()}>外网地址</button>{#if onEdit}<button type="button" data-testid="bookmark-context-edit" on:click={handleEditClick}>编辑</button>{/if}
 </div>
 
 <style>

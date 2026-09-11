@@ -49,6 +49,8 @@ export const defaultSearchEngine: SearchEngineSetting = {
 }
 
 export const emptySettingsForm: SettingsFormModel = {
+  network_mode: 'external',
+  network_probe_url: '',
   site_title: '',
   site_title_color: '#ffffff',
   site_title_font_size: 32,
@@ -89,6 +91,8 @@ export const emptySettingsForm: SettingsFormModel = {
 export function cloneSettingsForm(source: SettingsFormModel): SettingsFormModel {
   return {
     site_title: source.site_title,
+    network_mode: source.network_mode,
+    network_probe_url: source.network_probe_url,
     site_title_color: source.site_title_color,
     site_title_font_size: source.site_title_font_size,
     public_mode: source.public_mode,
@@ -166,6 +170,8 @@ export function createSettingsFormState(
   const navigation = source?.navigation
   return {
     site_title: source?.site_title ?? '',
+    network_mode: source?.network_mode === 'internal' || source?.network_mode === 'auto' ? source.network_mode : 'external',
+    network_probe_url: source?.network_probe_url ?? '',
     site_title_color: source?.site_title_color ?? '#ffffff',
     site_title_font_size: typeof source?.site_title_font_size === 'number' ? source.site_title_font_size : 32,
     public_mode: source?.public_mode ?? true,
@@ -274,6 +280,8 @@ export function normalizeSettingsForm(source: SettingsFormModel): SettingsFormMo
   const darkBackground = normalizeBackground(source.backgrounds.dark, defaultDarkBackground)
   return {
     site_title: source.site_title.trim(),
+    network_mode: source.network_mode,
+    network_probe_url: source.network_probe_url.trim(),
     site_title_color: source.site_title_color?.trim() ?? '',
     site_title_font_size: clampNumber(source.site_title_font_size, 16, 72),
     public_mode: source.public_mode,

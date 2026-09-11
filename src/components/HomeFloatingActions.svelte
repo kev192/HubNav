@@ -16,11 +16,14 @@
   export let topNavigation = false
 
   let showBackToTop = false
+  let networkMode = "external"
 
   $: nextThemeLabel = themeMode === 'light' ? '暗色模式' : themeMode === 'dark' ? '跟随系统' : '浅色模式'
   $: currentThemeLabel = themeMode === 'auto' ? `跟随系统（当前${activeTheme === 'dark' ? '暗色' : '浅色'}）` : activeTheme === 'dark' ? '暗色模式' : '浅色模式'
   $: themeToggleLabel = `当前${currentThemeLabel}，点击切换到${nextThemeLabel}`
 
+  function toggleNetworkMode() { const order = ["external","internal","auto"]; networkMode = order[(order.indexOf(networkMode)+1)%3]; document.documentElement.dataset.networkMode = networkMode; }
+  $: networkLabel = networkMode === "external" ? "外网" : networkMode === "internal" ? "内网" : "自动"
   function handleToggleTheme() {
     void onToggleTheme?.()
   }
@@ -47,6 +50,7 @@
   }
 
   onMount(() => {
+    networkMode = document.documentElement.dataset.networkMode || "external"
     updateBackToTopVisibility()
     window.addEventListener('scroll', updateBackToTopVisibility, { passive: true })
 
@@ -54,6 +58,7 @@
   })
 </script>
 
+<div class="network-switch"><button type="button" class="icon-button" on:click={toggleNetworkMode} title={`网络模式：${networkLabel}`} aria-label={`网络模式：${networkLabel}`}><span>{networkMode === "external" ? "↗" : networkMode === "internal" ? "⌂" : "⇄"}</span></button><span>{networkLabel}</span></div>
 <div class="floating-actions" class:below-top-navigation={topNavigation}>
   <button
     type="button"
@@ -142,6 +147,9 @@
 {/if}
 
 <style>
+  .network-switch { position: fixed; left: 1.25rem; top: 1.25rem; z-index: 70; display: flex; align-items: center; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
+  .network-switch .icon-button { font-size: 1.2rem; }
+
   .floating-actions {
     position: fixed;
     top: 1.25rem;
@@ -245,7 +253,10 @@
   }
 
   @media (max-width: 799px) {
-    .floating-actions {
+    .network-switch { position: fixed; left: 1.25rem; top: 1.25rem; z-index: 70; display: flex; align-items: center; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
+  .network-switch .icon-button { font-size: 1.2rem; }
+
+  .floating-actions {
       top: 1rem;
       right: 1rem;
     }

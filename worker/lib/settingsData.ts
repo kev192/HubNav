@@ -7,6 +7,8 @@ import { SETTINGS_KEYS } from '../../shared/settings'
 // Keep these defaults aligned with schema.sql seed settings.
 export const DEFAULT_SETTINGS: Settings = {
   site_title: 'NavHub',
+  network_mode: 'external',
+  network_probe_url: '',
   site_title_color: '',
   site_title_font_size: 32,
   public_mode: true,

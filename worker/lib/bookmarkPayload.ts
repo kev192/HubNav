@@ -35,6 +35,7 @@ export function parseBookmarkUpsertPayload(body: BookmarkUpsertReq | null): Book
     body.category_id <= 0 ||
     !isNonEmptyString(body.title) ||
     !isNonEmptyString(body.url) ||
+    !isOptionalString(body.internal_url) ||
     !isOptionalString(body.icon) ||
     !isOptionalString(body.icon_background_color) ||
     !isOptionalString(body.description) ||
@@ -51,6 +52,9 @@ export function parseBookmarkUpsertPayload(body: BookmarkUpsertReq | null): Book
   }
 
   const url = body.url.trim()
+  const internalUrl = body.internal_url?.trim() || null
+  if (internalUrl && !isAllowedBookmarkUrl(internalUrl)) return { ok: false, message: 'invalid internal url' }
+
   if (!isAllowedBookmarkUrl(url)) {
     return { ok: false, message: 'bookmark url must start with http:// or https://' }
   }

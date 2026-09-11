@@ -18,6 +18,7 @@ export interface Bookmark {
   category_id: number
   title: string
   url: string
+  internal_url?: string | null
   icon: string | null
   icon_source: IconSource | null // 图标获取方式（direct/favicon_im/logo_surf/google/iconify/custom）
   icon_background_color: string | null
@@ -154,6 +155,8 @@ export interface Settings {
   footer_html: string
   most_visited_count: number
   site_title_show: boolean
+  network_mode: 'external' | 'internal' | 'auto'
+  network_probe_url: string
 }
 
 // ========== API 统一响应包络 ==========
@@ -251,6 +254,8 @@ export interface DataVersionResp {
 // 公开输出的设置子集（不含密码等敏感项）
 export interface PublicSettings {
   site_title: string
+  network_mode: 'external' | 'internal' | 'auto'
+  network_probe_url: string
   site_title_color: string
   site_title_font_size: number
   theme: ThemeMode
@@ -298,6 +303,7 @@ export interface BookmarkUpsertReq {
   category_id: number
   title: string
   url: string
+  internal_url?: string | null
   icon?: string | null
   icon_source?: IconSource | null
   icon_background_color?: string | null

@@ -34,7 +34,7 @@ export type AdminBookmarkSummary = {
 
 export type SettingsFormValue = Pick<
   Settings,
-  'site_title' | 'site_title_color' | 'site_title_font_size' | 'public_mode' | 'browser_sync_enabled' | 'theme' | 'background_preset_id' | 'custom_css' | 'custom_js' | 'image_host_url' | 'background' | 'backgrounds' | 'search_engine' | 'card_size' | 'card_style' | 'card_icon_size' | 'card_show_description' | 'card_description_mode' | 'card_background_color' | 'card_background_opacity' | 'card_icon_show_title' | 'card_text_color' | 'search_box_show' | 'search_engine_selector_show' | 'content_layout' | 'navigation' | 'footer_html' | 'most_visited_count' | 'site_title_show'
+  'site_title' | 'network_mode' | 'network_probe_url' | 'site_title_color' | 'site_title_font_size' | 'public_mode' | 'browser_sync_enabled' | 'theme' | 'background_preset_id' | 'custom_css' | 'custom_js' | 'image_host_url' | 'background' | 'backgrounds' | 'search_engine' | 'card_size' | 'card_style' | 'card_icon_size' | 'card_show_description' | 'card_description_mode' | 'card_background_color' | 'card_background_opacity' | 'card_icon_show_title' | 'card_text_color' | 'search_box_show' | 'search_engine_selector_show' | 'content_layout' | 'navigation' | 'footer_html' | 'most_visited_count' | 'site_title_show'
 >
 
 export function toAdminCategories(categories: Category[], bookmarks: Bookmark[]): AdminCategorySummary[] {
@@ -106,6 +106,8 @@ export function toSettingsForm(settings: Settings | null): SettingsFormValue | n
 
   return {
     site_title: settings.site_title,
+    network_mode: settings.network_mode,
+    network_probe_url: settings.network_probe_url,
     site_title_color: settings.site_title_color,
     site_title_font_size: settings.site_title_font_size,
     public_mode: settings.public_mode,

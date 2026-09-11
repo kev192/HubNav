@@ -215,6 +215,8 @@
   $: if (typeof document !== 'undefined') {
     document.documentElement.dataset.theme = activeTheme
     document.documentElement.dataset.backgroundPreset = publicData?.settings.background_preset_id ?? 'custom'
+    document.documentElement.dataset.networkMode = publicData?.settings.network_mode ?? 'external'
+    document.documentElement.dataset.networkProbeUrl = publicData?.settings.network_probe_url ?? ''
 
     // Mobile overscroll exposes the root canvas outside the fixed homepage layers.
     const parsedHomeBackground = document.createElement('div').style
