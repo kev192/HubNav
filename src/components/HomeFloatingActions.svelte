@@ -1,6 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import type { ThemeMode } from '../../shared/types'
+  import {
+    getNetworkMode,
+    setNetworkMode,
+    setResolvedNetworkMode,
+    type NetworkMode,
+  } from '../lib/networkMode'
 
   type AsyncVoid<T = void> = T | Promise<T>
   const BACK_TO_TOP_VISIBILITY_OFFSET = 320
@@ -14,17 +20,66 @@
   export let onLogout: (() => AsyncVoid) | undefined = undefined
   export let onOpenLogin: (() => AsyncVoid) | undefined = undefined
   export let topNavigation = false
+  export let networkProbeUrl = ''
 
   let showBackToTop = false
-  let networkMode = "external"
+  let networkMode: NetworkMode = 'external'
+  let networkProbeSequence = 0
   let networkOnline: boolean | null = null
   let probing = false
+  let lastAutoProbeUrl = ''
 
   $: nextThemeLabel = themeMode === 'light' ? '暗色模式' : themeMode === 'dark' ? '跟随系统' : '浅色模式'
   $: currentThemeLabel = themeMode === 'auto' ? `跟随系统（当前${activeTheme === 'dark' ? '暗色' : '浅色'}）` : activeTheme === 'dark' ? '暗色模式' : '浅色模式'
   $: themeToggleLabel = `当前${currentThemeLabel}，点击切换到${nextThemeLabel}`
 
-  async function toggleNetworkMode() { const order = ["external","internal","auto"]; networkMode = order[(order.indexOf(networkMode)+1)%3]; localStorage.setItem("navhub-network-mode", networkMode); document.documentElement.dataset.networkMode = networkMode; networkOnline = networkMode !== "internal" ? null : true; if (networkMode === "auto") { const probe = document.documentElement.dataset.networkProbeUrl; probing = true; networkOnline = null; const started = performance.now(); try { if (!probe) throw new Error("no probe"); const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 4000); await fetch(probe, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: controller.signal }); clearTimeout(timer); networkOnline = true; document.documentElement.dataset.networkResolvedMode = "internal"; localStorage.setItem("navhub-network-resolved", "internal"); } catch { networkOnline = false; document.documentElement.dataset.networkResolvedMode = "external"; localStorage.setItem("navhub-network-resolved", "external"); } finally { probing = false; } } else { document.documentElement.dataset.networkResolvedMode = networkMode; localStorage.setItem("navhub-network-resolved", networkMode); } }
+  async function probeNetworkMode(sequence: number, probe = networkProbeUrl): Promise<void> {
+    probing = true
+    try {
+      if (!probe) throw new Error('no probe')
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 4000)
+      try {
+        await fetch(probe, {
+          method: 'HEAD',
+          mode: 'no-cors',
+          cache: 'no-store',
+          signal: controller.signal,
+        })
+        if (sequence !== networkProbeSequence) return
+        networkOnline = true
+        setResolvedNetworkMode('internal')
+      } finally {
+        clearTimeout(timer)
+      }
+    } catch {
+      if (sequence !== networkProbeSequence) return
+      networkOnline = false
+      setResolvedNetworkMode('external')
+    } finally {
+      if (sequence === networkProbeSequence) probing = false
+    }
+  }
+
+  async function toggleNetworkMode() {
+    const order: readonly NetworkMode[] = ['external', 'internal', 'auto']
+    const nextMode = order[(order.indexOf(networkMode) + 1) % order.length]
+    const sequence = ++networkProbeSequence
+    networkMode = nextMode
+    networkOnline = nextMode === 'internal' ? true : null
+    setNetworkMode(nextMode)
+
+    if (nextMode === 'auto') {
+      // Keep the last auto result while probing instead of silently routing a
+      // click to the external URL during the detection window.
+      await probeNetworkMode(sequence)
+      return
+    }
+
+    probing = false
+    setResolvedNetworkMode(nextMode)
+  }
+
   $: networkLabel = networkMode === "external" ? "外网" : networkMode === "internal" ? "内网" : "自动"
   function handleToggleTheme() {
     void onToggleTheme?.()
@@ -51,10 +106,20 @@
     window.scrollTo({ top: 0, behavior })
   }
 
+  // Public settings load asynchronously. Once the probe URL becomes available,
+  // resolve a server-configured auto mode instead of permanently falling back
+  // to the external URL.
+  $: if (networkProbeUrl && networkMode === 'auto' && networkProbeUrl !== lastAutoProbeUrl) {
+    lastAutoProbeUrl = networkProbeUrl
+    void probeNetworkMode(++networkProbeSequence)
+  }
+
   onMount(() => {
-    networkMode = localStorage.getItem("navhub-network-mode") || document.documentElement.dataset.networkMode || "external"
+    networkMode = getNetworkMode()
     document.documentElement.dataset.networkMode = networkMode
-    document.documentElement.dataset.networkResolvedMode = networkMode === "auto" ? (document.documentElement.dataset.networkResolvedMode || "external") : networkMode
+    document.documentElement.dataset.networkResolvedMode = networkMode === 'auto'
+      ? (document.documentElement.dataset.networkResolvedMode || 'external')
+      : networkMode
     updateBackToTopVisibility()
     window.addEventListener('scroll', updateBackToTopVisibility, { passive: true })
 

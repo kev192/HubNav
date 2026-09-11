@@ -16,6 +16,7 @@
   import type { BackupSelection as BackupSelectionInput } from './lib/appBackup'
   import { clearCachedAdminData } from './lib/adminDataCache'
   import { clearCachedPublicData } from './lib/publicDataCache'
+  import { notifyNetworkModeChanged } from './lib/networkMode'
   import { toastStore } from './lib/toast'
   import type { AdminTab, BookmarkFormValue, CategoryFormValue } from './lib/adminTypes'
   import { toBookmarkForm, toBookmarkPayload, toCategoryForm, toCategoryPayload } from './lib/adminFormAdapters'
@@ -215,8 +216,13 @@
   $: if (typeof document !== 'undefined') {
     document.documentElement.dataset.theme = activeTheme
     document.documentElement.dataset.backgroundPreset = publicData?.settings.background_preset_id ?? 'custom'
-    document.documentElement.dataset.networkMode = (typeof localStorage !== 'undefined' ? localStorage.getItem('navhub-network-mode') : null) || publicData?.settings.network_mode || 'external'
+    const storedNetworkMode = typeof localStorage !== 'undefined' ? localStorage.getItem('navhub-network-mode') : null
+    const isStoredNetworkMode = storedNetworkMode === 'external' || storedNetworkMode === 'internal' || storedNetworkMode === 'auto'
+    document.documentElement.dataset.networkMode = isStoredNetworkMode
+      ? storedNetworkMode
+      : publicData?.settings.network_mode || 'external'
     document.documentElement.dataset.networkProbeUrl = publicData?.settings.network_probe_url ?? ''
+    notifyNetworkModeChanged()
 
     // Mobile overscroll exposes the root canvas outside the fixed homepage layers.
     const parsedHomeBackground = document.createElement('div').style

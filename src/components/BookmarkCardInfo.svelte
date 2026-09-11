@@ -6,6 +6,7 @@
   type AsyncVoid<T = void> = T | Promise<T>
 
   export let bookmark: PublicBookmark
+  export let bookmarkUrl = ''
   export let openInNewTab = true
   export let sortMode = false
   export let cardLinkStyle = ''
@@ -38,7 +39,7 @@
   class:bookmark-tooltip-anchor={showDescription && descriptionMode === 'hover' && Boolean(bookmark.description)}
   class:sort-mode={sortMode}
   class:preview-light={preview && themeOverride === 'light'}
-  href={preview ? undefined : bookmark.url}
+  href={preview ? undefined : bookmarkUrl || bookmark.url}
   target={!preview && openInNewTab ? '_blank' : undefined}
   rel={!preview && openInNewTab ? 'noopener noreferrer' : undefined}
   tabindex={preview ? -1 : undefined}

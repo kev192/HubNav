@@ -396,6 +396,7 @@ import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCa
     {onLogout}
     {onOpenLogin}
     topNavigation={isTopNavigation}
+    networkProbeUrl={settings?.network_probe_url ?? ''}
   />
 
   <HomeHeroSearch

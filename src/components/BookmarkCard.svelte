@@ -23,6 +23,10 @@
   } from '../lib/bookmarkCardIconState'
   import { observeIconVisibility } from '../lib/iconVisibility'
   import {
+    NETWORK_MODE_CHANGE_EVENT,
+    resolveBookmarkUrl,
+  } from '../lib/networkMode'
+  import {
     fetchCachedBookmarkIconUrl,
     readCachedBookmarkIconDataUri,
     revokeLocalIconUrl,
@@ -60,9 +64,10 @@
   let iconStateKey = ''
   let windowListenersAttached = false
   let contextMenuInstanceId = Math.random().toString(36).slice(2)
+  let networkModeRevision = 0
 
   $: openInNewTab = bookmark.open_method === 1
-  $: selectedBookmarkUrl = bookmark.url
+  $: selectedBookmarkUrl = getSelectedBookmarkUrl()
   $: iconBaseState = deriveBookmarkCardIconBase({
     bookmark,
     iconInView,
@@ -191,8 +196,27 @@
     await onEdit?.(bookmark)
   }
 
-  function openBookmarkUrl(url: string) { if (!url) return; if (openInNewTab) window.open(url, "_blank", "noopener,noreferrer"); else window.location.href = url }
-  async function resolveBookmarkUrl(): Promise<string> { const mode = (typeof localStorage !== "undefined" ? localStorage.getItem("navhub-network-mode") : null) || document.documentElement.dataset.networkMode || "external"; const effective = mode === "auto" ? ((typeof localStorage !== "undefined" ? localStorage.getItem("navhub-network-resolved") : null) || document.documentElement.dataset.networkResolvedMode || "external") : mode; return effective === "internal" && bookmark.internal_url?.trim() ? bookmark.internal_url.trim() : bookmark.url }
+  function getSelectedBookmarkUrl(): string {
+    // Keep the reactive dependency so a mode switch updates every rendered anchor.
+    void networkModeRevision
+    return resolveBookmarkUrl(bookmark)
+  }
+
+  function handleNetworkModeChanged() {
+    networkModeRevision += 1
+  }
+
+  function handleStorageChange(event: StorageEvent) {
+    if (event.key === null || event.key === 'navhub-network-mode' || event.key === 'navhub-network-resolved') {
+      networkModeRevision += 1
+    }
+  }
+
+  function openBookmarkUrl(url: string) {
+    if (!url) return
+    if (openInNewTab) window.open(url, '_blank', 'noopener,noreferrer')
+    else window.location.href = url
+  }
   function handleLinkClick(event: MouseEvent) {
     if (preview) {
       event.preventDefault()
@@ -203,9 +227,14 @@
       return
     }
 
-    event.preventDefault()
-    void resolveBookmarkUrl().then(openBookmarkUrl)
-    // Register click both locally and on server
+    if (!selectedBookmarkUrl) {
+      event.preventDefault()
+      return
+    }
+
+    // Register click both locally and on server. For normal links we leave the
+    // browser's native navigation intact; the anchor already contains the
+    // network-aware URL, so new-tab/current-tab behavior remains reliable.
     publicStore.incrementClick(bookmark.id)
     void api.public.registerClick(bookmark.id)
 
@@ -269,6 +298,8 @@
 
   onMount(() => {
     setupIconObserver()
+    window.addEventListener(NETWORK_MODE_CHANGE_EVENT, handleNetworkModeChanged)
+    window.addEventListener('storage', handleStorageChange)
   })
 
   onDestroy(() => {
@@ -276,6 +307,8 @@
     disconnectIconObserver()
     resetLocalCachedIconUrl()
     syncWindowListeners(false)
+    window.removeEventListener(NETWORK_MODE_CHANGE_EVENT, handleNetworkModeChanged)
+    window.removeEventListener('storage', handleStorageChange)
   })
 </script>
 
@@ -290,6 +323,7 @@
   {#if style === 'info'}
     <BookmarkCardInfo
       {bookmark}
+      bookmarkUrl={selectedBookmarkUrl}
       {openInNewTab}
       {sortMode}
       {cardLinkStyle}
@@ -311,6 +345,7 @@
   {:else}
     <BookmarkCardCompact
       {bookmark}
+      bookmarkUrl={selectedBookmarkUrl}
       {openInNewTab}
       {sortMode}
       {tooltipText}
@@ -334,7 +369,7 @@
   {/if}
 
   {#if modalOpen}
-    <BookmarkLinkModal title={bookmark.title} url={bookmark.url} onClose={closeModal} />
+    <BookmarkLinkModal title={bookmark.title} url={selectedBookmarkUrl} onClose={closeModal} />
   {/if}
 </div>
 
