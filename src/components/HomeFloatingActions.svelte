@@ -17,12 +17,14 @@
 
   let showBackToTop = false
   let networkMode = "external"
+  let networkOnline: boolean | null = null
+  let probing = false
 
   $: nextThemeLabel = themeMode === 'light' ? '暗色模式' : themeMode === 'dark' ? '跟随系统' : '浅色模式'
   $: currentThemeLabel = themeMode === 'auto' ? `跟随系统（当前${activeTheme === 'dark' ? '暗色' : '浅色'}）` : activeTheme === 'dark' ? '暗色模式' : '浅色模式'
   $: themeToggleLabel = `当前${currentThemeLabel}，点击切换到${nextThemeLabel}`
 
-  function toggleNetworkMode() { const order = ["external","internal","auto"]; networkMode = order[(order.indexOf(networkMode)+1)%3]; document.documentElement.dataset.networkMode = networkMode; }
+  async function toggleNetworkMode() { const order = ["external","internal","auto"]; networkMode = order[(order.indexOf(networkMode)+1)%3]; document.documentElement.dataset.networkMode = networkMode; networkOnline = networkMode !== "internal" ? null : true; if (networkMode === "auto") { const probe = document.documentElement.dataset.networkProbeUrl; probing = true; networkOnline = null; const started = performance.now(); try { if (!probe) throw new Error("no probe"); const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 4000); await fetch(probe, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: controller.signal }); clearTimeout(timer); networkOnline = true; document.documentElement.dataset.networkResolvedMode = "internal"; } catch { networkOnline = false; document.documentElement.dataset.networkResolvedMode = "external"; } finally { probing = false; } } else { document.documentElement.dataset.networkResolvedMode = networkMode; } }
   $: networkLabel = networkMode === "external" ? "外网" : networkMode === "internal" ? "内网" : "自动"
   function handleToggleTheme() {
     void onToggleTheme?.()
@@ -58,7 +60,7 @@
   })
 </script>
 
-<div class="network-switch"><button type="button" class="icon-button" on:click={toggleNetworkMode} title={`网络模式：${networkLabel}`} aria-label={`网络模式：${networkLabel}`}><span>{networkMode === "external" ? "↗" : networkMode === "internal" ? "⌂" : "⇄"}</span></button><span>{networkLabel}</span></div>
+<div class="network-switch"><button type="button" class="icon-button network-mode-button" on:click={toggleNetworkMode} title={`网络模式：${networkLabel}`} aria-label={`网络模式：${networkLabel}`}><span class="network-icon">{networkMode === "external" ? "↗" : networkMode === "internal" ? "⌂" : "⇄"}</span></button><span class="network-status-dot" class:online={networkOnline === true} class:offline={networkOnline === false}></span><span>{networkLabel}</span>{#if probing}<small>检测中</small>{/if}</div>
 <div class="floating-actions" class:below-top-navigation={topNavigation}>
   <button
     type="button"
@@ -149,6 +151,11 @@
 <style>
   .network-switch { position: fixed; left: 1.25rem; top: 1.25rem; z-index: 70; display: flex; align-items: center; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
   .network-switch .icon-button { font-size: 1.2rem; }
+  .network-mode-button { border-radius: 999px; background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(14,165,233,.12)); box-shadow: 0 4px 14px rgba(37,99,235,.16); }
+  .network-icon { font-size: 1.25rem; font-weight: 700; }
+  .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #94a3b8; margin-left: .05rem; }
+  .network-status-dot.online { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
+  .network-status-dot.offline { background: #ef4444; }
 
   .floating-actions {
     position: fixed;
@@ -255,6 +262,11 @@
   @media (max-width: 799px) {
     .network-switch { position: fixed; left: 1.25rem; top: 1.25rem; z-index: 70; display: flex; align-items: center; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
   .network-switch .icon-button { font-size: 1.2rem; }
+  .network-mode-button { border-radius: 999px; background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(14,165,233,.12)); box-shadow: 0 4px 14px rgba(37,99,235,.16); }
+  .network-icon { font-size: 1.25rem; font-weight: 700; }
+  .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #94a3b8; margin-left: .05rem; }
+  .network-status-dot.online { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
+  .network-status-dot.offline { background: #ef4444; }
 
   .floating-actions {
       top: 1rem;

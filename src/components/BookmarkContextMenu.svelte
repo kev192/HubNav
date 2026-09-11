@@ -12,7 +12,9 @@
 </script>
 
 <div class="bookmark-context-menu">
-  {#if hasInternal}<button type="button" on:click={() => void onOpenInternal?.()}>内网地址</button>{/if}<button type="button" on:click={() => void onOpenExternal?.()}>外网地址</button>{#if onEdit}<button type="button" data-testid="bookmark-context-edit" on:click={handleEditClick}>编辑</button>{/if}
+  <button type="button" disabled={!hasInternal} on:click={() => void onOpenInternal?.()}>打开内网地址</button>
+  <button type="button" on:click={() => void onOpenExternal?.()}>打开外网地址</button>
+  {#if onEdit}<button type="button" data-testid="bookmark-context-edit" on:click={handleEditClick}>编辑</button>{/if}
 </div>
 
 <style>

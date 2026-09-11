@@ -22,16 +22,7 @@
 <fieldset id="settings-section-search-display" class="group group-wide" disabled={saving}>
   <legend>首页显示</legend>
   <p class="group-desc">控制首页标题、搜索入口和「经常访问」区域的显示方式。</p>
-
-  <div class="settings-subsection">
-    <h3>网络环境切换</h3>
-    <div class="form-grid">
-      <label class="field"><span>默认网络模式</span><select bind:value={form.network_mode}><option value="external">外网</option><option value="internal">内网</option><option value="auto">自动</option></select></label>
-      <label class="field"><span>自动判别 URL</span><input bind:value={form.network_probe_url} type="url" placeholder="https://example.com/health" /></label>
-    </div>
-  </div>
-
-  <div class="form-grid search-display-grid">
+<div class="form-grid search-display-grid">
     <div class="field field-range">
       <Slider
         label="经常访问展示数量"

@@ -15,6 +15,7 @@ export interface BookmarkWriteValue {
   category_id: number
   title: string
   url: string
+  internal_url: string | null
   icon: string | null
   icon_source: IconSource | null
   icon_background_color: string | null
@@ -65,6 +66,7 @@ export function parseBookmarkUpsertPayload(body: BookmarkUpsertReq | null): Book
       category_id: body.category_id,
       title: body.title.trim(),
       url,
+      internal_url: internalUrl,
       icon: body.icon ?? null,
       icon_source: body.icon_source ?? null,
       icon_background_color: body.icon_background_color?.trim() || null,

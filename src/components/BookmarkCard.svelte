@@ -188,7 +188,7 @@
   }
 
   function openBookmarkUrl(url: string) { if (!url) return; if (openInNewTab) window.open(url, "_blank", "noopener,noreferrer"); else window.location.href = url }
-  async function resolveBookmarkUrl(): Promise<string> { const mode = document.documentElement.dataset.networkMode || "external"; if (mode === "internal" && bookmark.internal_url) return bookmark.internal_url; if (mode === "auto" && bookmark.internal_url) { const probe = document.documentElement.dataset.networkProbeUrl; if (probe) { try { await fetch(probe, { method: "HEAD", mode: "no-cors", cache: "no-store" }); return bookmark.internal_url } catch {} } } return bookmark.url }
+  async function resolveBookmarkUrl(): Promise<string> { const mode = document.documentElement.dataset.networkMode || "external"; const effective = mode === "auto" ? (document.documentElement.dataset.networkResolvedMode || "external") : mode; return effective === "internal" && bookmark.internal_url ? bookmark.internal_url : bookmark.url }
   function handleLinkClick(event: MouseEvent) {
     if (preview) {
       event.preventDefault()
