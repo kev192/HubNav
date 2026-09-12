@@ -122,7 +122,7 @@
   }
 
   function updateTopNavScrollState(): void {
-    topNavScrolled = window.scrollY > 12
+    topNavScrolled = window.scrollY > 0
   }
 
   function handleResize(): void {
@@ -738,18 +738,15 @@
     bottom: -5px;
     left: calc(50% - 50vw);
     right: calc(50% - 50vw);
-    background: var(--toc-surface-strong);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 180ms ease-out, visibility 180ms ease-out;
-    backdrop-filter: blur(18px) saturate(1.05);
-    -webkit-backdrop-filter: blur(18px) saturate(1.05);
+    background: rgb(var(--card-bg-rgb, 255 255 255) / 1);
+    display: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     pointer-events: none;
   }
 
   .top-navigation.scrolled::before {
-    opacity: 1;
-    visibility: visible;
+    display: block;
   }
 
   .top-track {

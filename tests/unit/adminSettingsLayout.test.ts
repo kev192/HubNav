@@ -153,34 +153,19 @@ describe('admin settings layout', () => {
     expect(footer).toContain('.field.full-width {\n    grid-column: 1 / -1;')
   })
 
-  it('connects a read-only live preview driven by the normalized form', () => {
+  it('renders the real public home first screen in a scaled preview iframe', () => {
     const panel = readFileSync('src/components/SettingsPanel.svelte', 'utf8')
     const preview = readFileSync('src/components/settings/SettingsHomePreview.svelte', 'utf8')
 
-    expect(panel).toContain('<SettingsHomePreview settings={normalizedForm} bind:theme={previewTheme} />')
-    expect(preview).toContain("import { buildHomeBackground } from '../../lib/appData'")
-    expect(preview).toContain("import BookmarkCard from '../BookmarkCard.svelte'")
-    expect(preview).toContain("import HomeHeroSearch from '../HomeHeroSearch.svelte'")
-    expect(preview).toContain("import { getMostVisitedBookmarks } from '../../lib/homeData'")
-    expect(preview).toContain('data-theme={theme}')
-    expect(preview).toContain('data-background-preset={previewSettings.background_preset_id}')
-    expect(preview).toContain('inert')
-    expect(preview).toContain('style={previewSettings.card_style}')
-    expect(preview).toContain('siteTitleFontSize={previewSettings.site_title_font_size}')
-    expect(preview).toContain('showIconTitle={previewSettings.card_icon_show_title}')
-    expect(preview).toContain('width={previewSettings.card_size.width}')
-    expect(preview).toContain('height={previewSettings.card_size.height}')
-    expect(preview).toContain("previewSettings.navigation.position === 'top'")
-    expect(preview).toContain('sandbox=""')
-    expect(preview).toContain('srcdoc={customContentPreview}')
-    expect(preview).toContain("script-src 'none'")
-    expect(preview).toContain('custom-js-preview-notice')
-    expect(preview).not.toContain('allow-scripts')
-    expect(preview).not.toContain('allow-same-origin')
-    expect(preview).not.toContain('eval(')
-    expect(preview).not.toContain('new Function')
-    expect(preview).not.toContain('fetch(')
-    expect(preview).not.toContain('/api/')
+    expect(panel).toContain('<SettingsHomePreview refreshToken={previewRefreshToken} />')
+    expect(panel).toContain('previewRefreshToken += 1')
+    expect(preview).toContain('PREVIEW_VIEWPORT_WIDTH = 1440')
+    expect(preview).toContain('previewViewportHeight = Math.max(')
+    expect(preview).toContain('previewScale = previewFrame.clientWidth / PREVIEW_VIEWPORT_WIDTH')
+    expect(preview).toContain('src={`/?preview=${refreshToken}-${localRefreshCount}`}')
+    expect(preview).toContain('title="当前前台首页首屏预览"')
+    expect(preview).toContain('pointer-events: none')
+    expect(preview).toContain('当前前台完整首屏；保存成功后自动刷新')
   })
 
   it('paginates zero-visit analytics inside the bookmark-list height contract', () => {
@@ -255,8 +240,6 @@ describe('admin settings layout', () => {
     expect(card).toContain('{#if form.card_style === \'info\'}')
     expect(advanced).toContain('disabled={form.card_style !== \'info\'}')
     expect(advanced).toContain('disabled={form.card_style !== \'icon\'}')
-    expect(preview).toContain('data-card-description-mode=')
-    expect(preview).toContain('showDescription={previewSettings.card_style === \'info\' && showDescription}')
   })
 
   it('stacks the admin shell and settings preview on narrow screens', () => {
@@ -290,7 +273,7 @@ describe('admin settings layout', () => {
     const search = readFileSync('src/components/settings/SearchEngineSettingsSection.svelte', 'utf8')
 
     expect(search).toContain("import { faviconImIcon } from '../../lib/icons'")
-    expect(search).toContain('engine.icon = icon')
+    expect(search).toContain("updateEngineField(index, 'icon', icon)")
     expect(search).toContain('Favicon.im')
     expect(search).toContain('搜索引擎图标预览')
     expect(search).toContain('class="favicon-suffix-button"')

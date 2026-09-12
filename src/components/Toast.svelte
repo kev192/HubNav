@@ -12,7 +12,7 @@
     const distance = Math.max(viewportHeight - (rect.top + rect.height / 2), 180)
 
     return {
-      duration: 420,
+      duration: 180,
       easing: cubicOut,
       css: (t) => `transform: translateY(${(1 - t) * distance}px); opacity: ${t};`,
     }
@@ -49,7 +49,7 @@
 <style>
   .toast-container {
     position: fixed;
-    top: 50%;
+    top: 45%;
     left: 50%;
     right: auto;
     z-index: 10020;
@@ -149,7 +149,7 @@
   }
   @media (max-width: 600px) {
     .toast-container {
-      top: 50%;
+      top: 45%;
       width: min(calc(100vw - 24px), 420px);
     }
   }

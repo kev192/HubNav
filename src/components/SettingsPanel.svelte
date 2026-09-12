@@ -46,7 +46,7 @@
   let formKey = ''
   let activeSectionId = 'basic'
   let appearanceAdvancedOpen = false
-  let previewTheme: 'light' | 'dark' = 'light'
+  let previewRefreshToken = 0
 
   $: nextKey = JSON.stringify({ value, loading })
   $: if (nextKey !== formKey) {
@@ -97,6 +97,7 @@
     }
 
     await onSubmit?.(normalizedForm)
+    previewRefreshToken += 1
   }
 
   function handleAppearanceAdvancedChange(open: boolean): void {
@@ -173,7 +174,7 @@
         </div>
 
         <div class="settings-preview-column">
-          <SettingsHomePreview settings={normalizedForm} bind:theme={previewTheme} />
+          <SettingsHomePreview refreshToken={previewRefreshToken} />
         </div>
       </div>
 

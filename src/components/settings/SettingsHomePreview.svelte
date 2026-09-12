@@ -1,73 +1,30 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import type { PublicBookmark } from '../../../shared/types'
-  import { buildHomeBackground } from '../../lib/appData'
-  import { getMostVisitedBookmarks } from '../../lib/homeData'
-  import type { SettingsFormModel } from '../../lib/settingsForm'
-  import BookmarkCard from '../BookmarkCard.svelte'
-  import HomeHeroSearch from '../HomeHeroSearch.svelte'
+  export let refreshToken = 0
 
-  export let settings: SettingsFormModel
-  export let theme: 'light' | 'dark' = 'light'
-
-  // Render at a representative desktop viewport, then scale that complete
-  // screen into the existing preview box without changing the module's size.
+  // Render the real public home route at a representative desktop viewport,
+  // then scale that complete first screen into the unchanged preview box.
   const PREVIEW_VIEWPORT_WIDTH = 1440
-  const previewSections = [
-    { id: 'preview-tools', title: '常用工具', count: 2 },
-    { id: 'preview-reading', title: '稍后阅读', count: 1 },
-  ]
 
-  const previewBookmarks: PublicBookmark[] = [
-    {
-      id: -101,
-      category_id: -1,
-      title: '设计资料',
-      url: 'https://example.test/design',
-      icon: 'D',
-      icon_source: null,
-      icon_background_color: null,
-      icon_blob: null,
-      icon_cached: false,
-      description: '组件规范、配色与交互参考',
-      description_mode: null,
-      open_method: 1,
-      sort: 1,
-      click_count: 18,
-    },
-    {
-      id: -102,
-      category_id: -1,
-      title: '开发文档',
-      url: 'https://example.test/docs',
-      icon: 'C',
-      icon_source: null,
-      icon_background_color: null,
-      icon_blob: null,
-      icon_cached: false,
-      description: '接口说明与项目开发记录',
-      description_mode: null,
-      open_method: 1,
-      sort: 2,
-      click_count: 9,
-    },
-  ]
-
-  let previewQuery = ''
   let previewFrame: HTMLElement | null = null
   let previewScale = 1
   let previewViewportHeight = 900
+  let localRefreshCount = 0
 
   function updatePreviewScale(): void {
     if (!previewFrame || previewFrame.clientWidth === 0) return
-    // Match the virtual screen to the current preview-box aspect ratio, then
-    // scale it uniformly. The full first screen fills the existing module
-    // without letterboxing or changing the visible preview area.
+
     previewViewportHeight = Math.max(
       480,
-      Math.round(PREVIEW_VIEWPORT_WIDTH * previewFrame.clientHeight / previewFrame.clientWidth),
+      Math.round(
+        PREVIEW_VIEWPORT_WIDTH * previewFrame.clientHeight / previewFrame.clientWidth,
+      ),
     )
     previewScale = previewFrame.clientWidth / PREVIEW_VIEWPORT_WIDTH
+  }
+
+  function refreshPreview(): void {
+    localRefreshCount += 1
   }
 
   onMount(() => {
@@ -77,234 +34,32 @@
 
     return () => observer.disconnect()
   })
-
-  $: previewSettings = {
-    ...settings,
-    search_engine: {
-      ...settings.search_engine,
-      engines: settings.search_engine.engines.map((engine) => ({ ...engine, icon: '' })),
-    },
-  }
-  $: pageTitle = previewSettings.site_title || '导航首页'
-  $: contentMaxWidth = `${previewSettings.content_layout.max_width}${previewSettings.content_layout.max_width_unit}`
-  $: previewStyle = [
-    buildHomeBackground(previewSettings, theme),
-    `--content-max-width: ${contentMaxWidth}`,
-    `--content-margin-x: ${previewSettings.content_layout.margin_x}px`,
-    `--content-margin-top: ${previewSettings.content_layout.margin_top}%`,
-    `--content-margin-bottom: ${previewSettings.content_layout.margin_bottom}%`,
-    previewSettings.card_text_color ? `--card-text-color: ${previewSettings.card_text_color}` : '',
-    `--preview-card-width: ${previewSettings.card_size.width}px`,
-  ].filter(Boolean).join('; ')
-  $: descriptionMode = previewSettings.card_description_mode
-  $: showDescription = descriptionMode !== 'hidden'
-  $: mostVisitedBookmarks = getMostVisitedBookmarks(previewBookmarks, previewSettings.most_visited_count)
-  $: safePreviewCss = previewSettings.custom_css.replace(/<\/style/gi, '<\\/style')
-  $: customContentPreview = `<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; img-src data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 18px; background: ${theme === 'dark' ? '#111827' : '#f8fafc'}; color: ${theme === 'dark' ? '#e5eefb' : '#0f172a'}; font: 14px/1.55 system-ui, sans-serif; }
-    .home-shell { min-height: 160px; }
-    .preview-category { margin-bottom: 18px; }
-    .preview-category h3 { margin: 0 0 10px; font-size: 15px; }
-    .bookmark-card { width: min(100%, 260px); padding: 12px 14px; border: 1px solid ${theme === 'dark' ? '#334155' : '#dbe3ee'}; border-radius: 10px; background: ${theme === 'dark' ? '#1e293b' : '#ffffff'}; }
-    .bookmark-card strong, .bookmark-card span { display: block; }
-    .bookmark-card span { margin-top: 3px; opacity: .68; font-size: 12px; }
-    .home-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid ${theme === 'dark' ? '#334155' : '#dbe3ee'}; }
-  </style>
-  <style>${safePreviewCss}</style>
-</head>
-<body>
-  <div class="home-shell">
-    <main class="home-content">
-      <section class="preview-category category-section">
-        <h3>自定义样式示例</h3>
-        <article class="bookmark-card"><strong>示例书签</strong><span>用于观察自定义 CSS 效果</span></article>
-      </section>
-    </main>
-    <footer class="home-footer">${previewSettings.footer_html || '<span>页脚 HTML 预览区域</span>'}</footer>
-  </div>
-</body>
-</html>`
 </script>
 
-<aside class="home-preview" aria-label="首页实时预览" data-testid="settings-home-preview">
+<aside class="home-preview" aria-label="首页首屏预览" data-testid="settings-home-preview">
   <header class="preview-toolbar">
     <div>
       <strong>首页预览</strong>
-      <span>未保存状态</span>
+      <span>当前前台完整首屏；保存成功后自动刷新</span>
     </div>
-    <div class="preview-theme-switch" role="group" aria-label="预览主题">
-      <button
-        type="button"
-        class:active={theme === 'light'}
-        aria-pressed={theme === 'light'}
-        data-testid="preview-theme-light"
-        on:click={() => theme = 'light'}
-      >浅色</button>
-      <button
-        type="button"
-        class:active={theme === 'dark'}
-        aria-pressed={theme === 'dark'}
-        data-testid="preview-theme-dark"
-        on:click={() => theme = 'dark'}
-      >深色</button>
-    </div>
+    <button type="button" class="preview-refresh-button" on:click={refreshPreview}>
+      刷新首屏
+    </button>
   </header>
 
   <div class="preview-frame" bind:this={previewFrame}>
-    <div
-      class="preview-stage"
-      class:top-navigation={previewSettings.navigation.position === 'top'}
-      data-theme={theme}
-      data-background-preset={previewSettings.background_preset_id}
-      data-testid="home-preview-stage"
-      style={previewStyle}
-      inert
-    >
+    <div class="preview-stage" data-testid="home-preview-stage">
       <div
         class="preview-viewport"
         style={`--preview-scale: ${previewScale}; --preview-viewport-height: ${previewViewportHeight}px`}
       >
-        <div class="preview-background" aria-hidden="true"></div>
-        <div class="preview-mask" aria-hidden="true"></div>
-
-        {#if previewSettings.navigation.position === 'top'}
-          <nav class="preview-nav preview-nav-top" aria-label="预览分类导航" data-testid="preview-top-navigation">
-            {#each previewSections as section, index (section.id)}
-              <button type="button" class:active={index === 0} tabindex="-1">
-                <span>{section.title}</span><small>{section.count}</small>
-              </button>
-            {/each}
-          </nav>
-        {:else}
-          <nav
-            class="preview-nav preview-nav-left"
-            class:expanded={previewSettings.navigation.always_expanded}
-            aria-label="预览分类导航"
-            data-testid="preview-left-navigation"
-          >
-            {#each previewSections as section, index (section.id)}
-              <button type="button" class:active={index === 0} tabindex="-1" aria-label={section.title}>
-                <span class="nav-mark" aria-hidden="true"></span>
-                <span class="nav-label">{section.title}</span>
-              </button>
-            {/each}
-          </nav>
-        {/if}
-
-        <div class="preview-page">
-          <HomeHeroSearch
-            {pageTitle}
-            siteTitleColor={previewSettings.site_title_color?.trim() || 'inherit'}
-            siteTitleFontSize={previewSettings.site_title_font_size}
-            settings={previewSettings}
-            topNavigation={previewSettings.navigation.position === 'top'}
-            bind:query={previewQuery}
-            preview
-            themeOverride={theme}
-          />
-
-          <main class="preview-content">
-            {#if mostVisitedBookmarks.length > 0}
-              <section class="preview-category preview-most-visited" aria-label="经常访问预览" data-testid="preview-most-visited">
-                <header>
-                  <div>
-                    <span class="category-mark" aria-hidden="true">常</span>
-                    <div>
-                      <h3>经常访问</h3>
-                      <p>显示 {mostVisitedBookmarks.length} 个示例，配置上限 {previewSettings.most_visited_count}</p>
-                    </div>
-                  </div>
-                </header>
-
-                <div
-                  class="preview-bookmarks"
-                  class:is-icon={previewSettings.card_style === 'icon'}
-                  data-card-style={previewSettings.card_style}
-                >
-                  {#each mostVisitedBookmarks as bookmark (bookmark.id)}
-                    <div class="preview-bookmark">
-                      <BookmarkCard
-                        {bookmark}
-                        style={previewSettings.card_style}
-                        iconSize={previewSettings.card_icon_size}
-                        showDescription={previewSettings.card_style === 'info' && showDescription}
-                        descriptionMode={previewSettings.card_style === 'info' ? descriptionMode : 'hidden'}
-                        showIconTitle={previewSettings.card_icon_show_title}
-                        width={previewSettings.card_size.width}
-                        height={previewSettings.card_size.height}
-                        preview
-                        themeOverride={theme}
-                      />
-                    </div>
-                  {/each}
-                </div>
-              </section>
-            {/if}
-
-            <section class="preview-category" aria-label="常用工具示例分类">
-              <header>
-                <div>
-                  <span class="category-mark" aria-hidden="true">常</span>
-                  <div>
-                    <h3>常用工具</h3>
-                    <p>共 2 个站点</p>
-                  </div>
-                </div>
-              </header>
-
-              <div
-                class="preview-bookmarks"
-                class:is-icon={previewSettings.card_style === 'icon'}
-                data-card-style={previewSettings.card_style}
-                data-card-description-mode={previewSettings.card_style === 'info' ? descriptionMode : 'hidden'}
-                data-card-icon-title={previewSettings.card_style === 'icon' ? String(previewSettings.card_icon_show_title) : 'false'}
-              >
-                {#each previewBookmarks as bookmark (bookmark.id)}
-                  <div class="preview-bookmark">
-                    <BookmarkCard
-                      {bookmark}
-                      style={previewSettings.card_style}
-                      iconSize={previewSettings.card_icon_size}
-                      showDescription={previewSettings.card_style === 'info' && showDescription}
-                      descriptionMode={previewSettings.card_style === 'info' ? descriptionMode : 'hidden'}
-                      showIconTitle={previewSettings.card_icon_show_title}
-                      width={previewSettings.card_size.width}
-                      height={previewSettings.card_size.height}
-                      preview
-                      themeOverride={theme}
-                    />
-                  </div>
-                {/each}
-              </div>
-            </section>
-
-            <section class="custom-content-preview" aria-label="页脚和自定义样式预览">
-              <header>
-                <h3>页脚与自定义样式</h3>
-                <p>内容在隔离环境中渲染，不影响管理页面。</p>
-              </header>
-              <iframe
-                title="页脚和自定义样式隔离预览"
-                data-testid="custom-content-preview"
-                sandbox=""
-                srcdoc={customContentPreview}
-                tabindex="-1"
-                aria-hidden="true"
-              ></iframe>
-              {#if previewSettings.custom_js.trim()}
-                <p class="script-preview-notice" data-testid="custom-js-preview-notice">
-                  已配置自定义 JavaScript；为保护管理会话，预览不会执行，保存后仅在公开首页尝试应用。
-                </p>
-              {/if}
-            </section>
-          </main>
-        </div>
+        <iframe
+          title="当前前台首页首屏预览"
+          data-testid="home-live-preview"
+          src={`/?preview=${refreshToken}-${localRefreshCount}`}
+          tabindex="-1"
+          aria-hidden="true"
+        ></iframe>
       </div>
     </div>
   </div>
@@ -343,35 +98,29 @@
     font-size: 11px;
   }
 
-  .preview-theme-switch {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 116px;
-    border: 1px solid var(--sp-input-border);
-    border-radius: 9px;
-    padding: 3px;
-    background: var(--sp-input-bg);
-  }
-
-  .preview-theme-switch button {
+  .preview-refresh-button {
     min-height: 30px;
-    border: 0;
-    border-radius: 6px;
-    background: transparent;
+    flex: 0 0 auto;
+    border: 1px solid var(--sp-input-border);
+    border-radius: 8px;
+    padding: 0 10px;
+    background: var(--sp-input-bg);
     color: var(--sp-muted);
     font: inherit;
     font-size: 12px;
     cursor: pointer;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition:
+      color var(--transition-fast),
+      border-color var(--transition-fast),
+      background var(--transition-fast);
   }
 
-  .preview-theme-switch button.active {
-    background: var(--sp-chip-bg);
-    color: var(--sp-chip-text);
-    font-weight: 650;
+  .preview-refresh-button:hover {
+    color: var(--sp-accent);
+    border-color: var(--sp-accent);
   }
 
-  .preview-theme-switch button:focus-visible {
+  .preview-refresh-button:focus-visible {
     outline: 2px solid var(--sp-accent);
     outline-offset: 2px;
   }
@@ -387,280 +136,29 @@
 
   .preview-stage {
     position: relative;
-    isolation: isolate;
     height: 100%;
     min-height: 520px;
-    display: grid;
-    place-items: center;
     overflow: hidden;
-    color: #0f172a;
-    background: transparent;
   }
 
   .preview-viewport {
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
     width: 1440px;
     height: var(--preview-viewport-height, 900px);
     overflow: hidden;
-    transform: scale(var(--preview-scale, 1));
+    transform: translate(-50%, -50%) scale(var(--preview-scale, 1));
     transform-origin: center;
   }
 
-  .preview-stage[data-theme='dark'] {
-    color: #e5eefb;
-  }
-
-  .preview-background,
-  .preview-mask {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-
-  .preview-background {
-    z-index: -2;
-    background: var(--home-background, transparent);
-    filter: var(--home-background-filter, none);
-    transform: var(--home-background-transform, none);
-    transform-origin: center;
-  }
-
-  .preview-mask {
-    z-index: -1;
-    background: var(--home-background-mask-color, #000000);
-    opacity: var(--home-background-mask, 0.3);
-  }
-
-  .preview-page {
-    position: relative;
+  .preview-viewport iframe {
+    display: block;
     width: 100%;
     height: 100%;
-    min-height: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    padding: 1px var(--content-margin-x, 0px) var(--content-margin-bottom, 0%);
-  }
-
-  .preview-content {
-    width: min(100%, var(--content-max-width, 1200px));
-    margin: 0 auto;
-    padding: 0 18px 28px;
-    box-sizing: border-box;
-  }
-
-  .preview-category {
-    display: grid;
-    gap: 12px;
-  }
-
-  .preview-most-visited {
-    margin-bottom: 24px;
-  }
-
-  .custom-content-preview {
-    display: grid;
-    gap: 10px;
-    margin-top: 26px;
-    padding-top: 18px;
-    border-top: 1px solid color-mix(in srgb, var(--card-title-color, currentColor) 16%, transparent);
-  }
-
-  .custom-content-preview header {
-    display: grid;
-    gap: 3px;
-  }
-
-  .custom-content-preview h3,
-  .custom-content-preview p {
-    margin: 0;
-  }
-
-  .custom-content-preview h3 {
-    color: var(--card-title-color, currentColor);
-    font-size: 14px;
-  }
-
-  .custom-content-preview p {
-    color: var(--card-description-color, currentColor);
-    font-size: 11px;
-    opacity: 0.78;
-  }
-
-  .custom-content-preview iframe {
-    width: 100%;
-    height: 220px;
-    border: 1px solid color-mix(in srgb, var(--theme-accent-color, #2563eb) 18%, transparent);
-    border-radius: 10px;
-    background: transparent;
-    pointer-events: none;
-  }
-
-  .custom-content-preview .script-preview-notice {
-    padding: 8px 10px;
-    border-radius: 8px;
-    background: color-mix(in srgb, #f59e0b 12%, transparent);
-    color: var(--card-title-color, currentColor);
-    opacity: 0.9;
-  }
-
-  .preview-category header > div {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .category-mark {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border: 1px solid color-mix(in srgb, var(--theme-accent-color, #2563eb) 22%, transparent);
-    border-radius: 9px;
-    background: rgb(var(--card-bg-rgb, 255 255 255) / var(--card-bg-opacity, 0.9));
-    color: var(--card-title-color, currentColor);
-    font-size: 13px;
-    font-weight: 700;
-  }
-
-  .preview-category h3,
-  .preview-category p {
-    margin: 0;
-  }
-
-  .preview-category h3 {
-    color: var(--card-title-color, currentColor);
-    font-size: 15px;
-    line-height: 1.25;
-  }
-
-  .preview-category p {
-    margin-top: 2px;
-    color: var(--card-description-color, currentColor);
-    font-size: 11px;
-    opacity: 0.76;
-  }
-
-  .preview-bookmarks {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--preview-card-width)), 1fr));
-    gap: 10px;
-    min-width: 0;
-  }
-
-  .preview-bookmarks.is-icon {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
-
-  .preview-bookmark {
-    min-width: 0;
-  }
-
-  .preview-nav {
-    position: absolute;
-    z-index: 4;
-    color: var(--card-title-color, currentColor);
-    background: rgb(var(--card-bg-rgb, 255 255 255) / calc(var(--card-bg-opacity, 0.9) * 0.9));
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
-    backdrop-filter: blur(12px);
-  }
-
-  .preview-nav button {
     border: 0;
     background: transparent;
-    color: inherit;
-    font: inherit;
-  }
-
-  .preview-nav-top {
-    top: 12px;
-    left: 50%;
-    width: min(88%, 360px);
-    min-height: 36px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--theme-accent-color, #2563eb) 20%, transparent);
-    border-radius: 10px;
-    padding: 4px;
-    transform: translateX(-50%);
-  }
-
-  .preview-nav-top button {
-    flex: 1 1 0;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    border-radius: 7px;
-    padding: 7px 8px;
-    font-size: 11px;
-    white-space: nowrap;
-  }
-
-  .preview-nav-top button.active {
-    background: color-mix(in srgb, var(--theme-accent-color, #2563eb) 14%, transparent);
-  }
-
-  .preview-nav-top small {
-    opacity: 0.66;
-  }
-
-  .preview-nav-left {
-    top: 112px;
-    left: 10px;
-    width: 32px;
-    display: grid;
-    gap: 4px;
-    overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--theme-accent-color, #2563eb) 20%, transparent);
-    border-radius: 10px;
-    padding: 5px;
-    transition: width var(--transition-base);
-  }
-
-  .preview-nav-left.expanded {
-    width: 112px;
-  }
-
-  .preview-nav-left button {
-    min-width: 0;
-    display: grid;
-    grid-template-columns: 20px minmax(0, 1fr);
-    align-items: center;
-    gap: 6px;
-    border-radius: 7px;
-    padding: 6px;
-    text-align: left;
-  }
-
-  .preview-nav-left button.active {
-    background: color-mix(in srgb, var(--theme-accent-color, #2563eb) 14%, transparent);
-  }
-
-  .nav-mark {
-    width: 6px;
-    height: 6px;
-    justify-self: center;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.72;
-  }
-
-  .nav-label {
-    min-width: 0;
-    overflow: hidden;
-    font-size: 10px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .preview-nav-left:not(.expanded) .nav-label {
-    visibility: hidden;
+    pointer-events: none;
   }
 
   @media (max-width: 1280px) {
@@ -681,10 +179,6 @@
 
     .preview-stage {
       height: 500px;
-    }
-
-    .preview-content {
-      padding-inline: 14px;
     }
   }
 </style>

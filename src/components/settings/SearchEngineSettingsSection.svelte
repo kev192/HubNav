@@ -1,35 +1,65 @@
 <script lang="ts">
   import { faviconImIcon } from '../../lib/icons'
-  import { cloneSettingsForm, type SettingsFormModel } from '../../lib/settingsForm'
+  import type { SettingsFormModel } from '../../lib/settingsForm'
   import InputGroup from '../ui/InputGroup.svelte'
 
   export let form: SettingsFormModel
   export let saving = false
   export let enginesValid = true
 
-  function syncForm(): void {
-    // Svelte 4 does not mark a nested bound field as dirty when only an object
-    // property changes. Replace the form synchronously so the save button and
-    // live preview update on the same input event that changes the engine.
-    form = cloneSettingsForm(form)
+  type EngineField = 'name' | 'icon' | 'url_template'
+
+  // Update from the actual input value in the same event cycle. This avoids
+  // relying on Svelte's nested bind ordering, which could leave the parent's
+  // dirty-state comparison one keystroke behind.
+  function updateEngineField(index: number, field: EngineField, value: string): void {
+    form = {
+      ...form,
+      search_engine: {
+        ...form.search_engine,
+        engines: form.search_engine.engines.map((engine, currentIndex) => (
+          currentIndex === index ? { ...engine, [field]: value } : engine
+        )),
+      },
+    }
+  }
+
+  function updateCurrentEngine(event: Event): void {
+    const value = (event.currentTarget as HTMLSelectElement).value
+    form = {
+      ...form,
+      search_engine: {
+        ...form.search_engine,
+        current: value,
+      },
+    }
   }
 
   function addEngine(): void {
-    form.search_engine.engines = [
-      ...form.search_engine.engines,
-      { name: '', icon: '', url_template: 'https://example.com/search?q={q}' },
-    ]
-    form = cloneSettingsForm(form)
+    form = {
+      ...form,
+      search_engine: {
+        ...form.search_engine,
+        engines: [
+          ...form.search_engine.engines,
+          { name: '', icon: '', url_template: 'https://example.com/search?q={q}' },
+        ],
+      },
+    }
   }
 
   function removeEngine(index: number): void {
     const removed = form.search_engine.engines[index]
-    const next = form.search_engine.engines.filter((_, i) => i !== index)
-    form.search_engine.engines = next
-    if (removed && removed.name === form.search_engine.current) {
-      form.search_engine.current = next[0]?.name ?? ''
+    const engines = form.search_engine.engines.filter((_, currentIndex) => currentIndex !== index)
+    form = {
+      ...form,
+      search_engine: {
+        current: removed && removed.name === form.search_engine.current
+          ? engines[0]?.name ?? ''
+          : form.search_engine.current,
+        engines,
+      },
     }
-    form = cloneSettingsForm(form)
   }
 
   function applyFaviconImIcon(index: number): void {
@@ -39,8 +69,7 @@
     const icon = faviconImIcon(engine.url_template)
     if (!icon) return
 
-    engine.icon = icon
-    form = cloneSettingsForm(form)
+    updateEngineField(index, 'icon', icon)
   }
 
   function canPreviewIcon(icon: string): boolean {
@@ -52,8 +81,6 @@
   id="settings-section-search"
   class="group group-wide group-search"
   disabled={saving}
-  on:input={syncForm}
-  on:change={() => void syncForm()}
 >
   <legend>搜索引擎</legend>
   <p class="group-desc">维护首页搜索框可切换的外部搜索引擎，查询模板中用 {'{q}'} 代表关键词。</p>
@@ -61,7 +88,12 @@
   <div class="settings-grid search-controls-grid">
     <label class="field field-select">
       <span>默认搜索引擎</span>
-      <select class="native-select" bind:value={form.search_engine.current} disabled={form.search_engine.engines.length === 0}>
+      <select
+        class="native-select"
+        value={form.search_engine.current}
+        on:change={updateCurrentEngine}
+        disabled={form.search_engine.engines.length === 0}
+      >
         {#if form.search_engine.engines.length === 0}
           <option value="">无可用引擎</option>
         {:else}
@@ -80,17 +112,22 @@
       <div class="engine-row">
         <label class="engine-cell">
           <span>名称</span>
-          <input bind:value={engine.name} type="text" placeholder="引擎名称 (如 Google)" on:input={syncForm} />
+          <input
+            type="text"
+            value={engine.name}
+            placeholder="引擎名称 (如 Google)"
+            on:input={(event) => updateEngineField(index, 'name', event.currentTarget.value)}
+          />
         </label>
         <label class="engine-cell">
           <span>图标 URL（可选）</span>
           <div class="engine-icon-control">
             <InputGroup
               type="url"
-              bind:value={engine.icon}
+              value={engine.icon}
               placeholder="图标链接"
               ariaLabel="图标链接"
-              on:input={syncForm}
+              on:input={(event) => updateEngineField(index, 'icon', String(event.detail))}
             >
               <button
                 slot="suffix"
@@ -119,10 +156,10 @@
         <label class="engine-cell grow">
           <span>搜索 URL 模板 (关键词用 {'{q}'} 代替)</span>
           <input
-            bind:value={engine.url_template}
-            on:input={syncForm}
             type="text"
+            value={engine.url_template}
             placeholder="https://www.google.com/search?q={'{q}'}"
+            on:input={(event) => updateEngineField(index, 'url_template', event.currentTarget.value)}
           />
         </label>
         <button
