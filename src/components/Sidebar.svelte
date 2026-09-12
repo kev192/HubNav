@@ -738,7 +738,15 @@
     bottom: -5px;
     left: calc(50% - 50vw);
     right: calc(50% - 50vw);
-    background: rgb(var(--card-bg-rgb, 255 255 255) / 1);
+    /* Match the live theme background at this viewport position instead of an
+       opaque card color that can clash with gradients and image backgrounds. */
+    background:
+      linear-gradient(
+        color-mix(in srgb, var(--home-background-mask-color, #000000) calc(var(--home-background-mask, 0) * 100%), transparent),
+        color-mix(in srgb, var(--home-background-mask-color, #000000) calc(var(--home-background-mask, 0) * 100%), transparent)
+      ),
+      var(--home-background, rgb(var(--card-bg-rgb, 255 255 255) / 1));
+    background-attachment: fixed;
     display: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;

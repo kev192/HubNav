@@ -4,6 +4,8 @@ import { PUBLIC_DATA_SETTINGS_KEYS, PUBLIC_SETTINGS_KEYS, SETTINGS_KEYS, toPubli
 
 const settings: Settings = {
   site_title: 'CF-Navs',
+  network_mode: 'auto',
+  network_probe_url: 'https://example.com',
   site_title_color: '#ffffff',
   site_title_font_size: 32,
   public_mode: true,

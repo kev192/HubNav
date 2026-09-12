@@ -160,12 +160,25 @@ describe('admin settings layout', () => {
     expect(panel).toContain('<SettingsHomePreview refreshToken={previewRefreshToken} />')
     expect(panel).toContain('previewRefreshToken += 1')
     expect(preview).toContain('PREVIEW_VIEWPORT_WIDTH = 1440')
-    expect(preview).toContain('previewViewportHeight = Math.max(')
+    expect(preview).toContain('previewViewportHeight = Math.max(\n      1,')
+    expect(preview).not.toContain('Math.max(\n      480,')
+    expect(preview).toContain('.preview-stage {\n    position: relative;\n    height: 100%;\n    min-height: 0;')
+    expect(preview).not.toContain('min-height: 520px')
     expect(preview).toContain('previewScale = previewFrame.clientWidth / PREVIEW_VIEWPORT_WIDTH')
     expect(preview).toContain('src={`/?preview=${refreshToken}-${localRefreshCount}`}')
     expect(preview).toContain('title="当前前台首页首屏预览"')
     expect(preview).toContain('pointer-events: none')
     expect(preview).toContain('当前前台完整首屏；保存成功后自动刷新')
+  })
+
+  it('keeps newly added search engines saveable after filling the URL template', () => {
+    const section = readFileSync('src/components/settings/SearchEngineSettingsSection.svelte', 'utf8')
+    const panel = readFileSync('src/components/SettingsPanel.svelte', 'utf8')
+
+    expect(section).toContain('function nextEngineName(): string')
+    expect(section).toContain("{ name: nextEngineName(), icon: '', url_template: '' }")
+    expect(section).toContain("on:input={(event) => updateEngineField(index, 'url_template', event.currentTarget.value)}")
+    expect(panel).toContain("engine.name.length > 0 && engine.url_template.includes('{q}')")
   })
 
   it('paginates zero-visit analytics inside the bookmark-list height contract', () => {

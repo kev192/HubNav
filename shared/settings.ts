@@ -36,6 +36,8 @@ export const SETTINGS_KEYS = [
 
 export const PUBLIC_SETTINGS_KEYS = [
   'site_title',
+  'network_mode',
+  'network_probe_url',
   'site_title_color',
   'site_title_font_size',
   'theme',

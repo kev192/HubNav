@@ -37,6 +37,19 @@ describe('home responsive layout', () => {
     expect(actions.slice(0, actions.indexOf('@media (max-width: 799px)'))).toContain('width: 2.5rem;')
   })
 
+  it('paints the scrolled top navigation strip with the active theme background', () => {
+    const sidebar = readFileSync('src/components/Sidebar.svelte', 'utf8').replace(/\r\n/g, '\n')
+    const ruleStart = sidebar.indexOf('  .top-navigation::before {')
+    const ruleEnd = sidebar.indexOf('  .top-track {', ruleStart)
+    const rule = sidebar.slice(ruleStart, ruleEnd)
+
+    expect(rule).toContain('var(--home-background,')
+    expect(rule).toContain('var(--home-background-mask-color,')
+    expect(rule).toContain('var(--home-background-mask,')
+    expect(rule).toContain('background-attachment: fixed;')
+    expect(rule).not.toContain('background: rgb(var(--card-bg-rgb, 255 255 255) / 1);')
+  })
+
   it('paints mobile overscroll with the active homepage background', () => {
     const app = readFileSync('src/App.svelte', 'utf8')
     const globalStyles = readFileSync('src/app.css', 'utf8')

@@ -14,8 +14,11 @@
   function updatePreviewScale(): void {
     if (!previewFrame || previewFrame.clientWidth === 0) return
 
+    // The preview viewport must match the visible frame aspect exactly. A hard
+    // minimum height would make the scaled iframe taller than the frame and crop
+    // the bottom of the real first screen.
     previewViewportHeight = Math.max(
-      480,
+      1,
       Math.round(
         PREVIEW_VIEWPORT_WIDTH * previewFrame.clientHeight / previewFrame.clientWidth,
       ),
@@ -137,7 +140,7 @@
   .preview-stage {
     position: relative;
     height: 100%;
-    min-height: 520px;
+    min-height: 0;
     overflow: hidden;
   }
 

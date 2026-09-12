@@ -12,7 +12,7 @@
     const distance = Math.max(viewportHeight - (rect.top + rect.height / 2), 180)
 
     return {
-      duration: 180,
+      duration: 0,
       easing: cubicOut,
       css: (t) => `transform: translateY(${(1 - t) * distance}px); opacity: ${t};`,
     }

@@ -35,6 +35,17 @@
     }
   }
 
+  function nextEngineName(): string {
+    const existingNames = new Set(form.search_engine.engines.map((engine) => engine.name.trim()))
+    let index = form.search_engine.engines.length + 1
+    let name = `搜索引擎 ${index}`
+    while (existingNames.has(name)) {
+      index += 1
+      name = `搜索引擎 ${index}`
+    }
+    return name
+  }
+
   function addEngine(): void {
     form = {
       ...form,
@@ -42,7 +53,10 @@
         ...form.search_engine,
         engines: [
           ...form.search_engine.engines,
-          { name: '', icon: '', url_template: 'https://example.com/search?q={q}' },
+          // A non-empty default name keeps the save action available as soon as
+          // the user fills the URL template, instead of blocking on a hidden
+          // empty-name validation error.
+          { name: nextEngineName(), icon: '', url_template: '' },
         ],
       },
     }

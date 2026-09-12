@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 describe('category hierarchy visibility markup', () => {
   it('shows every root group with direct bookmarks and per-group child tabs', () => {
     const section = readFileSync('src/components/CategorySection.svelte', 'utf8')
-    const card = readFileSync('src/components/BookmarkCard.svelte', 'utf8')
+    const card = readFileSync('src/components/BookmarkCard.svelte', 'utf8').replace(/\r\n/g, '\n')
     const home = readFileSync('src/views/Home.svelte', 'utf8')
     const scope = readFileSync('src/components/HomeCategoryScope.svelte', 'utf8')
 

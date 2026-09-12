@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { get } from 'svelte/store'
 import { createToastStore, TOAST_DURATIONS, type ToastType } from '../../src/lib/toast'
@@ -10,6 +11,18 @@ describe('toast store', () => {
   afterEach(() => {
     vi.clearAllTimers()
     vi.useRealTimers()
+  })
+
+  it('shows bookmark save feedback without a transition wait or refresh delay', () => {
+    const toast = readFileSync('src/components/Toast.svelte', 'utf8')
+    const app = readFileSync('src/App.svelte', 'utf8')
+    const submitStart = app.indexOf('async function handleSubmitBookmark')
+    const submitEnd = app.indexOf('async function handleDeleteBookmark', submitStart)
+    const submit = app.slice(submitStart, submitEnd)
+
+    expect(toast).toContain('duration: 0')
+    expect(submit).toContain('await applyLocalBookmarkUpsert(bookmark)')
+    expect(submit.indexOf('toastStore.addToast(')).toBeLessThan(submit.indexOf('void refreshAdminDataAfterMutation()'))
   })
 
   it('starts with an empty list', () => {

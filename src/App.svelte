@@ -765,12 +765,13 @@
 
       resetBookmarkState()
       await applyLocalBookmarkUpsert(bookmark)
-      await refreshAdminDataAfterMutation()
-     refreshBookmarkIconCacheInBackground(bookmark.id)
       toastStore.addToast(
         bookmarkModalMode === 'edit' ? `书签「${bookmark.title}」已更新` : `书签「${bookmark.title}」已创建`,
         'success',
       )
+      // 保存成功后先给用户反馈，后台数据刷新不阻塞 Toast 和弹窗关闭。
+      void refreshAdminDataAfterMutation()
+      refreshBookmarkIconCacheInBackground(bookmark.id)
    } catch (error) {
      bookmarkError = getErrorMessage(error)
     } finally {
