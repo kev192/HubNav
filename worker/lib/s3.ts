@@ -56,13 +56,17 @@ function normalizeEndpoint(endpointUrl: string): URL {
 
 function buildObjectUrl(config: S3Config, objectKey: string): URL {
   const endpoint = normalizeEndpoint(config.endpointUrl)
+  // URL.pathname for a root endpoint is always "/", while an endpoint such as
+  // "https://example.com/minio/" can carry a service base path. Normalize it as
+  // a plain string so root endpoints do not produce "//bucket/key".
+  const basePath = endpoint.pathname.replace(/\/+$/, '')
   if (config.addressingStyle === 'virtual-hosted') {
     const endpointPort = endpoint.port ? `:${endpoint.port}` : ''
     const virtualHost = `${config.bucket}.${endpoint.hostname}${endpointPort}`
-    return new URL(`${endpoint.protocol}//${virtualHost}${endpoint.pathname}/${uriEncode(objectKey, false)}`)
+    return new URL(`${endpoint.protocol}//${virtualHost}${basePath}/${uriEncode(objectKey, false)}`)
   }
   const endpointPort = endpoint.port ? `:${endpoint.port}` : ''
-  return new URL(`${endpoint.protocol}//${endpoint.hostname}${endpointPort}${endpoint.pathname}/${config.bucket}/${uriEncode(objectKey, false)}`)
+  return new URL(`${endpoint.protocol}//${endpoint.hostname}${endpointPort}${basePath}/${config.bucket}/${uriEncode(objectKey, false)}`)
 }
 
 function canonicalQuery(query: Record<string, string>): string {
