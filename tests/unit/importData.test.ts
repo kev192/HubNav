@@ -54,6 +54,7 @@ describe('prepareImportPayload', () => {
               title: 'Docs',
               url: 'https://docs.example.com',
               internalUrl: 'http://192.168.1.10',
+              lanUrl: 'http://192.168.1.20:8080',
               icon: { icon: 'mdi/book-open', backgroundColor: '#112233' },
               description: 'Reference',
               openMethod: 1,
@@ -90,7 +91,7 @@ describe('prepareImportPayload', () => {
       open_method: 2,
       sort: 7,
     })
-    expect(prepared.payload.bookmarks[0].internal_url).toBe('http://192.168.1.10')
+    expect(prepared.payload.bookmarks[0].internal_url).toBe('http://192.168.1.20:8080')
     expect(prepared.payload.bookmarks[1]).toMatchObject({
       id: 2,
       category_id: 1,

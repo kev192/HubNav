@@ -217,7 +217,7 @@ export async function setIconBlob(db: D1Database, id: number, blob: string | nul
 export async function incrementBookmarkClick(db: D1Database, id: number): Promise<boolean> {
  return await withSchemaRetry(db, async () => {
   const res = await db
-   .prepare("UPDATE bookmarks SET click_count = COALESCE(click_count, 0) + 1 WHERE id = ? AND is_private = 0")
+   .prepare("UPDATE bookmarks SET click_count = COALESCE(click_count, 0) + 1 WHERE id = ?")
    .bind(id)
    .run()
   return (res.meta.changes ?? 0) > 0

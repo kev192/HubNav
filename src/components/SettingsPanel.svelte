@@ -4,6 +4,7 @@
     cloneSettingsForm,
     createSettingsFormState,
     emptySettingsForm,
+    isSearchEngineValid,
     normalizeSettingsForm,
     shouldAutoExpandAppearanceAdvanced,
     type SettingsFormModel,
@@ -63,7 +64,7 @@
   $: enginesValid =
     normalizedForm.search_engine.engines.length > 0 &&
     normalizedForm.search_engine.engines.every(
-      (engine) => engine.name.length > 0 && engine.url_template.includes('{q}'),
+      (engine) => isSearchEngineValid(engine),
     )
   $: lightBackgroundValid = normalizedForm.backgrounds.light.value.length > 0
   $: darkBackgroundValid = normalizedForm.backgrounds.dark.value.length > 0

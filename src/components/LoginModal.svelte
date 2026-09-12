@@ -9,6 +9,7 @@
 
   let username = ''
   let password = ''
+  let showPassword = false
   let formKey = ''
 
   $: nextKey = open ? 'open' : 'closed'
@@ -34,6 +35,10 @@
 
     onCancel?.()
   }
+
+  function toggleShowPassword() {
+    showPassword = !showPassword
+  }
 </script>
 
 {#if open}
@@ -54,13 +59,25 @@
 
         <label>
           <span>密码</span>
-          <input
-            bind:value={password}
-            type="password"
-            placeholder="请输入密码"
-            autocomplete="current-password"
-            required
-          />
+          <div class="password-control">
+            <input
+              value={password}
+              type={showPassword ? 'text' : 'password'}
+              placeholder="请输入密码"
+              autocomplete="current-password"
+              required
+              on:input={(event) => password = event.currentTarget.value}
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              on:click={toggleShowPassword}
+              aria-pressed={showPassword}
+              aria-label={showPassword ? '隐藏密码' : '显示密码'}
+            >
+              {showPassword ? '隐藏' : '显示'}
+            </button>
+          </div>
         </label>
 
         {#if error}
@@ -167,6 +184,31 @@
     color: #94a3b8;
   }
 
+  .password-control {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .password-toggle {
+    border: 1px solid color-mix(in srgb, var(--card-text-color, #64748b) 24%, transparent);
+    border-radius: var(--radius-lg);
+    background: rgb(var(--card-bg-rgb, 255 255 255) / 0.48);
+    color: var(--card-text-color, #0f172a);
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transition-base);
+  }
+
+  .password-toggle:hover {
+    border-color: var(--home-accent-color, #2563eb);
+    color: var(--home-accent-color, #2563eb);
+  }
+
   .error-text {
     margin: 0;
     color: #dc2626;
@@ -246,6 +288,12 @@
   }
 
   :global(html[data-theme='dark']) .ghost-button {
+    color: #e5eefb;
+    background: rgba(30, 41, 59, 0.76);
+    border-color: rgba(148, 163, 184, 0.36);
+  }
+
+  :global(html[data-theme='dark']) .password-toggle {
     color: #e5eefb;
     background: rgba(30, 41, 59, 0.76);
     border-color: rgba(148, 163, 184, 0.36);

@@ -11,6 +11,7 @@ import {
   markBackgroundPresetCustom,
   normalizeBackgroundPresetId,
   normalizeBackgroundValueForType,
+  isSearchEngineValid,
   normalizeSettingsForm,
   shouldAutoExpandAppearanceAdvanced,
 } from '../../src/lib/settingsForm'
@@ -165,6 +166,28 @@ describe('settings form model', () => {
     expect(normalized.content_layout.margin_top).toBe(50)
     expect(normalized.navigation).toEqual({ position: 'left', always_expanded: true, top_layout: 'scroll' })
     expect(normalized.footer_html).toBe('<p>Footer</p>')
+  })
+
+  it('normalizes search engine input and ignores completely blank engine rows', () => {
+    const form = createSettingsFormState({
+      search_engine: {
+        current: 'Baidu',
+        engines: [
+          { name: 'Google', icon: '', url_template: 'https://google.com/search?q={q}' },
+          { name: '', icon: '', url_template: '' },
+          { name: 'Baidu', icon: '', url_template: 'https://www.baidu.com/s?wd=%7Bq%7D' },
+        ] as never,
+      },
+    })
+
+    const normalized = normalizeSettingsForm(form)
+
+    expect(normalized.search_engine.current).toBe('Baidu')
+    expect(normalized.search_engine.engines).toEqual([
+      { name: 'Google', icon: '', url_template: 'https://google.com/search?q={q}' },
+      { name: 'Baidu', icon: '', url_template: 'https://www.baidu.com/s?wd={q}' },
+    ])
+    expect(normalized.search_engine.engines.every(isSearchEngineValid)).toBe(true)
   })
 
   it('detects gradient presets from background values', () => {

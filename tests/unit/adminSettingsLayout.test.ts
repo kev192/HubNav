@@ -194,7 +194,7 @@ describe('admin settings layout', () => {
     expect(section).toContain('function nextEngineName(): string')
     expect(section).toContain("{ name: nextEngineName(), icon: '', url_template: '' }")
     expect(section).toContain("on:input={(event) => updateEngineField(index, 'url_template', event.currentTarget.value)}")
-    expect(panel).toContain("engine.name.length > 0 && engine.url_template.includes('{q}')")
+    expect(panel).toContain('(engine) => isSearchEngineValid(engine)')
   })
 
   it('paginates zero-visit analytics inside the bookmark-list height contract', () => {

@@ -227,6 +227,9 @@ export function isUnauthorizedError(error: unknown): boolean {
 
 export function getErrorMessage(error: unknown): string {
   if (isApiError(error)) {
+    if (error.status === 401 && error.message === 'invalid credentials') {
+      return '账号或密码不正确，请检查浏览器是否自动填充了旧密码。'
+    }
     return error.message
   }
 

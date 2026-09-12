@@ -184,7 +184,10 @@ function prepareSunPanelImport(parsed: unknown): PreparedImport {
         category_id: categoryId,
         title: readString(rawBookmark.title, `Bookmark ${nextBookmarkId}`).trim() || `Bookmark ${nextBookmarkId}`,
         url,
-        internal_url: normalizeInternalUrl(rawBookmark.internalUrl) ?? normalizeInternalUrl(rawBookmark.internal_url) ?? normalizeInternalUrl(rawBookmark.innerUrl),
+        internal_url: normalizeInternalUrl(rawBookmark.lanUrl)
+          ?? normalizeInternalUrl(rawBookmark.internalUrl)
+          ?? normalizeInternalUrl(rawBookmark.internal_url)
+          ?? normalizeInternalUrl(rawBookmark.innerUrl),
         icon: normalizedIcon.icon,
         icon_source: normalizedIcon.icon_source,
         icon_background_color: normalizedIcon.icon_background_color,

@@ -164,7 +164,7 @@ export function createSettingsFormState(
   const background = source?.background
   const lightBackground = source?.backgrounds?.light ?? background
   const darkBackground = source?.backgrounds?.dark ?? background
-  const searchEngine = source?.search_engine
+  const searchEngine = normalizeSearchEngineSettingInput(source?.search_engine)
   const cardSize = source?.card_size
   const contentLayout = source?.content_layout
   const navigation = source?.navigation
@@ -204,17 +204,7 @@ export function createSettingsFormState(
         maskColor: darkBackground?.maskColor ?? defaultDarkBackground.maskColor,
       },
     },
-    search_engine: {
-      current: searchEngine?.current ?? defaultSearchEngine.current,
-      engines:
-        searchEngine?.engines && searchEngine.engines.length > 0
-          ? searchEngine.engines.map((engine) => ({
-              name: engine.name ?? '',
-              icon: engine.icon ?? '',
-              url_template: engine.url_template ?? '',
-            }))
-          : defaultSearchEngine.engines.map((engine) => ({ ...engine })),
-    },
+    search_engine: searchEngine,
     card_size: {
       width: typeof cardSize?.width === 'number' ? cardSize.width : 80,
       height: typeof cardSize?.height === 'number' ? cardSize.height : 60,
@@ -247,12 +237,58 @@ export function createSettingsFormState(
   }
 }
 
+function normalizeSearchEngineInput(value: unknown): SearchEngine {
+  if (!value || typeof value !== 'object') return { name: '', icon: '', url_template: '' }
+  const engine = value as Partial<SearchEngine>
+  return {
+    name: typeof engine.name === 'string' ? engine.name.trim() : '',
+    icon: typeof engine.icon === 'string' ? engine.icon.trim() : '',
+    // Some mobile browsers and IMEs turn braces into full-width characters or
+    // URL-encode the placeholder. Normalize those forms so a valid template is
+    // not rejected merely because it was entered through another input method.
+    url_template: normalizeSearchEnginePlaceholder(
+      typeof engine.url_template === 'string' ? engine.url_template.trim() : '',
+    ),
+  }
+}
+
+export function normalizeSearchEnginePlaceholder(value: string): string {
+  return value
+    .replace(/%7Bq%7D/gi, '{q}')
+    .replace(/\uFF7Bq\uFF7D/gi, '{q}')
+}
+
+function normalizeSearchEngineSettingInput(value: unknown): SearchEngineSetting {
+  const source = value && typeof value === 'object' ? value as Partial<SearchEngineSetting> : {}
+  const engines = (Array.isArray(source.engines) ? source.engines : [])
+    .map(normalizeSearchEngineInput)
+    .filter((engine) => engine.name || engine.icon || engine.url_template)
+
+  if (engines.length === 0) {
+    return {
+      current: defaultSearchEngine.current,
+      engines: defaultSearchEngine.engines.map((engine) => ({ ...engine })),
+    }
+  }
+
+  const current = typeof source.current === 'string' && engines.some((engine) => engine.name === source.current)
+    ? source.current
+    : engines[0]?.name ?? ''
+  return { current, engines }
+}
+
+export function hasSearchEnginePlaceholder(value: string): boolean {
+  return value.includes('{q}')
+}
+
+export function isSearchEngineValid(engine: SearchEngine): boolean {
+  return engine.name.length > 0 && hasSearchEnginePlaceholder(engine.url_template)
+}
+
 function normalizeEngines(engines: SearchEngine[]): SearchEngine[] {
-  return engines.map((engine) => ({
-    name: engine.name.trim(),
-    icon: engine.icon.trim(),
-    url_template: engine.url_template.trim(),
-  }))
+  return engines
+    .map(normalizeSearchEngineInput)
+    .filter((engine) => engine.name || engine.icon || engine.url_template)
 }
 
 function normalizeBackground(source: BackgroundSetting, fallback: BackgroundSetting): BackgroundSetting {

@@ -206,6 +206,11 @@
     return resolveBookmarkUrl(bookmark)
   }
 
+  function recordBookmarkClick() {
+    publicStore.incrementClick(bookmark.id)
+    void api.public.registerClick(bookmark.id)
+  }
+
   function handleNetworkModeChanged() {
     networkModeRevision += 1
   }
@@ -225,6 +230,7 @@
 
   function handleOpenExternalFromMenu() {
     closeContextMenu()
+    recordBookmarkClick()
     openBookmarkUrl(bookmark.url)
   }
 
@@ -235,6 +241,7 @@
       toastStore.addToast('该书签未设置内网地址', 'info')
       return
     }
+    recordBookmarkClick()
     openBookmarkUrl(internalUrl)
   }
   function handleLinkClick(event: MouseEvent) {
@@ -261,8 +268,7 @@
       return
     }
 
-    publicStore.incrementClick(bookmark.id)
-    void api.public.registerClick(bookmark.id)
+    recordBookmarkClick()
 
     if (shouldOpenBookmarkModal({ sortMode, openMethod: bookmark.open_method })) {
       event.preventDefault()

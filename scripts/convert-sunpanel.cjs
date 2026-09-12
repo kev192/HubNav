@@ -105,6 +105,7 @@ function convertSunPanelToCFNavs(sunPanelData) {
           category_id: cfCategory.id,
           title: item.title || '未命名书签',
           url: item.url || '',
+          internal_url: item.lanUrl || item.internalUrl || item.internal_url || item.innerUrl || null,
           icon: icon || null,
           icon_source: null,
           description: item.description || null,

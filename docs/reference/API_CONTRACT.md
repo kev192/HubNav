@@ -16,7 +16,7 @@
 - 会话是无状态 JWT，payload 为 `{ username, exp, jti }`。`jti` 保证同一毫秒内的两次登录也会签出不同 token，否则「退出这台设备」会连带撤销另一台。
 - `POST /api/logout` 把当前 token 的 SHA-256 摘要写入 KV `revoked:<sha256>`，TTL 为 `max(60 秒, token 剩余寿命)`，以满足 KV `expirationTtl` 的下限。用摘要而不是 token 本身做 key，避免 KV 被 dump 时泄露仍在有效期内的 token。其它 isolate 上最多 15 秒后才感知到撤销，这是内存缓存换来的固定窗口；logout 的 KV 写入失败时接口仍完成，但撤销未落库，token 会继续有效到 `exp`。
 - 修改密码和凭据重置走 `rotateJwtSecret`，一次性作废全部会话。
-- KV `SESSION` 绑定当前只用于登录限流（`rl:login:*`）、点击计数限流（`rl:click:*`）和会话撤销名单（`revoked:*`），不再存储会话本身。
+- KV `SESSION` 绑定当前只用于登录限流（`rl:login:*`）和会话撤销名单（`revoked:*`），不再存储会话本身。
 - `/api/public/data`：匿名请求默认可查公开数据 edge cache；缓存未命中时先复用 `/api/config` edge cache，仍未命中才读取轻量 `site_title/public_mode`，公开模式关闭则要求有效 token，否则返回 `code=1005`，该轻量 1005 响应也会短时写入 edge cache。请求带 `Cache-Control: no-cache`、`Cache-Control: no-store`、`Cache-Control: max-age=0` 或 `Pragma: no-cache` 时，服务端必须绕过公开数据和站点配置 edge cache。
 - `/api/data/version`：用一次 `settings` 查询同时读取 `site_title`、`public_mode` 和内部 `data_version`，返回轻量版本号；公开模式关闭时匿名请求返回 `code=1005` 并携带轻量站点配置，登录态请求需通过 token 校验。这是每次页面加载都会走的热路径，查询条数是契约。
 

@@ -9,8 +9,8 @@ import { chunkImportRows, remapImportRecords } from './importHelpers'
 // 因此最多 14 行（98 参数），为新增列保留上限内余量。
 export const CATEGORY_IMPORT_CHUNK_SIZE = 14
 
-// 书签每行绑定 16 个参数；一次最多 6 行（96 参数），保持 D1 的 100 参数上限内。
-export const BOOKMARK_IMPORT_CHUNK_SIZE = 6
+// 书签每行绑定 17 个参数；一次最多 5 行（85 参数），保持 D1 的 100 参数上限内。
+export const BOOKMARK_IMPORT_CHUNK_SIZE = 5
 
 export async function importData(
   db: D1Database,
@@ -33,8 +33,8 @@ export async function importData(
   }
 
   for (const chunk of chunkImportRows(importedBookmarks, BOOKMARK_IMPORT_CHUNK_SIZE)) {
-    stmts.push(db.prepare(`INSERT INTO bookmarks (id, category_id, title, url, internal_url, icon, icon_source, icon_background_color, icon_blob, description, description_mode, open_method, is_private, sort, all_sort, created_at) VALUES ${chunk.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' ).join(', ')}`)
-      .bind(...chunk.flatMap((bookmark) => [bookmark.id, bookmark.category_id, bookmark.title, bookmark.url, bookmark.internal_url ?? null, bookmark.icon, bookmark.icon_source, bookmark.icon_background_color, bookmark.icon_blob, bookmark.description, bookmark.description_mode ?? null, bookmark.open_method, bookmark.is_private === true || bookmark.is_private === 1 ? 1 : 0, bookmark.sort, bookmark.all_sort ?? bookmark.sort, bookmark.created_at])))
+    stmts.push(db.prepare(`INSERT INTO bookmarks (id, category_id, title, url, internal_url, icon, icon_source, icon_background_color, icon_blob, description, description_mode, open_method, is_private, sort, all_sort, click_count, created_at) VALUES ${chunk.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' ).join(', ')}`)
+      .bind(...chunk.flatMap((bookmark) => [bookmark.id, bookmark.category_id, bookmark.title, bookmark.url, bookmark.internal_url ?? null, bookmark.icon, bookmark.icon_source, bookmark.icon_background_color, bookmark.icon_blob, bookmark.description, bookmark.description_mode ?? null, bookmark.open_method, bookmark.is_private === true || bookmark.is_private === 1 ? 1 : 0, bookmark.sort, bookmark.all_sort ?? bookmark.sort, bookmark.click_count ?? 0, bookmark.created_at])))
   }
 
   // 设置（仅写入受支持的 key，绝不触碰 admin_* 等内部 key）

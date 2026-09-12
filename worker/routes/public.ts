@@ -214,8 +214,6 @@ publicRoutes.get('/public/data', async (c) => {
   return response
 })
 
-import { getClientIp } from '../middleware/rateLimit'
-
 publicRoutes.post('/public/bookmarks/:id/click', async (c) => {
   const token = extractBearerToken(c.req.header('Authorization'))
   if (!token) return unauthorizedResponse()
@@ -226,32 +224,6 @@ publicRoutes.post('/public/bookmarks/:id/click', async (c) => {
   const id = Number(c.req.param('id'))
   if (!Number.isInteger(id) || id <= 0) {
     return c.json(fail(ErrCode.BAD_REQUEST, 'invalid id'), 400)
-  }
-
-  // OD-09: Click count rate limiting (max 3 clicks per 10 mins per IP+Bookmark ID)
-  if (c.env.SESSION) {
-    try {
-      const ip = getClientIp(c)
-      const rateLimitKey = `rl:click:${ip}:${id}`
-      const now = Date.now()
-      const raw = await c.env.SESSION.get(rateLimitKey)
-      let state = raw ? JSON.parse(raw) : null
-
-      if (state && state.resetAt > now) {
-        if (state.count >= 3) {
-          // Silent ignore, return success
-          return c.json(ok(null))
-        }
-        state.count++
-      } else {
-        state = { count: 1, resetAt: now + 600000 }
-      }
-
-      const ttl = Math.max(1, Math.ceil((state.resetAt - now) / 1000))
-      await c.env.SESSION.put(rateLimitKey, JSON.stringify(state), { expirationTtl: ttl })
-    } catch (err) {
-      console.error('Failed to apply click count rate limiting:', err)
-    }
   }
 
   try {

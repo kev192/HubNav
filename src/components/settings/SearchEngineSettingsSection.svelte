@@ -1,5 +1,6 @@
 <script lang="ts">
   import { faviconImIcon } from '../../lib/icons'
+  import { isSearchEngineValid, normalizeSearchEnginePlaceholder } from '../../lib/settingsForm'
   import type { SettingsFormModel } from '../../lib/settingsForm'
   import InputGroup from '../ui/InputGroup.svelte'
 
@@ -13,12 +14,16 @@
   // relying on Svelte's nested bind ordering, which could leave the parent's
   // dirty-state comparison one keystroke behind.
   function updateEngineField(index: number, field: EngineField, value: string): void {
+    const nextValue = field === 'url_template'
+      ? normalizeSearchEnginePlaceholder(value)
+      : value
+
     form = {
       ...form,
       search_engine: {
         ...form.search_engine,
         engines: form.search_engine.engines.map((engine, currentIndex) => (
-          currentIndex === index ? { ...engine, [field]: value } : engine
+          currentIndex === index ? { ...engine, [field]: nextValue } : engine
         )),
       },
     }
@@ -173,8 +178,16 @@
             type="text"
             value={engine.url_template}
             placeholder="https://www.google.com/search?q={'{q}'}"
+            aria-invalid={!isSearchEngineValid(engine)}
             on:input={(event) => updateEngineField(index, 'url_template', event.currentTarget.value)}
           />
+          {#if !isSearchEngineValid(engine)}
+            {#if engine.url_template}
+              <small class="engine-field-error">URL 模板必须包含 {'{q}'} 占位符。</small>
+            {:else}
+              <small class="engine-field-error">请填写包含 {'{q}'} 的搜索 URL 模板。</small>
+            {/if}
+          {/if}
         </label>
         <button
           type="button"
@@ -225,6 +238,11 @@
 
   .engine-cell.grow {
     min-width: 0;
+  }
+
+  .engine-field-error {
+    color: #dc2626;
+    font-size: 12px;
   }
 
   .engine-icon-control {

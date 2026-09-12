@@ -76,8 +76,8 @@ describe('bookmark import batching', () => {
   it('keeps every bookmark statement within the 100-parameter D1 limit', () => {
     const chunks = chunkImportRows(Array.from({ length: 16 }, (_, id) => ({ id })), BOOKMARK_IMPORT_CHUNK_SIZE)
 
-    expect(BOOKMARK_IMPORT_CHUNK_SIZE * 16).toBeLessThanOrEqual(100)
-    expect(chunks.map((chunk) => chunk.length)).toEqual([6, 6, 4])
+    expect(BOOKMARK_IMPORT_CHUNK_SIZE * 17).toBeLessThanOrEqual(100)
+    expect(chunks.map((chunk) => chunk.length)).toEqual([5, 5, 5, 1])
   })
 })
 
@@ -89,6 +89,8 @@ describe('normalizeImportBookmark', () => {
     category_id: 10,
     title: 'GitHub',
     url: 'https://github.com',
+    internal_url: 'http://192.168.1.10',
+    click_count: 7,
     icon: 'https://favicon.im/github.com',
     icon_source: 'favicon_im' as const,
     icon_background_color: '#333',
@@ -138,6 +140,8 @@ describe('normalizeImportBookmark', () => {
     expect(output.icon_source).toBeNull()
     expect(output.icon_background_color).toBeNull()
     expect(output.icon_blob).toBeNull()
+    expect(output.internal_url).toBeNull()
+    expect(output.click_count).toBe(0)
   })
 
   it('defaults NaN sort to 0', () => {
@@ -150,12 +154,21 @@ describe('normalizeImportBookmark', () => {
     expect(output.created_at).toBe(now)
   })
 
-  it('keeps explicit sort and icon data', () => {
+  it('keeps explicit sort, icon, internal address, and click count', () => {
     const output = normalizeImportBookmark(base, now)
     expect(output.sort).toBe(5)
     expect(output.icon_source).toBe('favicon_im')
     expect(output.icon_background_color).toBe('#333')
     expect(output.description).toBe('Code host')
+    expect(output.internal_url).toBe('http://192.168.1.10')
+    expect(output.click_count).toBe(7)
+  })
+
+  it('sanitizes invalid click counts without losing the internal address', () => {
+    const output = normalizeImportBookmark({ ...base, click_count: -3.8 }, now)
+
+    expect(output.internal_url).toBe('http://192.168.1.10')
+    expect(output.click_count).toBe(0)
   })
 })
 

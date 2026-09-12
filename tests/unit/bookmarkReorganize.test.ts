@@ -67,7 +67,7 @@ describe('reorganizeBookmarks', () => {
     await expect(reorganizeBookmarks(db, [{ category_id: 1, ids: [10] }]))
       .rejects.toBeInstanceOf(BookmarkReorganizeError)
   })
-  it('restricts anonymous click updates to public bookmarks', async () => {
+  it('increments authenticated click counts for both public and private bookmarks', async () => {
     let sql = ''
     const db = {
       prepare(query: string) {
@@ -84,7 +84,8 @@ describe('reorganizeBookmarks', () => {
     }
 
     await expect(incrementBookmarkClick(db as unknown as D1Database, 10)).resolves.toBe(true)
-    expect(sql).toContain('WHERE id = ? AND is_private = 0')
+    expect(sql).toContain('WHERE id = ?')
+    expect(sql).not.toContain('is_private = 0')
   })
 
 })

@@ -25,6 +25,8 @@ export function normalizeImportBookmark(b: Bookmark, now: number): Bookmark {
     category_id: b.category_id,
     title: b.title,
     url: b.url,
+    internal_url: b.internal_url ?? null,
+    click_count: typeof b.click_count === 'number' && Number.isFinite(b.click_count) ? Math.max(0, Math.trunc(b.click_count)) : 0,
     icon: b.icon ?? null,
     icon_source: (b as unknown as Record<string, Bookmark['icon_source']>).icon_source ?? null,
     icon_background_color: (b as unknown as Record<string, string | null | undefined>).icon_background_color ?? null,
