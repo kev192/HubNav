@@ -125,9 +125,9 @@
         {#if networkMode === 'external'}
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M3.8 12h16.4M12 3.5c2.2 2.3 3.3 5.1 3.3 8.5s-1.1 6.2-3.3 8.5c-2.2-2.3-3.3-5.1-3.3-8.5S9.8 5.8 12 3.5Z" /><path d="m16.8 4.8 3.2 3.2-3.2 3.2" /></svg>
         {:else if networkMode === 'internal'}
-          <svg viewBox="0 0 24 24"><path d="M4 11.2 12 4l8 7.2" /><path d="M6.5 10.2v8.3h11v-8.3M12 18.5v-4.2" /><circle cx="5" cy="20" r="1.5" /><circle cx="19" cy="20" r="1.5" /><path d="M6.2 19.5h11.6" /></svg>
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2" /><path d="M7 7.5h.01" /><rect x="3" y="13" width="18" height="7" rx="2" /><path d="M7 16.5h.01" /></svg>
         {:else}
-          <svg viewBox="0 0 24 24"><path d="M4 7h11M15 4l3 3-3 3M20 17H9M9 14l-3 3 3 3" /><path d="M4 7a8 8 0 0 1 14.1-2.1M20 17a8 8 0 0 1-14.1 2.1" /></svg>
+          <svg viewBox="0 0 24 24"><path d="m8 3-4 4 4 4" /><path d="M4 7h16" /><path d="m16 21 4-4-4-4" /><path d="M20 17H4" /></svg>
         {/if}
       </span>
     </button>
@@ -226,7 +226,7 @@
 <style>
   .network-switch { position: fixed; left: 1.25rem; right: auto; top: 1.25rem; z-index: 70; display: flex; align-items: center; flex-wrap: nowrap; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
   .network-switch .icon-button { font-size: 1.2rem; }
-  .network-mode-button { border-radius: 999px; background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(14,165,233,.12)); box-shadow: 0 4px 14px rgba(37,99,235,.16); }
+  .network-mode-button { border-radius: .75rem; color: #2563eb; }
   .network-icon { display: inline-flex; align-items: center; justify-content: center; }
   .network-icon svg { width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #22c55e; margin-left: .05rem; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
@@ -314,12 +314,6 @@
     stroke-linejoin: round;
   }
 
-  .admin-entry-button svg {
-    width: 1.42em;
-    height: 1.42em;
-    stroke-width: 2.15;
-  }
-
   :global([data-theme='dark']) .icon-button {
     background: rgba(15, 23, 42, 0.7);
     border-color: rgba(148, 163, 184, 0.32);
@@ -347,6 +341,11 @@
       width: 1.5rem;
       height: 1.5rem;
       font-size: .68rem;
+    }
+
+    .network-icon svg {
+      width: 1.2em;
+      height: 1.2em;
     }
 
     .network-status-dot,

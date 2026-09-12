@@ -15,6 +15,13 @@ describe('home floating actions', () => {
     expect(source).toContain("window.removeEventListener('scroll', updateBackToTopVisibility)")
   })
 
+  it('keeps top action buttons visually consistent', () => {
+    expect(source).toContain('.network-mode-button { border-radius: .75rem;')
+    expect(source).not.toContain('border-radius: 999px')
+    expect(source).not.toContain('width: 1.42em')
+    expect(source.match(/width: 1\.2em;/g)).toBeTruthy()
+  })
+
   it('positions the action for desktop and mobile safe areas', () => {
     expect(source).toContain('right: max(1.25rem, env(safe-area-inset-right));')
     expect(source).toContain('bottom: max(1.25rem, env(safe-area-inset-bottom));')

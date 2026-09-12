@@ -1241,8 +1241,12 @@
 
   @media (max-width: 799px) {
     .top-navigation::before {
-      top: -0.65rem;
-      bottom: -0.25rem;
+      position: fixed;
+      top: 0;
+      bottom: auto;
+      height: 3.46rem;
+      left: 0;
+      right: 0;
     }
 
     /* 移动端顶部一行：左侧网络按钮、中间分类栏、右侧操作按钮。

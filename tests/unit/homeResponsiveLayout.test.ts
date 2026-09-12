@@ -26,6 +26,10 @@ describe('home responsive layout', () => {
     expect(mobileSidebar).toContain('right: calc(max(.75rem, env(safe-area-inset-right)) + 3.6rem);')
     expect(mobileSidebar).toContain('.top-navigation.with-inline-actions {')
     expect(mobileSidebar).toContain('height: 2.56rem;')
+    expect(mobileSidebar).toContain('position: fixed;')
+    expect(mobileSidebar).toContain('height: 3.46rem;')
+    expect(mobileSidebar).toContain('left: 0;')
+    expect(mobileSidebar).toContain('right: 0;')
     expect(mobileSidebar).toContain('font-size: 0.96rem;')
     expect(mobileHome).toContain('padding-top: 4.1rem;')
 
