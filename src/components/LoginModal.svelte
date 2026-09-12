@@ -21,10 +21,24 @@
     }
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(event: SubmitEvent) {
+    const form = event.currentTarget
+    const fields =
+      form instanceof HTMLFormElement
+        ? new FormData(form)
+        : new Map<string, string>([
+            ['username', username],
+            ['password', password],
+          ])
+    const submittedUsername = String(fields.get('username') ?? '')
+    const submittedPassword = String(fields.get('password') ?? '')
+
+    username = submittedUsername
+    password = submittedPassword
+
     await onSubmit?.({
-      username: username.trim(),
-      password,
+      username: submittedUsername.trim(),
+      password: submittedPassword,
     })
   }
 
@@ -54,7 +68,7 @@
       <form class="modal-form" on:submit|preventDefault={handleSubmit}>
         <label>
           <span>用户名</span>
-          <input bind:value={username} type="text" placeholder="请输入用户名" autocomplete="username" required />
+          <input bind:value={username} name="username" type="text" placeholder="请输入用户名" autocomplete="username" required />
         </label>
 
         <label>
@@ -62,11 +76,13 @@
           <div class="password-control">
             <input
               value={password}
+              name="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="请输入密码"
               autocomplete="current-password"
               required
               on:input={(event) => password = event.currentTarget.value}
+              on:change={(event) => password = event.currentTarget.value}
             />
             <button
               type="button"
@@ -86,7 +102,7 @@
 
         <div class="modal-actions">
           <button type="button" class="ghost-button" on:click={handleCancel} disabled={loading}>取消</button>
-          <button type="submit" class="primary-button" disabled={loading || !username.trim() || !password}>
+          <button type="submit" class="primary-button" disabled={loading}>
             {#if loading}登录中...{:else}登录{/if}
           </button>
         </div>

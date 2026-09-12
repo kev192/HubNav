@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import {
   applyAuthUIRegion,
@@ -101,5 +102,19 @@ describe('applyAuthUIRegion', () => {
     const result = applyAuthUIRegion({ loginModalOpen: true, currentView: null })
     expect(result.loginModalOpen).toBe(true)
     expect(result).not.toHaveProperty('currentView')
+  })
+})
+
+describe('login modal browser autofill handling', () => {
+  it('submits real form field values even when password-manager input events are delayed', () => {
+    const modal = readFileSync('src/components/LoginModal.svelte', 'utf8').replace(/\r\n/g, '\n')
+
+    expect(modal).toContain('async function handleSubmit(event: SubmitEvent)')
+    expect(modal).toContain('new FormData(form)')
+    expect(modal).toContain('name="username"')
+    expect(modal).toContain('name="password"')
+    expect(modal).toContain('on:input={(event) => password = event.currentTarget.value}')
+    expect(modal).toContain('on:change={(event) => password = event.currentTarget.value}')
+    expect(modal).not.toContain('disabled={loading || !username.trim() || !password}')
   })
 })

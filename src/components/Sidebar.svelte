@@ -877,10 +877,16 @@
     padding: 6px;
     border: 1px solid var(--toc-border);
     border-radius: 8px;
-    background: rgb(var(--card-bg-rgb, 255 255 255) / 1);
+    background:
+      linear-gradient(
+        color-mix(in srgb, var(--home-background-mask-color, #000000) calc(var(--home-background-mask, 0) * 100%), transparent),
+        color-mix(in srgb, var(--home-background-mask-color, #000000) calc(var(--home-background-mask, 0) * 100%), transparent)
+      ),
+      var(--home-background, var(--toc-surface-strong));
+    background-attachment: fixed;
     box-shadow: var(--toc-shadow);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
   }
 
   .top-submenu button {

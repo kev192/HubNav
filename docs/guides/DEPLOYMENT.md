@@ -251,14 +251,16 @@ npm run db:init:remote
 
 **密码错误**
 - 如果仍能登录后台：进入 **站点设置 → 账号安全**，用当前密码更新管理员密码。
-- 如果已经无法登录：以下 `INIT_ADMIN_*` 流程仅用于已完成初始化的旧数据库升级或凭据恢复，不适用于全新部署。修改 `INIT_ADMIN_USER` 和 `INIT_ADMIN_PASSWORD` 后重新部署，下一次登录会自动用新值覆盖 D1 中的管理员凭据。确认当前 Wrangler 指向正确的 Worker、D1 和账号后再执行：
+- 如果已经无法登录：以下流程仅用于已完成初始化的数据库凭据恢复，不适用于全新部署。请同时设置 `INIT_ADMIN_USER`、`INIT_ADMIN_PASSWORD` 和一个**新的** `RESET_ADMIN_CREDENTIALS` 标记值（例如 `reset-2026-09-12-1`），重新部署后尝试登录一次。确认当前 Wrangler 指向正确的 Worker、D1 和账号后再执行：
 
 ```bash
+npx wrangler secret put INIT_ADMIN_USER
 npx wrangler secret put INIT_ADMIN_PASSWORD
+npx wrangler secret put RESET_ADMIN_CREDENTIALS
 npx wrangler deploy
 ```
 
-- 已经存在但升级前创建的旧数据库可能还没有初始化标记。此时再增加一个新的 `RESET_ADMIN_CREDENTIALS` 变量值，例如 `reset-2026-07-12`，重新部署并登录一次。成功登录后可以移除该变量；同一个标记不会重复重置，以后再次强制重置时请使用新的标记值。
+- 成功登录后可以移除或轮换 `RESET_ADMIN_CREDENTIALS`。同一个标记不会重复重置；以后再次强制恢复时，必须使用新的标记值。已安装站点不会仅因为修改 `INIT_ADMIN_PASSWORD` 而自动覆盖后台中修改过的密码，这是为了避免旧的部署变量意外覆盖现有管理员。
 
 重置成功后，已有登录会话会失效，需要重新登录。
 

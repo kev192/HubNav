@@ -10,7 +10,7 @@ import {
 } from '../middleware/auth'
 import { clearLoginFailures, getClientIp, loginRateLimit, recordLoginFailure } from '../middleware/rateLimit'
 import { ensureAdminBootstrap, type AdminCredentials } from '../lib/bootstrap'
-import { verifyLoginCredentials } from '../lib/authValidation'
+import { inspectLoginCredentials } from '../lib/authValidation'
 import { hashPassword, verifyPassword } from '../lib/crypto'
 import { setSettingValue } from '../lib/db'
 import { fail, ok } from '../lib/response'
@@ -56,8 +56,14 @@ authRoutes.post('/login', loginRateLimit, async (c) => {
   }
 
   const ip = getClientIp(c)
-  const credentialOk = await verifyLoginCredentials(body, credentials)
-  if (!credentialOk) {
+  const credentialCheck = await inspectLoginCredentials(body, credentials)
+  if (!credentialCheck.ok) {
+    // Never log credentials or hashes. The non-sensitive reason makes Worker
+    // tails immediately distinguish a stale password from a username typo.
+    console.warn('[auth] login rejected', {
+      reason: credentialCheck.reason,
+      credentialResetApplied: Boolean(credentials.resetApplied),
+    })
     await recordLoginFailure(c.env, ip, c.get('loginRateLimitState'))
     return c.json(fail(ErrCode.UNAUTHORIZED, 'invalid credentials'))
   }

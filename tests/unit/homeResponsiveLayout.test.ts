@@ -45,8 +45,12 @@ describe('home responsive layout', () => {
     const submenuStart = sidebar.indexOf('  .top-submenu {')
     const submenuEnd = sidebar.indexOf('  .top-submenu button {', submenuStart)
     const submenu = sidebar.slice(submenuStart, submenuEnd)
-    expect(submenu).toContain('background: rgb(var(--card-bg-rgb, 255 255 255) / 1);')
-    expect(submenu).toContain('backdrop-filter: none;')
+    expect(submenu).toContain('var(--home-background, var(--toc-surface-strong));')
+    expect(submenu).toContain('var(--home-background-mask-color,')
+    expect(submenu).toContain('var(--home-background-mask,')
+    expect(submenu).toContain('background-attachment: fixed;')
+    expect(submenu).toContain('backdrop-filter: blur(16px) saturate(130%);')
+    expect(submenu).not.toContain('background: rgb(var(--card-bg-rgb, 255 255 255) / 1);')
 
     // 桌面端仍使用原有尺寸，避免移动端压缩规则反向影响宽屏。
     expect(sidebar.slice(0, sidebar.indexOf('@media (max-width: 799px)'))).toContain('height: 52px;')
