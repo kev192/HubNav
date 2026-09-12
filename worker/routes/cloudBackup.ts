@@ -26,6 +26,7 @@ import {
   listCloudBackupTasks,
   updateCloudBackupTask,
   type CloudBackupTaskInput,
+  type CloudBackupTaskRow,
 } from '../lib/db/cloudBackup'
 import { validateImportPayload } from '../lib/importValidation'
 import { fail, ok } from '../lib/response'
@@ -87,14 +88,19 @@ function validateTaskPayload(body: CloudBackupTaskUpsertReq | null, requireSecre
   }
 }
 
-function nextRunAt(input: CloudBackupTaskInput, lastRunAt: number | null): number | null {
+function nextRunAt(
+  input: CloudBackupTaskInput,
+  existing: Pick<CloudBackupTaskRow, 'last_run_at' | 'next_run_at'>,
+): number | null {
   if (!input.enabled) return null
+  // 开始时间只用于任务创建时的首次执行；后续编辑不重新按开始时间排队。
+  if (existing.last_run_at == null && existing.next_run_at != null) return existing.next_run_at
   return calculateNextRunAt({
     enabled: true,
     intervalHours: input.interval_hours,
     startTime: input.start_time,
     timeZone: input.timezone,
-    lastRunAt,
+    lastRunAt: existing.last_run_at,
     now: Date.now(),
   })
 }
@@ -110,7 +116,7 @@ cloudBackupRoutes.post('/cloud-backup/tasks', async (c) => {
   const input = validateTaskPayload(await readJson<CloudBackupTaskUpsertReq>(c), true)
   if (typeof input === 'string') return badRequest(c, input)
   try {
-    const task = await createCloudBackupTask(c.env.DB, { ...input, next_run_at: nextRunAt(input, null) })
+    const task = await createCloudBackupTask(c.env.DB, { ...input, next_run_at: nextRunAt(input, { last_run_at: null, next_run_at: null }) })
     return c.json(ok<CloudBackupTask>(task))
   } catch {
     return c.json(fail(ErrCode.SERVER_ERROR, 'failed to create cloud backup task'))
@@ -125,7 +131,7 @@ cloudBackupRoutes.put('/cloud-backup/tasks/:id', async (c) => {
   try {
     const existing = await getCloudBackupTaskRow(c.env.DB, id)
     const merged = { ...input, secret_access_key: input.secret_access_key || existing.secret_access_key }
-    const task = await updateCloudBackupTask(c.env.DB, id, { ...merged, next_run_at: nextRunAt(merged, existing.last_run_at) })
+    const task = await updateCloudBackupTask(c.env.DB, id, { ...merged, next_run_at: nextRunAt(merged, existing) })
     return c.json(ok<CloudBackupTask>(task))
   } catch (error) {
     if (error instanceof CloudBackupNotFoundError) return c.json(fail(ErrCode.NOT_FOUND, 'cloud backup task not found'))

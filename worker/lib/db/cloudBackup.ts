@@ -233,7 +233,7 @@ export async function deleteCloudBackupTask(db: D1Database, id: number): Promise
 export async function claimCloudBackupTaskRun(
   db: D1Database,
   id: number,
-  nextRunAt: number,
+  nextRunAt: number | null,
   now = Date.now(),
 ): Promise<void> {
   const result = await db
@@ -248,7 +248,7 @@ export async function completeCloudBackupTaskRun(
   id: number,
   status: 'success' | 'failed',
   lastRunAt: number,
-  nextRunAt: number,
+  nextRunAt: number | null,
   error: string | null = null,
   now = Date.now(),
 ): Promise<void> {

@@ -230,7 +230,7 @@
           </select>
         </label>
         <label class="import-source-field"><span>导入模式</span><select class="native-select" bind:value={importMode} disabled={!isAuthenticated || importing}><option value="merge">追加合并</option><option value="replace">覆盖现有数据</option></select></label>
-        <button type="button" class="ghost-button" on:click={triggerImport} disabled={!isAuthenticated || importing}>
+        <button type="button" class="primary-button" on:click={triggerImport} disabled={!isAuthenticated || importing}>
           {#if importing}导入中...{:else}选择文件并导入{/if}
         </button>
         <input
@@ -496,8 +496,7 @@
     color: var(--admin-ok);
   }
 
-  .primary-button,
-  .ghost-button {
+  .primary-button {
     min-height: 39px;
     border-radius: 12px;
     padding: 10px 16px;
@@ -512,19 +511,7 @@
     color: #ffffff;
   }
 
-  .ghost-button {
-    border: 1px solid var(--admin-input-border);
-    background: var(--admin-control-bg);
-    color: var(--admin-text);
-  }
-
-  .ghost-button:hover:not(:disabled) {
-    border-color: var(--admin-input-hover-border);
-    background: var(--admin-control-hover-bg);
-  }
-
-  .primary-button:disabled,
-  .ghost-button:disabled {
+  .primary-button:disabled {
     cursor: not-allowed;
     opacity: 0.6;
   }
@@ -561,7 +548,7 @@
       grid-area: mode;
     }
 
-    .import-actions > .ghost-button {
+    .import-actions > .primary-button {
       grid-area: button;
       align-self: stretch;
       min-width: 0;

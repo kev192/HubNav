@@ -11,7 +11,7 @@ import {
   listCloudBackupRecords,
   type CloudBackupTaskRow,
 } from './db/cloudBackup'
-import { calculateNextRunAt } from './cloudBackupSchedule'
+import { calculateNextRunAt, calculateNextRunAtAfterRun } from './cloudBackupSchedule'
 import { s3DeleteObject, s3PutObject, type S3Config } from './s3'
 
 const BACKUP_VERSION = 2
@@ -72,19 +72,12 @@ export async function runCloudBackupTask(
   db: D1Database,
   row: CloudBackupTaskRow,
   now = Date.now(),
-  mode: 'manual' | 'scheduled' = 'manual',
 ): Promise<{ task: CloudBackupTaskRow; record: CloudBackupRecord }> {
-  const intervalMs = row.interval_hours * 60 * 60 * 1000
-  const nextRunAt = mode === 'scheduled'
-    ? (row.next_run_at ?? now) + intervalMs
-    : row.next_run_at ?? calculateNextRunAt({
-      enabled: true,
-      intervalHours: row.interval_hours,
-      startTime: row.start_time,
-      timeZone: row.timezone,
-      lastRunAt: row.last_run_at,
-      now,
-    }) ?? now + intervalMs
+  const nextRunAt = calculateNextRunAtAfterRun({
+    enabled: row.enabled === 1,
+    intervalHours: row.interval_hours,
+    now,
+  })
   await claimCloudBackupTaskRun(db, row.id, nextRunAt, now)
 
   try {
@@ -134,7 +127,7 @@ export async function runDueCloudBackupTasks(db: D1Database, now = Date.now()): 
   let executed = 0
   for (const row of results ?? []) {
     try {
-      await runCloudBackupTask(db, row, now, 'scheduled')
+      await runCloudBackupTask(db, row, now)
       executed += 1
     } catch (error) {
       console.error('cloud backup task failed', { taskId: row.id, error })

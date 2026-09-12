@@ -76,11 +76,7 @@ export function calculateNextRunAt(options: {
   if (!options.enabled) return null
   const now = options.now ?? Date.now()
   const intervalMs = options.intervalHours * 60 * 60 * 1000
-  if (options.lastRunAt != null) {
-    const elapsed = now - options.lastRunAt
-    const missedIntervals = elapsed > 0 ? Math.ceil(elapsed / intervalMs) : 0
-    return options.lastRunAt + (missedIntervals + 1) * intervalMs
-  }
+  if (options.lastRunAt != null) return options.lastRunAt + intervalMs
 
   const [hourText, minuteText] = options.startTime.split(':')
   const hour = Number(hourText)
@@ -93,4 +89,13 @@ export function calculateNextRunAt(options: {
     timestamp = timestampForWallParts(target, options.timeZone)
   }
   return timestamp
+}
+
+export function calculateNextRunAtAfterRun(options: {
+  enabled: boolean
+  intervalHours: number
+  now: number
+}): number | null {
+  if (!options.enabled) return null
+  return options.now + options.intervalHours * 60 * 60 * 1000
 }

@@ -42,6 +42,13 @@ describe('admin backup layout', () => {
     expect(exportFlow).not.toContain('await api.admin.getData()')
   })
 
+  it('uses the primary action style for the import action', () => {
+    const backup = readFileSync('src/components/BackupPanel.svelte', 'utf8')
+
+    expect(backup).toContain('class="primary-button" on:click={triggerImport}')
+    expect(backup).not.toContain('class="ghost-button" on:click={triggerImport}')
+  })
+
   it('aligns the cloud backup heading with export and import headings', () => {
     const backup = readFileSync('src/components/BackupPanel.svelte', 'utf8')
     const cloud = readFileSync('src/components/CloudBackupPanel.svelte', 'utf8')
