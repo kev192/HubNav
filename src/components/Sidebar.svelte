@@ -1252,13 +1252,13 @@
     }
 
     /* The mask is a viewport-wide sibling, not a child of the blurred nav.
-       Its top and height exactly match the mobile navigation row. */
+       It reaches the viewport top and extends down through the full nav row. */
     .mobile-top-mask {
       position: fixed;
-      top: .65rem;
+      top: 0;
       left: 0;
       right: 0;
-      height: 2.56rem;
+      height: calc(.65rem + 2.56rem);
       z-index: 58;
       background:
         linear-gradient(
