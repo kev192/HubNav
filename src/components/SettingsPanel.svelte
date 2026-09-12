@@ -174,7 +174,7 @@
         </div>
 
         <div class="settings-preview-column">
-          <SettingsHomePreview refreshToken={previewRefreshToken} />
+          <SettingsHomePreview refreshToken={previewRefreshToken} settings={normalizedForm} />
         </div>
       </div>
 

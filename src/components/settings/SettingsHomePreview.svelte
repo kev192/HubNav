@@ -1,12 +1,21 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import type { Settings } from '../../../shared/types'
+  import {
+    HOME_PREVIEW_SETTINGS_MESSAGE,
+    isHomePreviewReadyMessage,
+  } from '../../lib/homePreviewMessages'
+
   export let refreshToken = 0
+  export let settings: Partial<Settings> | null = null
 
   // Render the real public home route at a representative desktop viewport,
   // then scale that complete first screen into the unchanged preview box.
   const PREVIEW_VIEWPORT_WIDTH = 1440
 
   let previewFrame: HTMLElement | null = null
+  let previewIframe: HTMLIFrameElement | null = null
+  let previewReady = false
   let previewScale = 1
   let previewViewportHeight = 900
   let localRefreshCount = 0
@@ -27,15 +36,51 @@
   }
 
   function refreshPreview(): void {
+    previewReady = false
     localRefreshCount += 1
   }
 
+  function postSettingsToPreview(): void {
+    if (!previewReady || !previewIframe?.contentWindow || !settings) return
+
+    previewIframe.contentWindow.postMessage(
+      {
+        type: HOME_PREVIEW_SETTINGS_MESSAGE,
+        settings,
+      },
+      window.location.origin,
+    )
+  }
+
+  function handlePreviewMessage(event: MessageEvent): void {
+    if (event.origin !== window.location.origin) return
+    if (!isHomePreviewReadyMessage(event.data)) return
+
+    previewReady = true
+    postSettingsToPreview()
+  }
+
+  $: {
+    void refreshToken
+    void localRefreshCount
+    previewReady = false
+  }
+
+  $: {
+    void JSON.stringify(settings ?? null)
+    postSettingsToPreview()
+  }
+
   onMount(() => {
+    window.addEventListener('message', handlePreviewMessage)
     const observer = new ResizeObserver(updatePreviewScale)
     if (previewFrame) observer.observe(previewFrame)
     updatePreviewScale()
 
-    return () => observer.disconnect()
+    return () => {
+      window.removeEventListener('message', handlePreviewMessage)
+      observer.disconnect()
+    }
   })
 </script>
 
@@ -43,7 +88,7 @@
   <header class="preview-toolbar">
     <div>
       <strong>首页预览</strong>
-      <span>当前前台完整首屏；保存成功后自动刷新</span>
+      <span>当前前台完整首屏；修改设置时实时预览</span>
     </div>
     <button type="button" class="preview-refresh-button" on:click={refreshPreview}>
       刷新首屏
@@ -59,6 +104,7 @@
         <iframe
           title="当前前台首页首屏预览"
           data-testid="home-live-preview"
+          bind:this={previewIframe}
           src={`/?preview=${refreshToken}-${localRefreshCount}`}
           tabindex="-1"
           aria-hidden="true"

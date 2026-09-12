@@ -6,7 +6,7 @@
 // - /api/icon/* and /api/iconify/*: do not write to Cache Storage; rely on HTTP and edge caching.
 // - Other /api/* requests: network only.
 
-const CACHE = 'cf-navs-v16'
+const CACHE = 'cf-navs-v17'
 const RUNTIME_CACHE_PREFIX = 'cf-navs-v'
 const APP_SHELL = ['/index.html', '/manifest.webmanifest', '/icon.ico', '/icon.png']
 const ICON_FALLBACK_TTL_MS = 5 * 60 * 1000
@@ -174,6 +174,23 @@ self.addEventListener('fetch', (event) => {
   // /assets/* 是 hash 文件名且同样被缓存，旧 HTML 引用的旧 JS/CSS 仍然取得到，
   // 不会白屏。检测到新版本时会通知页面，由页面决定怎么提示。
   if (request.mode === 'navigate') {
+    // The admin shell must never be served stale after a deployment. Chrome has
+    // been observed holding an older settings form while other browsers had the
+    // current build, which made valid input appear impossible to save.
+    if (url.pathname === '/admin' || url.pathname === '/admin/') {
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
+            if (response.ok && response.headers.get('content-type')?.includes('text/html')) {
+              cacheResponse(SHELL_URL, response)
+            }
+            return response
+          })
+          .catch(() => caches.match(SHELL_URL).then((cached) => cached || caches.match('/'))),
+      )
+      return
+    }
+
     event.respondWith(
       caches.match(SHELL_URL).then((cached) => {
         const network = fetch(request)

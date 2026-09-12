@@ -157,7 +157,7 @@ describe('admin settings layout', () => {
     const panel = readFileSync('src/components/SettingsPanel.svelte', 'utf8')
     const preview = readFileSync('src/components/settings/SettingsHomePreview.svelte', 'utf8')
 
-    expect(panel).toContain('<SettingsHomePreview refreshToken={previewRefreshToken} />')
+    expect(panel).toContain('<SettingsHomePreview refreshToken={previewRefreshToken} settings={normalizedForm} />')
     expect(panel).toContain('previewRefreshToken += 1')
     expect(preview).toContain('PREVIEW_VIEWPORT_WIDTH = 1440')
     expect(preview).toContain('previewViewportHeight = Math.max(\n      1,')
@@ -168,7 +168,23 @@ describe('admin settings layout', () => {
     expect(preview).toContain('src={`/?preview=${refreshToken}-${localRefreshCount}`}')
     expect(preview).toContain('title="当前前台首页首屏预览"')
     expect(preview).toContain('pointer-events: none')
-    expect(preview).toContain('当前前台完整首屏；保存成功后自动刷新')
+    expect(preview).toContain('当前前台完整首屏；修改设置时实时预览')
+  })
+
+  it('sends unsaved settings to the live home preview iframe', () => {
+    const panel = readFileSync('src/components/SettingsPanel.svelte', 'utf8')
+    const preview = readFileSync('src/components/settings/SettingsHomePreview.svelte', 'utf8')
+    const app = readFileSync('src/App.svelte', 'utf8')
+
+    expect(panel).toContain('settings={normalizedForm}')
+    expect(preview).toContain('isHomePreviewReadyMessage')
+    expect(preview).toContain('HOME_PREVIEW_SETTINGS_MESSAGE')
+    expect(preview).toContain('event.origin !== window.location.origin')
+    expect(preview).toContain('postSettingsToPreview()')
+    expect(app).toContain('isHomePreviewSettingsMessage')
+    expect(app).toContain('applyHomePreviewSettings()')
+    expect(app).toContain('window.parent.postMessage({ type: HOME_PREVIEW_READY_MESSAGE }, window.location.origin)')
+    expect(app).toContain('preferredThemeMode = isHomePreviewFrame ? null : readPreferredThemeMode()')
   })
 
   it('keeps newly added search engines saveable after filling the URL template', () => {

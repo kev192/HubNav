@@ -22,9 +22,13 @@ describe('home responsive layout', () => {
     expect(mobileActions).toContain('.network-switch .icon-button {\n      width: 1.88rem;')
     expect(mobileActions).toContain('.floating-actions .icon-button {\n      width: 1.76rem;')
     expect(mobileSidebar).toContain('top: 3.68rem;')
-    expect(mobileSidebar).toContain('height: 2.4rem;')
-    expect(mobileSidebar).toContain('font-size: 0.7rem;')
+    expect(mobileSidebar).toContain('height: 2.56rem;')
+    expect(mobileSidebar).toContain('font-size: 0.96rem;')
     expect(mobileHome).toContain('padding-top: 6.96rem;')
+
+    // 移动端顶部分类标题与二级分类标题保持同一字号，同时稍微增加点击区域。
+    expect(mobileSidebar).toContain('min-height: 2.04rem;')
+    expect(mobileSidebar).toContain('font-size: 0.96rem;')
 
     const submenuStart = sidebar.indexOf('  .top-submenu {')
     const submenuEnd = sidebar.indexOf('  .top-submenu button {', submenuStart)

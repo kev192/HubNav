@@ -1250,7 +1250,7 @@
       /* 第一行留给网络模式及主题/后台/退出按钮，导航独占第二行。 */
       top: 3.68rem;
       width: calc(100% - 16px);
-      height: 2.4rem;
+      height: 2.56rem;
       grid-template-columns: minmax(0, 1fr);
       padding: 0.15rem;
     }
@@ -1269,20 +1269,20 @@
     }
 
     .top-item-group {
-      min-height: 1.88rem;
+      min-height: 2.04rem;
       border-radius: 0.6rem;
     }
 
     .top-item {
-      min-height: 1.88rem;
-      padding: 0 0.55rem;
+      min-height: 2.04rem;
+      padding: 0 0.6rem;
       border-radius: 0.6rem;
-      font-size: 0.7rem;
+      font-size: 0.96rem;
       scroll-snap-align: center;
     }
 
     .top-item small {
-      font-size: 0.55rem;
+      font-size: 0.64rem;
     }
 
     .top-item :global(.top-category-icon),

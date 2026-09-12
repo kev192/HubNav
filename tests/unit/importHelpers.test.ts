@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CATEGORY_IMPORT_CHUNK_SIZE } from '../../worker/lib/db/import'
+import { BOOKMARK_IMPORT_CHUNK_SIZE, CATEGORY_IMPORT_CHUNK_SIZE } from '../../worker/lib/db/import'
 import { chunkImportRows, normalizeImportCategory, normalizeImportBookmark, remapImportRecords } from '../../worker/lib/db/importHelpers'
 import type { Bookmark, Category } from '../../shared/types'
 
@@ -72,6 +72,15 @@ describe('category import batching', () => {
     expect(chunks.map((chunk) => chunk.length)).toEqual([14, 1])
   })
 })
+describe('bookmark import batching', () => {
+  it('keeps every bookmark statement within the 100-parameter D1 limit', () => {
+    const chunks = chunkImportRows(Array.from({ length: 16 }, (_, id) => ({ id })), BOOKMARK_IMPORT_CHUNK_SIZE)
+
+    expect(BOOKMARK_IMPORT_CHUNK_SIZE * 16).toBeLessThanOrEqual(100)
+    expect(chunks.map((chunk) => chunk.length)).toEqual([6, 6, 4])
+  })
+})
+
 describe('normalizeImportBookmark', () => {
   const now = 1700000000000
 

@@ -6,6 +6,8 @@
     type BookmarkReorganizeReq,
     type Category,
     type ChangePasswordReq,
+    type PublicSettings,
+    type Settings,
     type ThemeMode,
   } from '../shared/types'
   import ConfirmDialog from './components/ConfirmDialog.svelte'
@@ -71,6 +73,10 @@
   import { createOptimisticSortState, runOptimisticSort } from './lib/appSortQueue'
   import { getAdminBookmarkCategoryOptions } from './lib/adminListState'
   import { getNextThemePreference, resolveAppThemeState } from './lib/appThemeState'
+  import {
+    HOME_PREVIEW_READY_MESSAGE,
+    isHomePreviewSettingsMessage,
+  } from './lib/homePreviewMessages'
   import type { ImportSource } from './lib/importData'
   import { pruneBookmarkIconCacheStorageBackedByLocalStorage } from './lib/localBookmarkIconCache'
   import { adminStore, authStore, configStore, isAuthenticated, publicStore } from './lib/stores'
@@ -168,6 +174,8 @@
   let colorSchemeChangeHandler: ((event: MediaQueryListEvent) => void) | null = null
   // 只在浏览器里创建：SSR/测试环境没有 document 和 URL.createObjectURL。
   let customScriptController: CustomScriptController | null = null
+  let isHomePreviewFrame = false
+  let homePreviewSettings: Partial<Settings> | null = null
   const categorySortState = createOptimisticSortState()
   const bookmarkSortState = createOptimisticSortState()
 
@@ -248,6 +256,38 @@
   // homeBackgroundStyle，写在里面的话切个主题就会把用户脚本重跑一遍。
   // controller 内部还做了幂等，即使这条语句被多余触发也不会重复执行。
   $: customScriptController?.apply(publicData?.settings?.custom_js)
+
+  function isHomePreviewFrameEnvironment(): boolean {
+    if (typeof window === 'undefined' || window.parent === window) return false
+    return new URLSearchParams(window.location.search).has('preview')
+  }
+
+  function handleHomePreviewMessage(event: MessageEvent): void {
+    if (!isHomePreviewFrame || event.origin !== window.location.origin) return
+    if (!isHomePreviewSettingsMessage(event.data)) return
+
+    homePreviewSettings = event.data.settings
+    applyHomePreviewSettings()
+  }
+
+  function applyHomePreviewSettings(): void {
+    if (!isHomePreviewFrame || !publicData?.settings || !homePreviewSettings) return
+
+    const nextSettings = {
+      ...publicData.settings,
+      ...homePreviewSettings,
+    } as PublicSettings
+
+    if (JSON.stringify(publicData.settings) === JSON.stringify(nextSettings)) return
+    publicStore.setData({
+      ...publicData,
+      settings: nextSettings,
+    })
+  }
+
+  $: if (isHomePreviewFrame && publicData?.settings && homePreviewSettings) {
+    applyHomePreviewSettings()
+  }
 
   function setPreferredThemeMode(mode: ThemeMode): void {
     preferredThemeMode = mode
@@ -927,8 +967,15 @@
   }
 
   onMount(() => {
-    preferredThemeMode = readPreferredThemeMode()
+    isHomePreviewFrame = isHomePreviewFrameEnvironment()
+    // 后台预览必须展示“默认主题模式”，不能被管理员浏览器里的手动偏好覆盖。
+    preferredThemeMode = isHomePreviewFrame ? null : readPreferredThemeMode()
     customScriptController = createCustomScriptController(createBrowserCustomScriptHost())
+
+    if (isHomePreviewFrame) {
+      window.addEventListener('message', handleHomePreviewMessage)
+      window.parent.postMessage({ type: HOME_PREVIEW_READY_MESSAGE }, window.location.origin)
+    }
 
     if (typeof window !== 'undefined' && window.matchMedia) {
       prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -943,6 +990,9 @@
   })
 
   onDestroy(() => {
+    if (isHomePreviewFrame) {
+      window.removeEventListener('message', handleHomePreviewMessage)
+    }
     if (colorSchemeMedia && colorSchemeChangeHandler) {
       colorSchemeMedia.removeEventListener?.('change', colorSchemeChangeHandler)
     }

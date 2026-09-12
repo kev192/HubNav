@@ -136,7 +136,16 @@ describe('service worker source contracts', () => {
   it('bumps the cache version so stale entries are dropped on activate', () => {
     // 缓存策略变了却不换版本号，旧条目会带着旧语义留下来
     expect(source).toMatch(/const CACHE = 'cf-navs-v(\d+)'/)
-    expect(Number(source.match(/const CACHE = 'cf-navs-v(\d+)'/)?.[1])).toBeGreaterThanOrEqual(15)
+    expect(Number(source.match(/const CACHE = 'cf-navs-v(\d+)'/)?.[1])).toBeGreaterThanOrEqual(17)
+  })
+
+  it('serves admin navigations from the network before falling back to cache', () => {
+    const navigationStart = source.indexOf("if (request.mode === 'navigate') {")
+    const navigationEnd = source.indexOf('const isStatic =', navigationStart)
+    const navigation = source.slice(navigationStart, navigationEnd)
+
+    expect(navigation).toContain("url.pathname === '/admin' || url.pathname === '/admin/'")
+    expect(navigation.indexOf('fetch(request)')).toBeLessThan(navigation.indexOf('caches.match(SHELL_URL)'))
   })
 
   it('still refuses to cache bookmark icon proxy responses', () => {
