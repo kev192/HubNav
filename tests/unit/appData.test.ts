@@ -129,6 +129,13 @@ describe('app data adapters', () => {
     expect('custom_js' in publicData.settings).toBe(true)
   })
 
+  it('preserves internal bookmark URLs for both admin and public adapters', () => {
+    const bookmark = { ...bookmarkA, internal_url: 'http://192.168.1.10:8123' }
+
+    expect(toAdminBookmarks([bookmark])[0].internal_url).toBe(bookmark.internal_url)
+    expect(toPublicBookmark(bookmark).internal_url).toBe(bookmark.internal_url)
+  })
+
   it('keeps stable object references when merged data is unchanged', () => {
     const publicData = {
       categories: [categoryA],
