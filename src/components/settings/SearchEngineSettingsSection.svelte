@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { tick } from 'svelte'
   import { faviconImIcon } from '../../lib/icons'
   import { cloneSettingsForm, type SettingsFormModel } from '../../lib/settingsForm'
   import InputGroup from '../ui/InputGroup.svelte'
@@ -8,8 +7,10 @@
   export let saving = false
   export let enginesValid = true
 
-  async function syncForm(): Promise<void> {
-    await tick()
+  function syncForm(): void {
+    // Svelte 4 does not mark a nested bound field as dirty when only an object
+    // property changes. Replace the form synchronously so the save button and
+    // live preview update on the same input event that changes the engine.
     form = cloneSettingsForm(form)
   }
 
@@ -51,7 +52,7 @@
   id="settings-section-search"
   class="group group-wide group-search"
   disabled={saving}
-  on:input={() => void syncForm()}
+  on:input={syncForm}
   on:change={() => void syncForm()}
 >
   <legend>搜索引擎</legend>
@@ -79,7 +80,7 @@
       <div class="engine-row">
         <label class="engine-cell">
           <span>名称</span>
-          <input bind:value={engine.name} type="text" placeholder="引擎名称 (如 Google)" />
+          <input bind:value={engine.name} type="text" placeholder="引擎名称 (如 Google)" on:input={syncForm} />
         </label>
         <label class="engine-cell">
           <span>图标 URL（可选）</span>
@@ -89,7 +90,7 @@
               bind:value={engine.icon}
               placeholder="图标链接"
               ariaLabel="图标链接"
-              on:input={() => void syncForm()}
+              on:input={syncForm}
             >
               <button
                 slot="suffix"
@@ -119,6 +120,7 @@
           <span>搜索 URL 模板 (关键词用 {'{q}'} 代替)</span>
           <input
             bind:value={engine.url_template}
+            on:input={syncForm}
             type="text"
             placeholder="https://www.google.com/search?q={'{q}'}"
           />

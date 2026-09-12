@@ -31,6 +31,7 @@
   const TOP_SUBMENU_WIDTH = 220
 
   let isMobileView = false
+  let topNavScrolled = false
   let mobileSidebarOpen = false
   let hoverExpanded = false
   let manuallyCollapsed = false
@@ -118,6 +119,10 @@
 
   function checkIsMobile(): void {
     isMobileView = window.innerWidth < MOBILE_WIDTH
+  }
+
+  function updateTopNavScrollState(): void {
+    topNavScrolled = window.scrollY > 12
   }
 
   function handleResize(): void {
@@ -383,6 +388,7 @@
     checkIsMobile()
     mounted = true
     window.addEventListener('resize', scheduleResize)
+    window.addEventListener('scroll', updateTopNavScrollState, { passive: true })
     document.addEventListener('pointerdown', handleDocumentPointerDown)
     document.addEventListener('keydown', handleDocumentKeyDown)
 
@@ -391,6 +397,7 @@
       if (topTrack) resizeObserver.observe(topTrack)
       if (navigationRoot) resizeObserver.observe(navigationRoot)
     }
+    updateTopNavScrollState()
     updateOverflowState()
     reportTopNavHeight()
   })
@@ -411,6 +418,7 @@
   onDestroy(() => {
     mounted = false
     window.removeEventListener('resize', scheduleResize)
+    window.removeEventListener('scroll', updateTopNavScrollState)
     document.removeEventListener('pointerdown', handleDocumentPointerDown)
     document.removeEventListener('keydown', handleDocumentKeyDown)
     resizeObserver?.disconnect()
@@ -421,7 +429,7 @@
 </script>
 
 {#if isTop}
-  <aside class="top-navigation" class:wrap={isWrap} bind:this={navigationRoot} data-testid="top-navigation" aria-label="分类导航">
+  <aside class="top-navigation" class:wrap={isWrap} class:scrolled={topNavScrolled} bind:this={navigationRoot} data-testid="top-navigation" aria-label="分类导航">
     <button
       type="button"
       class="scroll-arrow scroll-arrow-left"
@@ -718,6 +726,30 @@
     touch-action: auto;
     user-select: auto;
     row-gap: 6px;
+  }
+
+  /* Hide page content once it scrolls above the fixed category bar. The strip
+     stays behind the rounded navigation surface and spans the full viewport. */
+  .top-navigation::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -12px;
+    bottom: -5px;
+    left: calc(50% - 50vw);
+    right: calc(50% - 50vw);
+    background: var(--toc-surface-strong);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 180ms ease-out, visibility 180ms ease-out;
+    backdrop-filter: blur(18px) saturate(1.05);
+    -webkit-backdrop-filter: blur(18px) saturate(1.05);
+    pointer-events: none;
+  }
+
+  .top-navigation.scrolled::before {
+    opacity: 1;
+    visibility: visible;
   }
 
   .top-track {
@@ -1201,6 +1233,11 @@
   }
 
   @media (max-width: 799px) {
+    .top-navigation::before {
+      top: -4.15rem;
+      bottom: -4px;
+    }
+
     .top-navigation {
       /* 第一行留给网络模式及主题/后台/退出按钮，导航独占第二行。 */
       top: 4.15rem;
@@ -1211,8 +1248,8 @@
     }
 
     .top-track {
-      width: calc(100% - 8.5rem);
-      justify-self: start;
+      width: 100%;
+      justify-self: stretch;
       box-sizing: border-box;
       gap: 4px;
       cursor: auto;

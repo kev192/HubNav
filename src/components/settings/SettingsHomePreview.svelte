@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import type { PublicBookmark } from '../../../shared/types'
   import { buildHomeBackground } from '../../lib/appData'
   import { getMostVisitedBookmarks } from '../../lib/homeData'
@@ -9,6 +10,9 @@
   export let settings: SettingsFormModel
   export let theme: 'light' | 'dark' = 'light'
 
+  // Render at a representative desktop viewport, then scale that complete
+  // screen into the existing preview box without changing the module's size.
+  const PREVIEW_VIEWPORT_WIDTH = 1440
   const previewSections = [
     { id: 'preview-tools', title: '常用工具', count: 2 },
     { id: 'preview-reading', title: '稍后阅读', count: 1 },
@@ -50,6 +54,29 @@
   ]
 
   let previewQuery = ''
+  let previewFrame: HTMLElement | null = null
+  let previewScale = 1
+  let previewViewportHeight = 900
+
+  function updatePreviewScale(): void {
+    if (!previewFrame || previewFrame.clientWidth === 0) return
+    // Match the virtual screen to the current preview-box aspect ratio, then
+    // scale it uniformly. The full first screen fills the existing module
+    // without letterboxing or changing the visible preview area.
+    previewViewportHeight = Math.max(
+      480,
+      Math.round(PREVIEW_VIEWPORT_WIDTH * previewFrame.clientHeight / previewFrame.clientWidth),
+    )
+    previewScale = previewFrame.clientWidth / PREVIEW_VIEWPORT_WIDTH
+  }
+
+  onMount(() => {
+    const observer = new ResizeObserver(updatePreviewScale)
+    if (previewFrame) observer.observe(previewFrame)
+    updatePreviewScale()
+
+    return () => observer.disconnect()
+  })
 
   $: previewSettings = {
     ...settings,
@@ -129,7 +156,7 @@
     </div>
   </header>
 
-  <div class="preview-frame">
+  <div class="preview-frame" bind:this={previewFrame}>
     <div
       class="preview-stage"
       class:top-navigation={previewSettings.navigation.position === 'top'}
@@ -139,54 +166,94 @@
       style={previewStyle}
       inert
     >
-      <div class="preview-background" aria-hidden="true"></div>
-      <div class="preview-mask" aria-hidden="true"></div>
+      <div
+        class="preview-viewport"
+        style={`--preview-scale: ${previewScale}; --preview-viewport-height: ${previewViewportHeight}px`}
+      >
+        <div class="preview-background" aria-hidden="true"></div>
+        <div class="preview-mask" aria-hidden="true"></div>
 
-      {#if previewSettings.navigation.position === 'top'}
-        <nav class="preview-nav preview-nav-top" aria-label="预览分类导航" data-testid="preview-top-navigation">
-          {#each previewSections as section, index (section.id)}
-            <button type="button" class:active={index === 0} tabindex="-1">
-              <span>{section.title}</span><small>{section.count}</small>
-            </button>
-          {/each}
-        </nav>
-      {:else}
-        <nav
-          class="preview-nav preview-nav-left"
-          class:expanded={previewSettings.navigation.always_expanded}
-          aria-label="预览分类导航"
-          data-testid="preview-left-navigation"
-        >
-          {#each previewSections as section, index (section.id)}
-            <button type="button" class:active={index === 0} tabindex="-1" aria-label={section.title}>
-              <span class="nav-mark" aria-hidden="true"></span>
-              <span class="nav-label">{section.title}</span>
-            </button>
-          {/each}
-        </nav>
-      {/if}
+        {#if previewSettings.navigation.position === 'top'}
+          <nav class="preview-nav preview-nav-top" aria-label="预览分类导航" data-testid="preview-top-navigation">
+            {#each previewSections as section, index (section.id)}
+              <button type="button" class:active={index === 0} tabindex="-1">
+                <span>{section.title}</span><small>{section.count}</small>
+              </button>
+            {/each}
+          </nav>
+        {:else}
+          <nav
+            class="preview-nav preview-nav-left"
+            class:expanded={previewSettings.navigation.always_expanded}
+            aria-label="预览分类导航"
+            data-testid="preview-left-navigation"
+          >
+            {#each previewSections as section, index (section.id)}
+              <button type="button" class:active={index === 0} tabindex="-1" aria-label={section.title}>
+                <span class="nav-mark" aria-hidden="true"></span>
+                <span class="nav-label">{section.title}</span>
+              </button>
+            {/each}
+          </nav>
+        {/if}
 
-      <div class="preview-page">
-        <HomeHeroSearch
-          {pageTitle}
-          siteTitleColor={previewSettings.site_title_color?.trim() || 'inherit'}
-          siteTitleFontSize={previewSettings.site_title_font_size}
-          settings={previewSettings}
-          topNavigation={previewSettings.navigation.position === 'top'}
-          bind:query={previewQuery}
-          preview
-          themeOverride={theme}
-        />
+        <div class="preview-page">
+          <HomeHeroSearch
+            {pageTitle}
+            siteTitleColor={previewSettings.site_title_color?.trim() || 'inherit'}
+            siteTitleFontSize={previewSettings.site_title_font_size}
+            settings={previewSettings}
+            topNavigation={previewSettings.navigation.position === 'top'}
+            bind:query={previewQuery}
+            preview
+            themeOverride={theme}
+          />
 
-        <main class="preview-content">
-          {#if mostVisitedBookmarks.length > 0}
-            <section class="preview-category preview-most-visited" aria-label="经常访问预览" data-testid="preview-most-visited">
+          <main class="preview-content">
+            {#if mostVisitedBookmarks.length > 0}
+              <section class="preview-category preview-most-visited" aria-label="经常访问预览" data-testid="preview-most-visited">
+                <header>
+                  <div>
+                    <span class="category-mark" aria-hidden="true">常</span>
+                    <div>
+                      <h3>经常访问</h3>
+                      <p>显示 {mostVisitedBookmarks.length} 个示例，配置上限 {previewSettings.most_visited_count}</p>
+                    </div>
+                  </div>
+                </header>
+
+                <div
+                  class="preview-bookmarks"
+                  class:is-icon={previewSettings.card_style === 'icon'}
+                  data-card-style={previewSettings.card_style}
+                >
+                  {#each mostVisitedBookmarks as bookmark (bookmark.id)}
+                    <div class="preview-bookmark">
+                      <BookmarkCard
+                        {bookmark}
+                        style={previewSettings.card_style}
+                        iconSize={previewSettings.card_icon_size}
+                        showDescription={previewSettings.card_style === 'info' && showDescription}
+                        descriptionMode={previewSettings.card_style === 'info' ? descriptionMode : 'hidden'}
+                        showIconTitle={previewSettings.card_icon_show_title}
+                        width={previewSettings.card_size.width}
+                        height={previewSettings.card_size.height}
+                        preview
+                        themeOverride={theme}
+                      />
+                    </div>
+                  {/each}
+                </div>
+              </section>
+            {/if}
+
+            <section class="preview-category" aria-label="常用工具示例分类">
               <header>
                 <div>
                   <span class="category-mark" aria-hidden="true">常</span>
                   <div>
-                    <h3>经常访问</h3>
-                    <p>显示 {mostVisitedBookmarks.length} 个示例，配置上限 {previewSettings.most_visited_count}</p>
+                    <h3>常用工具</h3>
+                    <p>共 2 个站点</p>
                   </div>
                 </div>
               </header>
@@ -195,8 +262,10 @@
                 class="preview-bookmarks"
                 class:is-icon={previewSettings.card_style === 'icon'}
                 data-card-style={previewSettings.card_style}
+                data-card-description-mode={previewSettings.card_style === 'info' ? descriptionMode : 'hidden'}
+                data-card-icon-title={previewSettings.card_style === 'icon' ? String(previewSettings.card_icon_show_title) : 'false'}
               >
-                {#each mostVisitedBookmarks as bookmark (bookmark.id)}
+                {#each previewBookmarks as bookmark (bookmark.id)}
                   <div class="preview-bookmark">
                     <BookmarkCard
                       {bookmark}
@@ -214,65 +283,28 @@
                 {/each}
               </div>
             </section>
-          {/if}
 
-          <section class="preview-category" aria-label="常用工具示例分类">
-            <header>
-              <div>
-                <span class="category-mark" aria-hidden="true">常</span>
-                <div>
-                  <h3>常用工具</h3>
-                  <p>共 2 个站点</p>
-                </div>
-              </div>
-            </header>
-
-            <div
-              class="preview-bookmarks"
-              class:is-icon={previewSettings.card_style === 'icon'}
-              data-card-style={previewSettings.card_style}
-              data-card-description-mode={previewSettings.card_style === 'info' ? descriptionMode : 'hidden'}
-              data-card-icon-title={previewSettings.card_style === 'icon' ? String(previewSettings.card_icon_show_title) : 'false'}
-            >
-              {#each previewBookmarks as bookmark (bookmark.id)}
-                <div class="preview-bookmark">
-                  <BookmarkCard
-                    {bookmark}
-                    style={previewSettings.card_style}
-                    iconSize={previewSettings.card_icon_size}
-                    showDescription={previewSettings.card_style === 'info' && showDescription}
-                    descriptionMode={previewSettings.card_style === 'info' ? descriptionMode : 'hidden'}
-                    showIconTitle={previewSettings.card_icon_show_title}
-                    width={previewSettings.card_size.width}
-                    height={previewSettings.card_size.height}
-                    preview
-                    themeOverride={theme}
-                  />
-                </div>
-              {/each}
-            </div>
-          </section>
-
-          <section class="custom-content-preview" aria-label="页脚和自定义样式预览">
-            <header>
-              <h3>页脚与自定义样式</h3>
-              <p>内容在隔离环境中渲染，不影响管理页面。</p>
-            </header>
-            <iframe
-              title="页脚和自定义样式隔离预览"
-              data-testid="custom-content-preview"
-              sandbox=""
-              srcdoc={customContentPreview}
-              tabindex="-1"
-              aria-hidden="true"
-            ></iframe>
-            {#if previewSettings.custom_js.trim()}
-              <p class="script-preview-notice" data-testid="custom-js-preview-notice">
-                已配置自定义 JavaScript；为保护管理会话，预览不会执行，保存后仅在公开首页尝试应用。
-              </p>
-            {/if}
-          </section>
-        </main>
+            <section class="custom-content-preview" aria-label="页脚和自定义样式预览">
+              <header>
+                <h3>页脚与自定义样式</h3>
+                <p>内容在隔离环境中渲染，不影响管理页面。</p>
+              </header>
+              <iframe
+                title="页脚和自定义样式隔离预览"
+                data-testid="custom-content-preview"
+                sandbox=""
+                srcdoc={customContentPreview}
+                tabindex="-1"
+                aria-hidden="true"
+              ></iframe>
+              {#if previewSettings.custom_js.trim()}
+                <p class="script-preview-notice" data-testid="custom-js-preview-notice">
+                  已配置自定义 JavaScript；为保护管理会话，预览不会执行，保存后仅在公开首页尝试应用。
+                </p>
+              {/if}
+            </section>
+          </main>
+        </div>
       </div>
     </div>
   </div>
@@ -358,10 +390,20 @@
     isolation: isolate;
     height: 100%;
     min-height: 520px;
-    overflow: auto;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
     color: #0f172a;
     background: transparent;
-    scrollbar-width: thin;
+  }
+
+  .preview-viewport {
+    position: relative;
+    width: 1440px;
+    height: var(--preview-viewport-height, 900px);
+    overflow: hidden;
+    transform: scale(var(--preview-scale, 1));
+    transform-origin: center;
   }
 
   .preview-stage[data-theme='dark'] {
@@ -391,8 +433,11 @@
 
   .preview-page {
     position: relative;
+    width: 100%;
+    height: 100%;
     min-height: 100%;
     box-sizing: border-box;
+    overflow: hidden;
     padding: 1px var(--content-margin-x, 0px) var(--content-margin-bottom, 0%);
   }
 

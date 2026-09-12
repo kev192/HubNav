@@ -1,8 +1,22 @@
 <script lang="ts">
-  import { fly } from 'svelte/transition'
+  import { cubicOut } from 'svelte/easing'
+  import type { TransitionConfig } from 'svelte/transition'
   import { toastStore } from '../lib/toast'
 
   $: toasts = $toastStore
+
+  function flyFromBottom(node: HTMLElement): TransitionConfig {
+    const rect = node.getBoundingClientRect()
+    const viewportHeight = window.innerHeight
+    // Begin at the viewport bottom, regardless of the toast's final position.
+    const distance = Math.max(viewportHeight - (rect.top + rect.height / 2), 180)
+
+    return {
+      duration: 420,
+      easing: cubicOut,
+      css: (t) => `transform: translateY(${(1 - t) * distance}px); opacity: ${t};`,
+    }
+  }
 
   function dismiss(id: string) {
     toastStore.dismissToast(id)
@@ -17,7 +31,7 @@
         class:toast-success={toast.type === 'success'}
         class:toast-error={toast.type === 'error'}
         class:toast-info={toast.type === 'info'}
-        transition:fly={{ y: 16, duration: 220 }}
+        transition:flyFromBottom|global
         role="status"
         aria-live="polite"
       >
@@ -35,7 +49,7 @@
 <style>
   .toast-container {
     position: fixed;
-    top: clamp(72px, 14vh, 150px);
+    top: 50%;
     left: 50%;
     right: auto;
     z-index: 10020;
@@ -44,7 +58,7 @@
     gap: 10px;
     width: min(calc(100vw - 32px), 420px);
     max-width: 420px;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     pointer-events: none;
   }
 
@@ -135,7 +149,7 @@
   }
   @media (max-width: 600px) {
     .toast-container {
-      top: 76px;
+      top: 50%;
       width: min(calc(100vw - 24px), 420px);
     }
   }
