@@ -127,7 +127,24 @@
   })
 </script>
 
-{#if isAuthenticated}<div class="network-switch"><button type="button" class="icon-button network-mode-button" on:click={toggleNetworkMode} title={`网络模式：${networkLabel}`} aria-label={`网络模式：${networkLabel}`}><span class="network-icon">{networkMode === "external" ? "↗" : networkMode === "internal" ? "⌂" : "⇄"}</span></button><span class="network-status-dot" class:online={networkOnline === true} class:offline={networkOnline === false}></span><span>{networkLabel}</span>{#if probing}<small>检测中</small>{/if}</div>{/if}
+{#if isAuthenticated}
+  <div class="network-switch">
+    <button type="button" class="icon-button network-mode-button" on:click={toggleNetworkMode} title={`网络模式：${networkLabel}`} aria-label={`网络模式：${networkLabel}`}>
+      <span class="network-icon" aria-hidden="true">
+        {#if networkMode === 'external'}
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M3.8 12h16.4M12 3.5c2.2 2.3 3.3 5.1 3.3 8.5s-1.1 6.2-3.3 8.5c-2.2-2.3-3.3-5.1-3.3-8.5S9.8 5.8 12 3.5Z" /><path d="m16.8 4.8 3.2 3.2-3.2 3.2" /></svg>
+        {:else if networkMode === 'internal'}
+          <svg viewBox="0 0 24 24"><path d="M4 11.2 12 4l8 7.2" /><path d="M6.5 10.2v8.3h11v-8.3M12 18.5v-4.2" /><circle cx="5" cy="20" r="1.5" /><circle cx="19" cy="20" r="1.5" /><path d="M6.2 19.5h11.6" /></svg>
+        {:else}
+          <svg viewBox="0 0 24 24"><path d="M4 7h11M15 4l3 3-3 3M20 17H9M9 14l-3 3 3 3" /><path d="M4 7a8 8 0 0 1 14.1-2.1M20 17a8 8 0 0 1-14.1 2.1" /></svg>
+        {/if}
+      </span>
+    </button>
+    <span class="network-status-dot" class:online={networkOnline === true} class:offline={networkOnline === false}></span>
+    <span class="network-label">{networkLabel}</span>
+    {#if probing}<small class="network-probe-label">检测中</small>{/if}
+  </div>
+{/if}
 <div class="floating-actions" class:below-top-navigation={topNavigation}>
   <button
     type="button"
@@ -219,7 +236,8 @@
   .network-switch { position: fixed; left: 1.25rem; right: auto; top: 1.25rem; z-index: 70; display: flex; align-items: center; flex-wrap: nowrap; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
   .network-switch .icon-button { font-size: 1.2rem; }
   .network-mode-button { border-radius: 999px; background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(14,165,233,.12)); box-shadow: 0 4px 14px rgba(37,99,235,.16); }
-  .network-icon { font-size: 1.25rem; font-weight: 700; }
+  .network-icon { display: inline-flex; align-items: center; justify-content: center; }
+  .network-icon svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #22c55e; margin-left: .05rem; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
   .network-status-dot.online { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
 
@@ -326,21 +344,32 @@
   }
 
   @media (max-width: 799px) {
-    .network-switch { position: fixed; left: auto; right: 7.6rem; top: .65rem; z-index: 70; display: flex; align-items: center; flex-wrap: nowrap; gap: .35rem; color: inherit; font-size: .8rem; font-weight: 600; }
-  .network-switch .icon-button { font-size: 1.2rem; }
-  .network-mode-button { border-radius: 999px; background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(14,165,233,.12)); box-shadow: 0 4px 14px rgba(37,99,235,.16); }
-  .network-icon { font-size: 1.25rem; font-weight: 700; }
-  .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #22c55e; margin-left: .05rem; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
-  .network-status-dot.online { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
+    .network-switch {
+      left: max(.75rem, env(safe-area-inset-left));
+      right: auto;
+      top: .65rem;
+      gap: 0;
+    }
 
-  .floating-actions {
-      top: 1rem;
-      right: 1rem;
+    .network-switch .icon-button {
+      width: 2.35rem;
+      height: 2.35rem;
+    }
+
+    .network-status-dot,
+    .network-label,
+    .network-probe-label {
+      display: none;
+    }
+
+    .floating-actions {
+      top: .65rem;
+      right: max(.75rem, env(safe-area-inset-right));
+      gap: .35rem;
     }
 
     .floating-actions.below-top-navigation {
-      /* 移动端顶部导航 top:8px、高 48px；按钮垂直居中对齐首行，不遮挡搜索框 */
-      top: 0.85rem;
+      top: .65rem;
     }
 
     .icon-button {

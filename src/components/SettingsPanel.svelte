@@ -418,7 +418,7 @@
   .settings-workspace {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: minmax(430px, 1.3fr) minmax(340px, 0.9fr);
+    grid-template-columns: minmax(390px, 0.95fr) minmax(500px, 1.35fr);
     gap: 18px;
     min-width: 0;
     min-height: 0;

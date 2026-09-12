@@ -1202,7 +1202,8 @@
 
   @media (max-width: 799px) {
     .top-navigation {
-      top: 8px;
+      /* 第一行留给网络模式及主题/后台/退出按钮，导航独占第二行。 */
+      top: 4.15rem;
       width: calc(100% - 16px);
       height: 48px;
       grid-template-columns: minmax(0, 1fr);

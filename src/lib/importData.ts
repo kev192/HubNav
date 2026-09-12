@@ -28,6 +28,22 @@ function normalizeUrl(value: unknown): string {
   return text
 }
 
+function normalizeInternalUrl(value: unknown): string | null {
+  return normalizeUrl(value) || null
+}
+
+function normalizeCFNavsBookmark(bookmark: Bookmark): Bookmark {
+  const legacyBookmark = bookmark as Bookmark & { internalUrl?: unknown }
+  return {
+    ...bookmark,
+    // NavHub/CF-Navs backups already use url for the default (external)
+    // address. Keep the two address fields separate when importing older
+    // exports that used camelCase for the internal address.
+    url: normalizeUrl(bookmark.url),
+    internal_url: normalizeInternalUrl(bookmark.internal_url) ?? normalizeInternalUrl(legacyBookmark.internalUrl),
+  }
+}
+
 function faviconForUrl(url: string): string {
   try {
     const { hostname } = new URL(url)
@@ -115,7 +131,7 @@ function prepareCFNavsImport(parsed: unknown): PreparedImport {
   return {
     payload: {
       categories: normalizeCategories(data.categories as Category[]),
-      bookmarks: data.bookmarks as Bookmark[],
+      bookmarks: (data.bookmarks as Bookmark[]).map(normalizeCFNavsBookmark),
       settings: (data.settings ?? undefined) as Partial<Settings> | undefined,
     },
     categories: data.categories.length,
@@ -168,7 +184,7 @@ function prepareSunPanelImport(parsed: unknown): PreparedImport {
         category_id: categoryId,
         title: readString(rawBookmark.title, `Bookmark ${nextBookmarkId}`).trim() || `Bookmark ${nextBookmarkId}`,
         url,
-        internal_url: normalizeUrl(rawBookmark.internalUrl ?? rawBookmark.internal_url) || url,
+        internal_url: normalizeInternalUrl(rawBookmark.internalUrl) ?? normalizeInternalUrl(rawBookmark.internal_url) ?? normalizeInternalUrl(rawBookmark.innerUrl),
         icon: normalizedIcon.icon,
         icon_source: normalizedIcon.icon_source,
         icon_background_color: normalizedIcon.icon_background_color,
@@ -302,7 +318,7 @@ export function prepareBrowserBookmarkHtml(text: string): PreparedImport {
     bookmarks.push({
       id: nextBookmarkId++, category_id: categoryId,
       title: titleFallback(decode(title.replace(/<[^>]+>/g, '')), url), url,
-      internal_url: url,
+      internal_url: null,
       icon: safeIcon?.startsWith('data:') ? null : safeIcon,
       icon_source: safeIcon?.startsWith('data:') ? 'custom' : null,
       icon_background_color: null, icon_blob: safeIcon?.startsWith('data:') ? safeIcon : null,

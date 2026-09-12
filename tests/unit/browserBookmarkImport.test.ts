@@ -18,6 +18,8 @@ describe('browser bookmark import', () => {
     expect(result.bookmarks).toBe(2)
     expect(result.skipped).toBe(1)
     expect(result.payload.bookmarks[0].description).toBe('Example description')
+    expect(result.payload.bookmarks[0].url).toBe('https://example.com')
+    expect(result.payload.bookmarks[0].internal_url).toBeNull()
     expect(result.payload.bookmarks[0].icon_blob).toMatch(/^data:image\//)
     expect(result.payload.bookmarks[0].created_at).toBe(1700000000000)
     expect(result.payload.categories.map((category) => ({ title: category.title, parent_id: category.parent_id }))).toEqual([

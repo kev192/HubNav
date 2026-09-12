@@ -850,8 +850,8 @@ import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCa
     }
 
     .home-shell.top-navigation-layout {
-      /* 移动端顶部导航固定 48px，不随桌面分行高度变化 */
-      padding-top: 4.5rem;
+      /* 第一行是操作按钮，第二行是导航栏（top: 4.15rem）。 */
+      padding-top: 8.25rem;
     }
 
     .scope-section-list {

@@ -35,15 +35,17 @@
 <style>
   .toast-container {
     position: fixed;
-    top: 88px;
-    right: 24px;
-    z-index: 9999;
+    top: clamp(72px, 14vh, 150px);
+    left: 50%;
+    right: auto;
+    z-index: 10020;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-width: 380px;
+    width: min(calc(100vw - 32px), 420px);
+    max-width: 420px;
+    transform: translateX(-50%);
     pointer-events: none;
-    width: auto;
   }
 
   .toast-item {
@@ -131,4 +133,11 @@
   :global([data-theme='dark']) .toast-dismiss:hover {
     background: rgba(255, 255, 255, 0.18);
   }
+  @media (max-width: 600px) {
+    .toast-container {
+      top: 76px;
+      width: min(calc(100vw - 24px), 420px);
+    }
+  }
+
 </style>

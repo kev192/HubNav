@@ -16,6 +16,7 @@ describe('prepareImportPayload', () => {
           category_id: 1,
           title: 'GitHub',
           url: 'https://github.com',
+          internal_url: 'http://192.168.1.10',
           icon: null,
           icon_source: null,
           icon_background_color: null,
@@ -31,11 +32,14 @@ describe('prepareImportPayload', () => {
 
     const prepared = prepareImportPayload(backup, 'cf-navs')
 
-    expect(prepared.sourceLabel).toBe('CF-Navs backup')
+    expect(prepared.sourceLabel).toBe('NavHub backup')
     expect(prepared.categories).toBe(1)
     expect(prepared.bookmarks).toBe(1)
     expect(prepared.payload.categories).toEqual([{ ...backup.categories[0], parent_id: null }])
-    expect(prepared.payload.bookmarks).toBe(backup.bookmarks)
+    expect(prepared.payload.bookmarks[0]).toMatchObject({
+      url: 'https://github.com',
+      internal_url: 'http://192.168.1.10',
+    })
     expect(prepared.payload.settings).toEqual({ site_title: 'Imported' })
   })
 
@@ -49,6 +53,7 @@ describe('prepareImportPayload', () => {
             {
               title: 'Docs',
               url: 'https://docs.example.com',
+              internalUrl: 'http://192.168.1.10',
               icon: { icon: 'mdi/book-open', backgroundColor: '#112233' },
               description: 'Reference',
               openMethod: 1,
@@ -85,12 +90,15 @@ describe('prepareImportPayload', () => {
       open_method: 2,
       sort: 7,
     })
+    expect(prepared.payload.bookmarks[0].internal_url).toBe('http://192.168.1.10')
     expect(prepared.payload.bookmarks[1]).toMatchObject({
       id: 2,
       category_id: 1,
       icon: 'https://favicon.im/plain.example.com?larger=true',
       open_method: 3,
     })
+    expect(prepared.payload.bookmarks[1].url).toBe('https://plain.example.com')
+    expect(prepared.payload.bookmarks[1].internal_url).toBeNull()
   })
 
   it('rejects malformed import sources with clear errors', () => {
@@ -108,7 +116,7 @@ describe('prepareImportPayload', () => {
 
     expect(prepared.categories).toBe(1)
     expect(prepared.bookmarks).toBe(0)
-    expect(prepared.sourceLabel).toBe('CF-Navs backup')
+    expect(prepared.sourceLabel).toBe('NavHub backup')
   })
 
   it('rejects invalid JSON text with the UI-facing error message', () => {
