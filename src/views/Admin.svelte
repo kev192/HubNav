@@ -103,6 +103,7 @@
   export let backupMessage = ''
   export let onExportData: ((selection: BackupSelection) => AsyncVoid) | undefined = undefined
   export let onImportData: ((file: File, source: ImportSource, mode: 'replace' | 'merge') => AsyncVoid) | undefined = undefined
+  export let onRestoreData: (() => AsyncVoid) | undefined = undefined
 
   let importSource: ImportSource = 'cf-navs'
 
@@ -171,6 +172,7 @@
       {onSortBookmarks}
       {onExportData}
       {onImportData}
+      {onRestoreData}
     />
   </div>
 

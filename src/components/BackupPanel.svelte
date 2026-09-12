@@ -18,6 +18,7 @@
   export let bookmarks: BookmarkOption[] = []
   export let onExportData: ((selection: BackupSelection) => AsyncVoid) | undefined = undefined
   export let onImportData: ((file: File, source: ImportSource, mode: 'replace' | 'merge') => AsyncVoid) | undefined = undefined
+  export let onRestoreData: (() => AsyncVoid) | undefined = undefined
 
   let importInput: HTMLInputElement | null = null
   let importMode: 'replace' | 'merge' = 'replace'
@@ -124,8 +125,7 @@
 <section class="panel backup-panel">
   <div class="panel-header">
     <div>
-      <p class="panel-eyebrow">数据备份与导入</p>
-      <h2>导入 / 导出</h2>
+      <h2>备份与恢复</h2>
     </div>
   </div>
   <p class="backup-desc">
@@ -244,7 +244,7 @@
     </section>
   </div>
 
-  <CloudBackupPanel />
+  <CloudBackupPanel {onRestoreData} />
 </section>
 
 <style>
@@ -262,14 +262,6 @@
     align-items: flex-start;
     gap: 12px;
     margin-bottom: 14px;
-  }
-
-  .panel-eyebrow {
-    margin: 0 0 8px;
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--admin-subtle);
   }
 
   h2,

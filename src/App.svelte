@@ -965,6 +965,12 @@
     })
   }
 
+  async function handleRestoreData(): Promise<void> {
+    // 云端还原已经写入服务端；这里强制拉取一次远端数据，
+    // 同步后台列表、站点设置和前台预览，避免页面继续显示旧状态。
+    await refreshAdminDataAfterMutation()
+  }
+
   async function handleImportData(file: File, source: ImportSource, mode: 'replace' | 'merge'): Promise<void> {
     await importDataFromFile(importExportState, file, source, mode, {
       adminData,
@@ -1120,6 +1126,7 @@
         backupMessage={importExportState.backupMessage}
         onExportData={handleExportData}
         onImportData={handleImportData}
+        onRestoreData={handleRestoreData}
       />
     {:else}
       <div class="app-splash">

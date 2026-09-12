@@ -49,6 +49,7 @@
   export let onSortBookmarks: SortHandler | undefined = undefined
   export let onExportData: ((selection: BackupSelection) => AsyncVoid) | undefined = undefined
   export let onImportData: ((file: File, source: ImportSource, mode: 'replace' | 'merge') => AsyncVoid) | undefined = undefined
+  export let onRestoreData: (() => AsyncVoid) | undefined = undefined
 </script>
 
 <div class="admin-content">
@@ -116,6 +117,7 @@
       bind:importSource
       onExportData={onExportData}
       onImportData={onImportData}
+      {onRestoreData}
     />
   {/if}
 </div>

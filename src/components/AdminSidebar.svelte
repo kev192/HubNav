@@ -11,7 +11,7 @@
     { tab: 'bookmarks', icon: '🔖', label: '书签管理' },
     { tab: 'analytics', icon: '📊', label: '访问分析' },
     { tab: 'settings', icon: '⚙️', label: '站点设置' },
-    { tab: 'backup', icon: '💾', label: '数据备份与导入' },
+    { tab: 'backup', icon: '💾', label: '备份与恢复' },
   ]
 </script>
 

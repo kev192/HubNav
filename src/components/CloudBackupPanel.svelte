@@ -3,6 +3,8 @@
   import { cloudBackupApi, getErrorMessage } from '../lib/api'
   import type { CloudBackupRecord, CloudBackupTask } from '../../shared/types'
 
+  type AsyncVoid = void | Promise<void>
+
   type TaskForm = {
     name: string
     enabled: boolean
@@ -74,6 +76,7 @@
   let records: CloudBackupRecord[] = []
   let recordsLoading = false
   let recordActionId: number | null = null
+  export let onRestoreData: (() => AsyncVoid) | undefined = undefined
 
   $: taskButtonDisabled = loading || saving || runningTaskId != null || deletingTaskId != null
 
@@ -278,6 +281,7 @@
     message = ''
     try {
       const result = await cloudBackupApi.restoreRecord(record.id)
+      await onRestoreData?.()
       message = `还原成功：${result.categories} 个分类、${result.bookmarks} 个书签。`
     } catch (restoreError) {
       error = getErrorMessage(restoreError)
@@ -319,7 +323,6 @@
 <section class="cloud-backup" aria-labelledby="cloud-backup-title">
   <div class="cloud-header">
     <div>
-      <p class="panel-eyebrow">数据备份与导入</p>
       <h3 id="cloud-backup-title">云端备份</h3>
       <p class="cloud-desc">创建多个 S3 兼容备份任务，支持 Cloudflare R2、AWS S3 与其他兼容存储；每个任务可独立调度、执行、下载与还原。</p>
     </div>
