@@ -887,7 +887,21 @@
   async function handleChangePassword(payload: ChangePasswordReq): Promise<void> {
     rootError = ''
 
-    await api.auth.changePassword(payload)
+    try {
+      await api.auth.changePassword(payload)
+    } catch (error) {
+      if (!isUnauthorizedError(error)) throw error
+
+      // The password API returns 401 only when the bearer session is no longer
+      // valid. Keep the password form mounted so the user can retry immediately
+      // after signing in again, instead of exposing a raw "unauthorized" error.
+      authStore.setSession(null)
+      rootError = '登录状态已过期，请重新登录后再修改密码。'
+      await ensureLoginModalComponent()
+      loginModalOpen = true
+      throw new Error(rootError)
+    }
+
     authStore.setSession(null)
     resetCategoryState()
     resetSettingsState()
