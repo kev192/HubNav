@@ -33,7 +33,7 @@
 
   const settingsSections = [
     { id: 'basic', label: '站点设置', hint: '标题、首页显示与默认主题' },
-    { id: 'network', label: '网络环境切换', hint: '外网、内网与自动判别' },
+    { id: 'network', label: '网络环境切换', hint: '自动模式判别 URL' },
     { id: 'appearance', label: '外观与卡片', hint: '配色、背景与书签卡片' },
     { id: 'layout', label: '布局与导航', hint: '内容宽度、边距与导航位置' },
     { id: 'search', label: '搜索设置', hint: '默认引擎与搜索服务' },
@@ -146,8 +146,9 @@
           {#if activeSectionId === 'basic'}
             <BasicSettingsSection bind:form {saving} />
             <HeroSettingsSection bind:form {saving} />
+          {:else if activeSectionId === 'network'}
             <NetworkSettingsSection bind:form {saving} />
-          {:else if activeSectionId === 'network'}\n            <NetworkSettingsSection bind:form {saving} />\n          {:else if activeSectionId === 'appearance'}
+          {:else if activeSectionId === 'appearance'}
             <BackgroundSettingsSection
               bind:form
               {saving}

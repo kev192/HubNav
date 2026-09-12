@@ -3,6 +3,7 @@
   import type { CardStyle, DescriptionDisplayMode, PublicBookmark } from '../../shared/types'
   import BookmarkCardCompact from './BookmarkCardCompact.svelte'
   import { publicStore } from '../lib/stores'
+  import { toastStore } from '../lib/toast'
   import { api } from '../lib/api'
   import BookmarkCardInfo from './BookmarkCardInfo.svelte'
   import BookmarkContextMenu from './BookmarkContextMenu.svelte'
@@ -60,10 +61,6 @@
   let contextMenuOpen = false
   let contextMenuX = 0
   let contextMenuY = 0
-  const CONTEXT_MENU_WIDTH = 176
-  const CONTEXT_MENU_HEIGHT = 148
-  const CONTEXT_MENU_GAP = 10
-  const CONTEXT_MENU_MARGIN = 8
   let modalOpen = false
   let iconStateKey = ''
   let windowListenersAttached = false
@@ -190,22 +187,11 @@
     event.preventDefault()
     event.stopPropagation()
     notifyContextMenuOpen()
-    // Keep the menu in the pointer's lower-right quadrant, while preventing
-    // it from being rendered outside the viewport near the right/bottom edge.
-    contextMenuX = Math.max(
-      CONTEXT_MENU_MARGIN,
-      Math.min(
-        event.clientX + CONTEXT_MENU_GAP,
-        window.innerWidth - CONTEXT_MENU_WIDTH - CONTEXT_MENU_MARGIN,
-      ),
-    )
-    contextMenuY = Math.max(
-      CONTEXT_MENU_MARGIN,
-      Math.min(
-        event.clientY + CONTEXT_MENU_GAP,
-        window.innerHeight - CONTEXT_MENU_HEIGHT - CONTEXT_MENU_MARGIN,
-      ),
-    )
+    // Pass the original pointer coordinates to the body-mounted menu. The
+    // menu measures itself after mounting and only clamps when it would leave
+    // the viewport, so it stays immediately to the pointer's lower-right.
+    contextMenuX = event.clientX
+    contextMenuY = event.clientY
     contextMenuOpen = true
   }
 
@@ -235,6 +221,21 @@
     if (!targetUrl) return
     if (openInNewTab) window.open(targetUrl, '_blank', 'noopener,noreferrer')
     else window.location.href = targetUrl
+  }
+
+  function handleOpenExternalFromMenu() {
+    closeContextMenu()
+    openBookmarkUrl(bookmark.url)
+  }
+
+  function handleOpenInternalFromMenu() {
+    const internalUrl = bookmark.internal_url?.trim()
+    closeContextMenu()
+    if (!internalUrl) {
+      toastStore.addToast('该书签未设置内网地址', 'info')
+      return
+    }
+    openBookmarkUrl(internalUrl)
   }
   function handleLinkClick(event: MouseEvent) {
     if (preview) {
@@ -400,7 +401,14 @@
   {/if}
 
   {#if contextMenuOpen}
-    <BookmarkContextMenu menuX={contextMenuX} menuY={contextMenuY} onEdit={canEdit ? handleEditClick : undefined} hasInternal={Boolean(bookmark.internal_url?.trim())} onOpenExternal={() => openBookmarkUrl(bookmark.url)} onOpenInternal={() => openBookmarkUrl(bookmark.internal_url ?? '')} />
+    <BookmarkContextMenu
+      menuX={contextMenuX}
+      menuY={contextMenuY}
+      onEdit={canEdit ? handleEditClick : undefined}
+      hasInternal={Boolean(bookmark.internal_url?.trim())}
+      onOpenExternal={handleOpenExternalFromMenu}
+      onOpenInternal={handleOpenInternalFromMenu}
+    />
   {/if}
 
   {#if modalOpen}

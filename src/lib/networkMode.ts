@@ -38,18 +38,19 @@ function writeStorage(key: string, value: string): void {
 }
 
 /**
- * Read the user-selected mode. localStorage is authoritative because the
- * switch is a per-browser preference; the data attribute is the server-side
- * default/fallback used during the first render.
+ * Read the current mode. App.svelte writes the data attribute according to
+ * the current authentication state, so it must win over a stale preference
+ * while a visitor is using the page. The stored value remains the fallback
+ * for the administrator preference before the app has initialized.
  */
 export function getNetworkMode(): NetworkMode {
-  const stored = readStorage('navhub-network-mode')
-  if (isNetworkMode(stored)) return stored
-
   const datasetMode = typeof document !== 'undefined'
     ? document.documentElement.dataset.networkMode ?? null
     : null
-  return isNetworkMode(datasetMode) ? datasetMode : 'external'
+  if (isNetworkMode(datasetMode)) return datasetMode
+
+  const stored = readStorage('navhub-network-mode')
+  return isNetworkMode(stored) ? stored : 'external'
 }
 
 /** Resolve `auto` to the result of the most recent network probe. */

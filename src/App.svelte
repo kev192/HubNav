@@ -218,9 +218,12 @@
     document.documentElement.dataset.backgroundPreset = publicData?.settings.background_preset_id ?? 'custom'
     const storedNetworkMode = typeof localStorage !== 'undefined' ? localStorage.getItem('navhub-network-mode') : null
     const isStoredNetworkMode = storedNetworkMode === 'external' || storedNetworkMode === 'internal' || storedNetworkMode === 'auto'
-    document.documentElement.dataset.networkMode = isStoredNetworkMode
+    // Network mode is a per-browser administrator preference. Anonymous
+    // visitors never inherit the old server-side default and always use the
+    // external URL.
+    document.documentElement.dataset.networkMode = $isAuthenticated && isStoredNetworkMode
       ? storedNetworkMode
-      : publicData?.settings.network_mode || 'external'
+      : 'external'
     document.documentElement.dataset.networkProbeUrl = publicData?.settings.network_probe_url ?? ''
     notifyNetworkModeChanged()
 
