@@ -49,6 +49,7 @@ export async function createBookmark(db: D1Database, req: BookmarkUpsertReq): Pr
     req.category_id,
     req.title,
     req.url,
+    req.internal_url ?? null,
     req.icon ?? null,
     req.icon_source ?? null,
     req.icon_background_color ?? null,

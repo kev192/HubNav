@@ -861,9 +861,10 @@
     padding: 6px;
     border: 1px solid var(--toc-border);
     border-radius: 8px;
-    background: var(--toc-surface-strong);
+    background: rgb(var(--card-bg-rgb, 255 255 255) / 1);
     box-shadow: var(--toc-shadow);
-    backdrop-filter: blur(16px);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .top-submenu button {
@@ -1231,24 +1232,26 @@
 
   @media (max-width: 799px) {
     .top-navigation::before {
-      top: -4.15rem;
-      bottom: -4px;
+      top: -3.68rem;
+      bottom: -0.25rem;
     }
 
+    /* 移动端首行操作按钮与分类栏均按 0.8 缩放，并保留原有垂直间隙；
+       桌面端保持上面的原布局。 */
     .top-navigation {
       /* 第一行留给网络模式及主题/后台/退出按钮，导航独占第二行。 */
-      top: 4.15rem;
+      top: 3.68rem;
       width: calc(100% - 16px);
-      height: 48px;
+      height: 2.4rem;
       grid-template-columns: minmax(0, 1fr);
-      padding: 4px;
+      padding: 0.15rem;
     }
 
     .top-track {
       width: 100%;
       justify-self: stretch;
       box-sizing: border-box;
-      gap: 4px;
+      gap: 0.2rem;
       cursor: auto;
       scroll-snap-type: x proximity;
       -webkit-overflow-scrolling: touch;
@@ -1257,10 +1260,35 @@
       overflow-y: hidden;
     }
 
+    .top-item-group {
+      min-height: 1.88rem;
+      border-radius: 0.6rem;
+    }
+
     .top-item {
-      min-height: 38px;
-      padding: 0 11px;
+      min-height: 1.88rem;
+      padding: 0 0.55rem;
+      border-radius: 0.6rem;
+      font-size: 0.7rem;
       scroll-snap-align: center;
+    }
+
+    .top-item small {
+      font-size: 0.55rem;
+    }
+
+    .top-item :global(.top-category-icon),
+    .top-submenu-title :global(.top-submenu-icon) {
+      width: 1.1rem;
+      height: 1.1rem;
+      min-width: 1.1rem;
+      border-radius: 0.375rem;
+    }
+
+    .top-submenu-toggle {
+      width: 1.5rem;
+      min-height: 1.6rem;
+      border-radius: 0 0.375rem 0.375rem 0;
     }
 
     .scroll-arrow {

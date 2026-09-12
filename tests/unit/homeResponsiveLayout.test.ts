@@ -10,6 +10,33 @@ describe('home responsive layout', () => {
     expect(mobileStyles).toContain('padding: 1rem 1rem var(--content-margin-bottom, 0%);')
     expect(mobileStyles).not.toContain('var(--content-margin-x')
   })
+  it('compacts the mobile top action row and category bar without changing desktop layout', () => {
+    const actions = readFileSync('src/components/HomeFloatingActions.svelte', 'utf8').replace(/\r\n/g, '\n')
+    const sidebar = readFileSync('src/components/Sidebar.svelte', 'utf8').replace(/\r\n/g, '\n')
+    const home = readFileSync('src/views/Home.svelte', 'utf8').replace(/\r\n/g, '\n')
+    const mobileActions = actions.slice(actions.indexOf('@media (max-width: 799px)'))
+    const mobileSidebar = sidebar.slice(sidebar.indexOf('@media (max-width: 799px)'))
+    const mobileHome = home.slice(home.indexOf('@media (max-width: 799px)'))
+
+    expect(mobileActions).toContain('top: .65rem;')
+    expect(mobileActions).toContain('.network-switch .icon-button {\n      width: 1.88rem;')
+    expect(mobileActions).toContain('.floating-actions .icon-button {\n      width: 1.76rem;')
+    expect(mobileSidebar).toContain('top: 3.68rem;')
+    expect(mobileSidebar).toContain('height: 2.4rem;')
+    expect(mobileSidebar).toContain('font-size: 0.7rem;')
+    expect(mobileHome).toContain('padding-top: 6.96rem;')
+
+    const submenuStart = sidebar.indexOf('  .top-submenu {')
+    const submenuEnd = sidebar.indexOf('  .top-submenu button {', submenuStart)
+    const submenu = sidebar.slice(submenuStart, submenuEnd)
+    expect(submenu).toContain('background: rgb(var(--card-bg-rgb, 255 255 255) / 1);')
+    expect(submenu).toContain('backdrop-filter: none;')
+
+    // 桌面端仍使用原有尺寸，避免移动端压缩规则反向影响宽屏。
+    expect(sidebar.slice(0, sidebar.indexOf('@media (max-width: 799px)'))).toContain('height: 52px;')
+    expect(actions.slice(0, actions.indexOf('@media (max-width: 799px)'))).toContain('width: 2.5rem;')
+  })
+
   it('paints mobile overscroll with the active homepage background', () => {
     const app = readFileSync('src/App.svelte', 'utf8')
     const globalStyles = readFileSync('src/app.css', 'utf8')

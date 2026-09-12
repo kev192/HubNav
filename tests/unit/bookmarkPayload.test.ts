@@ -29,6 +29,7 @@ describe('bookmark upsert payload parsing', () => {
         category_id: 1,
         title: 'GitHub',
         url: 'https://github.com',
+        internal_url: null,
         icon: 'mdi:github',
         icon_source: 'iconify',
         icon_background_color: '#fff',
@@ -47,6 +48,7 @@ describe('bookmark upsert payload parsing', () => {
         category_id: 2,
         title: 'A',
         url: 'https://a.com',
+        internal_url: null,
         icon: null,
         icon_source: null,
         icon_background_color: null,
@@ -121,5 +123,18 @@ describe('bookmark route wiring', () => {
     expect(calls).toHaveLength(2)
     expect(source).not.toContain("!['always', 'hover', 'hidden'].includes")
     expect(source).not.toContain('function isNonEmptyString')
+  })
+
+  it('binds internal_url when inserting a new bookmark', async () => {
+    // INSERT 列表包含 internal_url 后，绑定参数也必须同步包含它。
+    // 漏传会让 D1 参数数量不匹配，新增书签全部报 failed to create bookmark。
+    const { readFileSync } = await import('node:fs')
+    const source = readFileSync('worker/lib/db/bookmarks.ts', 'utf8')
+    const start = source.indexOf('export async function createBookmark')
+    const end = source.indexOf('export async function updateBookmark', start)
+    const createBookmark = source.slice(start, end)
+
+    expect(createBookmark).toContain('internal_url,')
+    expect(createBookmark).toContain('req.internal_url ?? null,')
   })
 })

@@ -850,8 +850,8 @@ import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCa
     }
 
     .home-shell.top-navigation-layout {
-      /* 第一行是操作按钮，第二行是导航栏（top: 4.15rem）。 */
-      padding-top: 8.25rem;
+      /* 缩放后的移动端顶部操作行 + 分类栏，标题间距保持原来的 0.8。 */
+      padding-top: 6.96rem;
     }
 
     .scope-section-list {

@@ -352,8 +352,9 @@
     }
 
     .network-switch .icon-button {
-      width: 2.35rem;
-      height: 2.35rem;
+      width: 1.88rem;
+      height: 1.88rem;
+      font-size: .96rem;
     }
 
     .network-status-dot,
@@ -372,10 +373,11 @@
       top: .65rem;
     }
 
-    .icon-button {
-      width: 2.2rem;
-      height: 2.2rem;
-      font-size: 1rem;
+    /* 只缩放顶部操作行；回到顶部按钮保持原尺寸。 */
+    .floating-actions .icon-button {
+      width: 1.76rem;
+      height: 1.76rem;
+      font-size: .8rem;
     }
 
     .back-to-top-button {
