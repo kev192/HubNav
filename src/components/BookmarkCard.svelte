@@ -60,6 +60,10 @@
   let contextMenuOpen = false
   let contextMenuX = 0
   let contextMenuY = 0
+  const CONTEXT_MENU_WIDTH = 176
+  const CONTEXT_MENU_HEIGHT = 148
+  const CONTEXT_MENU_GAP = 10
+  const CONTEXT_MENU_MARGIN = 8
   let modalOpen = false
   let iconStateKey = ''
   let windowListenersAttached = false
@@ -186,8 +190,22 @@
     event.preventDefault()
     event.stopPropagation()
     notifyContextMenuOpen()
-    contextMenuX = Math.min(event.clientX + 12, window.innerWidth - 190)
-    contextMenuY = Math.min(event.clientY + 12, window.innerHeight - 150)
+    // Keep the menu in the pointer's lower-right quadrant, while preventing
+    // it from being rendered outside the viewport near the right/bottom edge.
+    contextMenuX = Math.max(
+      CONTEXT_MENU_MARGIN,
+      Math.min(
+        event.clientX + CONTEXT_MENU_GAP,
+        window.innerWidth - CONTEXT_MENU_WIDTH - CONTEXT_MENU_MARGIN,
+      ),
+    )
+    contextMenuY = Math.max(
+      CONTEXT_MENU_MARGIN,
+      Math.min(
+        event.clientY + CONTEXT_MENU_GAP,
+        window.innerHeight - CONTEXT_MENU_HEIGHT - CONTEXT_MENU_MARGIN,
+      ),
+    )
     contextMenuOpen = true
   }
 
@@ -213,9 +231,10 @@
   }
 
   function openBookmarkUrl(url: string) {
-    if (!url) return
-    if (openInNewTab) window.open(url, '_blank', 'noopener,noreferrer')
-    else window.location.href = url
+    const targetUrl = url.trim()
+    if (!targetUrl) return
+    if (openInNewTab) window.open(targetUrl, '_blank', 'noopener,noreferrer')
+    else window.location.href = targetUrl
   }
   function handleLinkClick(event: MouseEvent) {
     if (preview) {
@@ -232,15 +251,31 @@
       return
     }
 
-    // Register click both locally and on server. For normal links we leave the
-    // browser's native navigation intact; the anchor already contains the
-    // network-aware URL, so new-tab/current-tab behavior remains reliable.
+    // Resolve at click time instead of relying only on the anchor's last
+    // rendered href. This covers a mode change immediately before the click,
+    // including the auto probe finishing between renders.
+    const targetUrl = resolveBookmarkUrl(bookmark)
+    if (!targetUrl) {
+      event.preventDefault()
+      return
+    }
+
     publicStore.incrementClick(bookmark.id)
     void api.public.registerClick(bookmark.id)
 
-    if (!shouldOpenBookmarkModal({ sortMode, openMethod: bookmark.open_method })) return
-    event.preventDefault()
-    modalOpen = true
+    if (shouldOpenBookmarkModal({ sortMode, openMethod: bookmark.open_method })) {
+      event.preventDefault()
+      modalOpen = true
+      return
+    }
+
+    // Preserve the browser's native modifier-click behaviour (Ctrl/Cmd-click,
+    // middle-click and Shift-click). A normal click is routed explicitly so it
+    // always uses the current network mode.
+    if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      event.preventDefault()
+      openBookmarkUrl(targetUrl)
+    }
   }
 
   function closeModal() {
@@ -365,7 +400,7 @@
   {/if}
 
   {#if contextMenuOpen}
-    <BookmarkContextMenu menuX={contextMenuX} menuY={contextMenuY} onEdit={canEdit ? handleEditClick : undefined} hasInternal={Boolean(bookmark.internal_url)} onOpenExternal={() => openBookmarkUrl(bookmark.url)} onOpenInternal={() => openBookmarkUrl(bookmark.internal_url ?? bookmark.url)} />
+    <BookmarkContextMenu menuX={contextMenuX} menuY={contextMenuY} onEdit={canEdit ? handleEditClick : undefined} hasInternal={Boolean(bookmark.internal_url?.trim())} onOpenExternal={() => openBookmarkUrl(bookmark.url)} onOpenInternal={() => openBookmarkUrl(bookmark.internal_url ?? '')} />
   {/if}
 
   {#if modalOpen}

@@ -13,7 +13,7 @@
   }
 </script>
 
-<div class="bookmark-context-menu" style={`left:${menuX}px; top:${menuY}px;`}>
+<div class="bookmark-context-menu" role="menu" tabindex="-1" style={`left:${menuX}px; top:${menuY}px;`} on:click|stopPropagation on:contextmenu|stopPropagation on:keydown|stopPropagation>
   <button type="button" disabled={!hasInternal} on:click={() => void onOpenInternal?.()}>打开内网地址</button>
   <button type="button" on:click={() => void onOpenExternal?.()}>打开外网地址</button>
   {#if onEdit}<button type="button" data-testid="bookmark-context-edit" on:click={handleEditClick}>编辑</button>{/if}

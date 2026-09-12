@@ -491,11 +491,16 @@
   }
 
   @media (max-width: 720px) {
+    /* Keep the heading and the add/sort controls in separate rows. On narrow
+       screens the old two-column header squeezed the text into the button. */
     .section-header {
-      gap: 0.5rem 0.65rem;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      gap: 0.55rem;
     }
 
     .section-title-wrap {
+      width: 100%;
       gap: 0.56rem;
     }
 
@@ -512,20 +517,32 @@
       font-size: 0.64rem;
     }
 
+    .section-actions {
+      width: 100%;
+      gap: 0.35rem;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    /* Inline actions belong below the scope heading on phones. Keeping them
+       absolutely positioned made the “新增书签” button float over the title
+       and tabs in the upper-left area. */
+    .section-header.no-heading.inline-actions {
+      position: static;
+      width: 100%;
+      margin-bottom: 0.15rem;
+    }
+
     .add-link-button {
-      width: 1.9rem;
-      height: 1.9rem;
+      width: auto;
       min-height: 1.9rem;
-      padding: 0;
+      padding: 0.28rem 0.58rem;
       border-radius: 0.58rem;
+      font-size: 0.78rem;
     }
 
     .section-actions .action-label {
-      display: none;
-    }
-
-    .section-actions {
-      gap: 0.28rem;
+      display: inline;
     }
   }
 </style>
