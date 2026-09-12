@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ImportSource } from '../lib/importData'
   import type { BackupSelection } from '../lib/appBackup'
+  import CloudBackupPanel from './CloudBackupPanel.svelte'
 
   type AsyncVoid<T = void> = T | Promise<T>
   type CategoryOption = { id: number | string; parent_id: number | string | null; title: string; sort?: number }
@@ -242,6 +243,8 @@
       </div>
     </section>
   </div>
+
+  <CloudBackupPanel />
 </section>
 
 <style>

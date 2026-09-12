@@ -9,6 +9,11 @@ import {
   type BookmarkUpsertReq,
   type Category,
   type CategorySortReq,
+  type CloudBackupRecord,
+  type CloudBackupRestoreResp,
+  type CloudBackupRunResp,
+  type CloudBackupTask,
+  type CloudBackupTaskUpsertReq,
   type CategoryUpsertReq,
   type ChangePasswordReq,
   type DataVersionResp,
@@ -352,6 +357,42 @@ export const publicApi = {
 
 export const adminApi = {
   getData: () => request<AdminData>('/admin/data', { auth: true, cache: 'no-store', headers: NO_CACHE_HEADERS }),
+}
+export const cloudBackupApi = {
+  listTasks: () => request<CloudBackupTask[]>('/cloud-backup/tasks', { auth: true, cache: 'no-store', headers: NO_CACHE_HEADERS }),
+  createTask: (payload: CloudBackupTaskUpsertReq) => jsonRequest<CloudBackupTask>('/cloud-backup/tasks', 'POST', payload, true),
+  updateTask: (id: number, payload: CloudBackupTaskUpsertReq) =>
+    jsonRequest<CloudBackupTask>(`/cloud-backup/tasks/${id}`, 'PUT', payload, true),
+  deleteTask: (id: number) => request<null>(`/cloud-backup/tasks/${id}`, { method: 'DELETE', auth: true }),
+  runTask: (id: number) => request<CloudBackupRunResp>(`/cloud-backup/tasks/${id}/run`, { method: 'POST', auth: true }),
+  listRecords: (taskId: number) =>
+    request<CloudBackupRecord[]>(`/cloud-backup/tasks/${taskId}/records`, { auth: true, cache: 'no-store', headers: NO_CACHE_HEADERS }),
+  restoreRecord: (id: number) =>
+    jsonRequest<CloudBackupRestoreResp>(`/cloud-backup/records/${id}/restore`, 'POST', undefined, true),
+  deleteRecord: (id: number) => request<null>(`/cloud-backup/records/${id}`, { method: 'DELETE', auth: true }),
+  async downloadRecord(id: number, fileName: string): Promise<void> {
+    const headers = new Headers({ accept: 'application/json' })
+    const token = getAuthToken()
+    if (token) headers.set('Authorization', `Bearer ${token}`)
+    const response = await fetch(buildUrl(`/cloud-backup/records/${id}/download`), { headers, cache: 'no-store' })
+    const hasAttachment = response.headers.get('content-disposition')?.startsWith('attachment')
+    if (!response.ok || !hasAttachment) {
+      const payload = await parseResponseBody(response) as ApiResponse<null> | null
+      throw new ApiError(payload?.msg ?? response.statusText ?? '下载云端备份失败', {
+        status: response.status,
+        code: payload?.code ?? ErrCode.SERVER_ERROR,
+      })
+    }
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  },
 }
 
 export const authApi = {

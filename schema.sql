@@ -85,3 +85,43 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('content_layout', '{"max_width":1200,"max_width_unit":"px","margin_x":0,"margin_top":0,"margin_bottom":0}'),
   ('navigation', '{"position":"left","always_expanded":false,"top_layout":"scroll"}'),
   ('footer_html', '""');
+
+-- 云端备份任务（S3 兼容存储；secret 保存在任务配置中，只通过后端使用）
+CREATE TABLE IF NOT EXISTS cloud_backup_tasks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  interval_hours INTEGER NOT NULL DEFAULT 24,
+  start_time TEXT NOT NULL DEFAULT '00:00',
+  timezone TEXT NOT NULL DEFAULT 'Asia/Shanghai',
+  retention_count INTEGER NOT NULL DEFAULT 7,
+  endpoint_url TEXT NOT NULL,
+  addressing_style TEXT NOT NULL DEFAULT 'path',
+  bucket TEXT NOT NULL,
+  region TEXT NOT NULL DEFAULT 'auto',
+  access_key_id TEXT NOT NULL,
+  secret_access_key TEXT NOT NULL,
+  prefix TEXT NOT NULL DEFAULT '',
+  last_run_at INTEGER,
+  next_run_at INTEGER,
+  last_run_status TEXT,
+  last_error TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_cloud_backup_tasks_next_run ON cloud_backup_tasks(enabled, next_run_at);
+
+CREATE TABLE IF NOT EXISTS cloud_backup_records (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  task_id INTEGER NOT NULL,
+  file_name TEXT NOT NULL,
+  object_key TEXT NOT NULL,
+  backup_time INTEGER NOT NULL,
+  file_size INTEGER NOT NULL,
+  content_type TEXT NOT NULL DEFAULT 'application/json',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (task_id) REFERENCES cloud_backup_tasks(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_cloud_backup_records_task_time ON cloud_backup_records(task_id, backup_time DESC);

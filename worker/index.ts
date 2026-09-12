@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { ErrCode } from '../shared/types'
 import { withAssetCacheHeaders } from './lib/assetHeaders'
 import { corsHeaders, corsPreflight } from './lib/cors'
+import { runDueCloudBackupTasks } from './lib/cloudBackup'
 import { fail, ok } from './lib/response'
 import { authRequired } from './middleware/auth'
 import adminRoutes from './routes/admin'
@@ -9,6 +10,7 @@ import authRoutes from './routes/auth'
 import bookmarksRoutes from './routes/bookmarks'
 import browserSyncRoutes from './routes/browserSync'
 import categoriesRoutes from './routes/categories'
+import cloudBackupRoutes from './routes/cloudBackup'
 import dataRoutes from './routes/data'
 import errorReportRoutes from './routes/errorReport'
 import faviconRoutes from './routes/favicon'
@@ -16,7 +18,7 @@ import installRoutes from './routes/install'
 import { iconRoutes } from './routes/icon'
 import publicRoutes from './routes/public'
 import settingsRoutes from './routes/settings'
-import type { HonoEnv } from './types'
+import type { Env, HonoEnv } from './types'
 
 const app = new Hono<HonoEnv>()
 
@@ -61,6 +63,10 @@ app.route('/api', faviconRoutes)
 app.use('/api/iconify-search', authRequired)
 app.route('/api', iconRoutes)
 
+app.use('/api/cloud-backup', authRequired)
+app.use('/api/cloud-backup/*', authRequired)
+app.route('/api', cloudBackupRoutes)
+
 app.use('/api/settings', authRequired)
 app.use('/api/settings/*', authRequired)
 app.route('/api/settings', settingsRoutes)
@@ -88,3 +94,9 @@ app.all('*', async (c) => {
 })
 
 export default app
+
+// 云端备份任务使用分钟级 Cron 轮询，再由 D1 中的 next_run_at 决定真正执行时间。
+// 这样每个任务都能拥有独立间隔、开始时间与时区，而不需要重新部署 Worker。
+export const scheduled: ExportedHandlerScheduledHandler<Env> = async (_event, env) => {
+  await runDueCloudBackupTasks(env.DB)
+}

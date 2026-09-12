@@ -424,3 +424,67 @@ export interface BatchDeleteCategoriesResp {
 
 // PUT /api/settings  —— 部分更新，传哪些 key 改哪些
 export type SettingsUpdateReq = Partial<Settings>
+
+// ========== 云端备份（S3 兼容存储） ==========
+
+export type S3AddressingStyle = 'path' | 'virtual-hosted'
+
+export interface CloudBackupTask {
+  id: number
+  name: string
+  enabled: boolean
+  interval_hours: number
+  start_time: string
+  timezone: string
+  retention_count: number
+  endpoint_url: string
+  addressing_style: S3AddressingStyle
+  bucket: string
+  region: string
+  access_key_id: string
+  prefix: string
+  secret_configured: boolean
+  last_run_at: number | null
+  next_run_at: number | null
+  last_run_status: 'running' | 'success' | 'failed' | null
+  last_error: string | null
+  created_at: number
+  updated_at: number
+}
+
+export interface CloudBackupTaskUpsertReq {
+  name: string
+  enabled: boolean
+  interval_hours: number
+  start_time: string
+  timezone: string
+  retention_count: number
+  endpoint_url: string
+  addressing_style: S3AddressingStyle
+  bucket: string
+  region: string
+  access_key_id: string
+  secret_access_key?: string
+  prefix?: string
+}
+
+export interface CloudBackupRecord {
+  id: number
+  task_id: number
+  file_name: string
+  object_key: string
+  backup_time: number
+  file_size: number
+  content_type: string
+  created_at: number
+}
+
+export interface CloudBackupRunResp {
+  task: CloudBackupTask
+  record: CloudBackupRecord
+}
+
+export interface CloudBackupRestoreResp {
+  categories: number
+  bookmarks: number
+}
