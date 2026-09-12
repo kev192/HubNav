@@ -25,6 +25,7 @@
   import { observeIconVisibility } from '../lib/iconVisibility'
   import {
     NETWORK_MODE_CHANGE_EVENT,
+    ensureEffectiveNetworkMode,
     resolveBookmarkUrl,
   } from '../lib/networkMode'
   import {
@@ -244,7 +245,7 @@
     recordBookmarkClick()
     openBookmarkUrl(internalUrl)
   }
-  function handleLinkClick(event: MouseEvent) {
+  async function handleLinkClick(event: MouseEvent) {
     if (preview) {
       event.preventDefault()
       return
@@ -260,9 +261,10 @@
     }
 
     // Resolve at click time instead of relying only on the anchor's last
-    // rendered href. This covers a mode change immediately before the click,
-    // including the auto probe finishing between renders.
-    const targetUrl = resolveBookmarkUrl(bookmark)
+    // rendered href. In auto mode this also waits for an in-flight fast probe,
+    // so the first click after switching modes never uses a stale URL.
+    const effectiveMode = await ensureEffectiveNetworkMode()
+    const targetUrl = resolveBookmarkUrl(bookmark, effectiveMode)
     if (!targetUrl) {
       event.preventDefault()
       return

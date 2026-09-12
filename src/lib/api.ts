@@ -355,7 +355,13 @@ export const adminApi = {
 }
 
 export const authApi = {
-  login: (payload: LoginReq) => jsonRequest<LoginResp>('/login', 'POST', payload),
+  login: (payload: LoginReq) => request<LoginResp>('/login', {
+    method: 'POST',
+    headers: { ...JSON_HEADERS, ...NO_CACHE_HEADERS },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+    credentials: 'same-origin',
+  }),
   changePassword: (payload: ChangePasswordReq) => jsonRequest<null>('/password', 'POST', payload, true),
   logout: () => jsonRequest<null>('/logout', 'POST', undefined, true),
 }

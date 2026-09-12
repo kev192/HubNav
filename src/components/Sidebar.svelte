@@ -1240,15 +1240,15 @@
 
   @media (max-width: 799px) {
     .top-navigation::before {
-      top: -3.68rem;
+      top: -0.65rem;
       bottom: -0.25rem;
     }
 
     /* 移动端首行操作按钮与分类栏均按 0.8 缩放，并保留原有垂直间隙；
        桌面端保持上面的原布局。 */
     .top-navigation {
-      /* 第一行留给网络模式及主题/后台/退出按钮，导航独占第二行。 */
-      top: 3.68rem;
+      /* 移动端导航在上、操作按钮在下；桌面端保持原布局。 */
+      top: .65rem;
       width: calc(100% - 16px);
       height: 2.56rem;
       grid-template-columns: minmax(0, 1fr);

@@ -18,13 +18,14 @@ describe('home responsive layout', () => {
     const mobileSidebar = sidebar.slice(sidebar.indexOf('@media (max-width: 799px)'))
     const mobileHome = home.slice(home.indexOf('@media (max-width: 799px)'))
 
-    expect(mobileActions).toContain('top: .65rem;')
-    expect(mobileActions).toContain('.network-switch .icon-button {\n      width: 1.88rem;')
+    // 移动端导航在上，操作按钮在下；两者仍与原首行保持同样的 0.8 缩放。
+    expect(mobileActions).toContain('top: 3.68rem;')
+    expect(mobileActions).toContain('.network-switch .icon-button {\n      width: 1.76rem;')
     expect(mobileActions).toContain('.floating-actions .icon-button {\n      width: 1.76rem;')
-    expect(mobileSidebar).toContain('top: 3.68rem;')
+    expect(mobileSidebar).toContain('top: .65rem;')
     expect(mobileSidebar).toContain('height: 2.56rem;')
     expect(mobileSidebar).toContain('font-size: 0.96rem;')
-    expect(mobileHome).toContain('padding-top: 6.96rem;')
+    expect(mobileHome).toContain('padding-top: 6.16rem;')
 
     // 移动端顶部分类标题与二级分类标题保持同一字号，同时稍微增加点击区域。
     expect(mobileSidebar).toContain('min-height: 2.04rem;')

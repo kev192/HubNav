@@ -10,6 +10,7 @@ import {
 } from '../middleware/auth'
 import { clearLoginFailures, getClientIp, loginRateLimit, recordLoginFailure } from '../middleware/rateLimit'
 import { ensureAdminBootstrap, type AdminCredentials } from '../lib/bootstrap'
+import { verifyLoginCredentials } from '../lib/authValidation'
 import { hashPassword, verifyPassword } from '../lib/crypto'
 import { setSettingValue } from '../lib/db'
 import { fail, ok } from '../lib/response'
@@ -30,6 +31,10 @@ export function isValidNewPassword(value: unknown): value is string {
 export const authRoutes = new Hono<HonoEnv>()
 
 authRoutes.post('/login', loginRateLimit, async (c) => {
+  // Every login outcome (including bootstrap/JSON errors) is dynamic and must
+  // never be replayed by a browser or intermediary cache.
+  c.header('Cache-Control', 'no-store')
+
   let credentials: AdminCredentials
   try {
     credentials = await ensureAdminBootstrap(c.env)
@@ -51,8 +56,8 @@ authRoutes.post('/login', loginRateLimit, async (c) => {
   }
 
   const ip = getClientIp(c)
-  const passwordOk = username === credentials.username && (await verifyPassword(password, credentials.passwordHash))
-  if (!passwordOk) {
+  const credentialOk = await verifyLoginCredentials(body, credentials)
+  if (!credentialOk) {
     await recordLoginFailure(c.env, ip, c.get('loginRateLimitState'))
     return c.json(fail(ErrCode.UNAUTHORIZED, 'invalid credentials'))
   }

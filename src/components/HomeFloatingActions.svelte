@@ -2,7 +2,9 @@
   import { onMount } from 'svelte'
   import type { ThemeMode } from '../../shared/types'
   import {
+    getCachedNetworkProbeMode,
     getNetworkMode,
+    probeNetworkMode,
     setNetworkMode,
     setResolvedNetworkMode,
     type NetworkMode,
@@ -33,35 +35,18 @@
   $: currentThemeLabel = themeMode === 'auto' ? `跟随系统（当前${activeTheme === 'dark' ? '暗色' : '浅色'}）` : activeTheme === 'dark' ? '暗色模式' : '浅色模式'
   $: themeToggleLabel = `当前${currentThemeLabel}，点击切换到${nextThemeLabel}`
 
-  async function probeNetworkMode(sequence: number, probe = networkProbeUrl): Promise<void> {
+  async function refreshNetworkProbe(sequence: number): Promise<void> {
     probing = true
     try {
-      if (!probe) throw new Error('no probe')
-      const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), 4000)
-      try {
-        await fetch(probe, {
-          method: 'HEAD',
-          mode: 'no-cors',
-          cache: 'no-store',
-          signal: controller.signal,
-        })
-        if (sequence !== networkProbeSequence) return
-        networkOnline = true
-        setResolvedNetworkMode('internal')
-      } finally {
-        clearTimeout(timer)
-      }
-    } catch {
+      const mode = await probeNetworkMode({ url: networkProbeUrl, force: true })
       if (sequence !== networkProbeSequence) return
-      networkOnline = false
-      setResolvedNetworkMode('external')
+      networkOnline = mode === 'internal'
     } finally {
       if (sequence === networkProbeSequence) probing = false
     }
   }
 
-  async function toggleNetworkMode() {
+  function toggleNetworkMode() {
     const order: readonly NetworkMode[] = ['external', 'internal', 'auto']
     const nextMode = order[(order.indexOf(networkMode) + 1) % order.length]
     const sequence = ++networkProbeSequence
@@ -70,9 +55,14 @@
     setNetworkMode(nextMode)
 
     if (nextMode === 'auto') {
-      // Keep the last auto result while probing instead of silently routing a
-      // click to the external URL during the detection window.
-      await probeNetworkMode(sequence)
+      // Apply any fresh background result immediately. The forced revalidation
+      // continues in parallel instead of delaying the mode switch.
+      const cached = getCachedNetworkProbeMode(networkProbeUrl)
+      if (cached) {
+        networkOnline = cached === 'internal'
+        setResolvedNetworkMode(cached)
+      }
+      void refreshNetworkProbe(sequence)
       return
     }
 
@@ -109,9 +99,10 @@
   // Public settings load asynchronously. Once the probe URL becomes available,
   // resolve a server-configured auto mode instead of permanently falling back
   // to the external URL.
-  $: if (networkProbeUrl && networkMode === 'auto' && networkProbeUrl !== lastAutoProbeUrl) {
+  // Keep a fresh result ready before the administrator switches to auto.
+  $: if (networkProbeUrl && networkProbeUrl !== lastAutoProbeUrl) {
     lastAutoProbeUrl = networkProbeUrl
-    void probeNetworkMode(++networkProbeSequence)
+    void refreshNetworkProbe(++networkProbeSequence)
   }
 
   onMount(() => {
@@ -128,7 +119,7 @@
 </script>
 
 {#if isAuthenticated}
-  <div class="network-switch">
+  <div class="network-switch" class:below-top-navigation={topNavigation}>
     <button type="button" class="icon-button network-mode-button" on:click={toggleNetworkMode} title={`网络模式：${networkLabel}`} aria-label={`网络模式：${networkLabel}`}>
       <span class="network-icon" aria-hidden="true">
         {#if networkMode === 'external'}
@@ -181,8 +172,8 @@
       aria-label="管理后台"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
         <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1h-2.6v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.4v-2.6h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.1H15v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1Z" />
       </svg>
     </button>
     <button
@@ -210,8 +201,8 @@
       aria-label="管理员登录"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
         <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1h-2.6v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.4v-2.6h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.1H15v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1Z" />
       </svg>
     </button>
   {/if}
@@ -237,7 +228,7 @@
   .network-switch .icon-button { font-size: 1.2rem; }
   .network-mode-button { border-radius: 999px; background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(14,165,233,.12)); box-shadow: 0 4px 14px rgba(37,99,235,.16); }
   .network-icon { display: inline-flex; align-items: center; justify-content: center; }
-  .network-icon svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .network-icon svg { width: 1.15em; height: 1.15em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .network-status-dot { width: .48rem; height: .48rem; border-radius: 50%; background: #22c55e; margin-left: .05rem; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
   .network-status-dot.online { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
 
@@ -252,6 +243,7 @@
 
   /* 顶部导航模式：与固定导航栏（top:12px、高 52px）首行垂直居中对齐。
      悬浮在导航栏之上（z-index 70 > 导航栏 60），宽视口右缘重叠时不被遮挡（OQ-C2）。 */
+  .network-switch.below-top-navigation,
   .floating-actions.below-top-navigation {
     top: 1.125rem;
   }
@@ -347,14 +339,14 @@
     .network-switch {
       left: max(.75rem, env(safe-area-inset-left));
       right: auto;
-      top: .65rem;
+      top: 3.68rem;
       gap: 0;
     }
 
     .network-switch .icon-button {
-      width: 1.88rem;
-      height: 1.88rem;
-      font-size: .96rem;
+      width: 1.76rem;
+      height: 1.76rem;
+      font-size: .8rem;
     }
 
     .network-status-dot,
@@ -364,13 +356,13 @@
     }
 
     .floating-actions {
-      top: .65rem;
+      top: 3.68rem;
       right: max(.75rem, env(safe-area-inset-right));
       gap: .35rem;
     }
 
     .floating-actions.below-top-navigation {
-      top: .65rem;
+      top: 3.68rem;
     }
 
     /* 只缩放顶部操作行；回到顶部按钮保持原尺寸。 */

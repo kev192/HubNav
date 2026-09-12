@@ -8,8 +8,19 @@ type BookmarkUrlFields = {
   internal_url?: string | null
 }
 
+type NetworkProbeState = {
+  url: string
+  mode: EffectiveNetworkMode
+  probedAt: number
+}
+
 const NETWORK_MODES: readonly NetworkMode[] = ['external', 'internal', 'auto']
 const EFFECTIVE_NETWORK_MODES: readonly EffectiveNetworkMode[] = ['external', 'internal']
+const NETWORK_PROBE_TIMEOUT_MS = 700
+const NETWORK_PROBE_FRESH_MS = 10_000
+
+let networkProbeState: NetworkProbeState | null = null
+let pendingNetworkProbe: { url: string; promise: Promise<EffectiveNetworkMode> } | null = null
 
 function isNetworkMode(value: string | null): value is NetworkMode {
   return Boolean(value && NETWORK_MODES.includes(value as NetworkMode))
@@ -96,4 +107,92 @@ export function setResolvedNetworkMode(mode: EffectiveNetworkMode): void {
     document.documentElement.dataset.networkResolvedMode = mode
   }
   notifyNetworkModeChanged()
+}
+
+function readProbeUrl(fallbackUrl?: string): string {
+  const explicitUrl = fallbackUrl?.trim()
+  if (explicitUrl) return explicitUrl
+  if (typeof document === 'undefined') return ''
+  return document.documentElement.dataset.networkProbeUrl?.trim() ?? ''
+}
+
+export function getCachedNetworkProbeMode(
+  url?: string,
+  maxAgeMs = NETWORK_PROBE_FRESH_MS,
+): EffectiveNetworkMode | null {
+  const probeUrl = readProbeUrl(url)
+  if (!networkProbeState || networkProbeState.url !== probeUrl) return null
+  if (Date.now() - networkProbeState.probedAt > maxAgeMs) return null
+  return networkProbeState.mode
+}
+
+async function fetchNetworkProbe(url: string): Promise<EffectiveNetworkMode> {
+  if (typeof fetch === 'undefined') return 'external'
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), NETWORK_PROBE_TIMEOUT_MS)
+  try {
+    await fetch(url, {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+    return 'internal'
+  } catch {
+    // A local probe must fail fast. Waiting for the browser's full timeout
+    // makes the first bookmark click after switching to auto use a stale URL.
+    return 'external'
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+export async function probeNetworkMode(options: {
+  url?: string
+  force?: boolean
+} = {}): Promise<EffectiveNetworkMode> {
+  const url = readProbeUrl(options.url)
+  if (!url) {
+    setResolvedNetworkMode('external')
+    return 'external'
+  }
+
+  if (!options.force) {
+    const cached = getCachedNetworkProbeMode(url)
+    if (cached) return cached
+  }
+
+  if (pendingNetworkProbe?.url === url) return pendingNetworkProbe.promise
+
+  const promise = fetchNetworkProbe(url)
+    .then((mode) => {
+      networkProbeState = { url, mode, probedAt: Date.now() }
+      setResolvedNetworkMode(mode)
+      return mode
+    })
+    .finally(() => {
+      if (pendingNetworkProbe?.promise === promise) pendingNetworkProbe = null
+    })
+
+  pendingNetworkProbe = { url, promise }
+  return promise
+}
+
+/**
+ * A bookmark click in auto mode waits for an in-flight probe, but never for a
+ * slow browser timeout. This keeps the first click correct while still routing
+ * in well under a second for a reachable LAN address.
+ */
+export async function ensureEffectiveNetworkMode(url?: string): Promise<EffectiveNetworkMode> {
+  const mode = getNetworkMode()
+  if (mode !== 'auto') return mode
+
+  const probeUrl = readProbeUrl(url)
+  if (pendingNetworkProbe?.url === probeUrl) return pendingNetworkProbe.promise
+
+  const cached = getCachedNetworkProbeMode(probeUrl)
+  if (cached) return cached
+
+  return probeNetworkMode({ url: probeUrl, force: true })
 }
