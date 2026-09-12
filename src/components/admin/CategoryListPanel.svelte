@@ -176,7 +176,6 @@
   <section class="admin-list-panel admin-category-list-panel">
     <div class="admin-list-panel-header">
       <div>
-        <p class="admin-panel-eyebrow">分类</p>
         <div class="admin-title-row"><h2>分类列表</h2><label class="admin-bookmark-search-bar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg><input type="text" data-testid="admin-category-search" placeholder="搜索分类…" value={search} on:input={handleSearchInput} /></label></div>
       </div>
       <div class="admin-header-actions-row">

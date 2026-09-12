@@ -470,6 +470,7 @@
 
   .cloud-header h3 {
     margin-bottom: 6px;
+    font-size: 15px;
   }
 
   .cloud-desc {

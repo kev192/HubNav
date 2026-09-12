@@ -110,7 +110,6 @@
 <section class="settings-panel" aria-busy={loading || saving}>
   <div class="panel-header">
     <div class="panel-header-copy">
-      <p class="panel-eyebrow">设置</p>
       <h2>站点设置</h2>
     </div>
     <div class="header-actions">
@@ -317,21 +316,13 @@
     min-width: 0;
   }
 
-  .panel-eyebrow {
-    margin: 0 0 4px;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--sp-muted);
-  }
-
   h2,
   p {
     margin: 0;
   }
 
   h2 {
-    font-size: clamp(24px, 2.2vw, 32px);
+    font-size: 22px;
     line-height: 1.08;
     letter-spacing: -0.035em;
     color: var(--sp-heading);

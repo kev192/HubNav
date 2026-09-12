@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AdminData } from '../../shared/types'
 
-const { getAdminData, addToast } = vi.hoisted(() => ({
-  getAdminData: vi.fn(),
+const { getExportData, addToast } = vi.hoisted(() => ({
+  getExportData: vi.fn(),
   addToast: vi.fn(),
 }))
 
@@ -12,7 +12,7 @@ vi.mock('../../src/lib/api', async (importOriginal) => {
     ...actual,
     api: {
       ...actual.api,
-      admin: { ...actual.api.admin, getData: getAdminData },
+      admin: { ...actual.api.admin, getExportData },
     },
   }
 })
@@ -55,7 +55,7 @@ describe('fresh backup export', () => {
     vi.clearAllMocks()
     downloadedJson = ''
     anchor = { href: '', download: '', click: vi.fn(), remove: vi.fn() }
-    getAdminData.mockResolvedValue(remoteData)
+    getExportData.mockResolvedValue(remoteData)
 
     vi.stubGlobal('Blob', class {
       constructor(parts: unknown[]) {
@@ -78,7 +78,7 @@ describe('fresh backup export', () => {
 
   it('waits for the latest admin API data before downloading', async () => {
     let resolveRemote: ((data: AdminData) => void) | undefined
-    getAdminData.mockReturnValue(new Promise<AdminData>((resolve) => {
+    getExportData.mockReturnValue(new Promise<AdminData>((resolve) => {
       resolveRemote = resolve
     }))
 
@@ -90,7 +90,7 @@ describe('fresh backup export', () => {
 
     await Promise.resolve()
     expect(anchor.click).not.toHaveBeenCalled()
-    expect(getAdminData).toHaveBeenCalledOnce()
+    expect(getExportData).toHaveBeenCalledOnce()
 
     resolveRemote?.(remoteData)
     await exportPromise
@@ -104,7 +104,7 @@ describe('fresh backup export', () => {
   })
 
   it('surfaces a fresh-data request failure without downloading', async () => {
-    getAdminData.mockRejectedValue(new Error('fresh request failed'))
+    getExportData.mockRejectedValue(new Error('fresh request failed'))
 
     const state = createImportExportState()
     await exportDataToFile(state, { categoryIds: new Set([1]), includeSettings: true })

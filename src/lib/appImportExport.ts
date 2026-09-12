@@ -29,8 +29,8 @@ function notifyState(
 }
 
 /**
- * Fetches the latest admin data, builds the backup JSON artifact, triggers a
- * file download, and sets the success/error state + toast.
+ * Fetches the latest full backup data (including icon blobs), builds the JSON
+ * artifact, triggers a file download, and sets the success/error state + toast.
  */
 export async function exportDataToFile(
  state: ImportExportState,
@@ -45,7 +45,7 @@ export async function exportDataToFile(
  notifyState(state, onStateChange)
 
  try {
-  const adminData = await api.admin.getData()
+  const adminData = await api.admin.getExportData()
   const artifact = createBackupExportArtifact(adminData, Date.now(), selection)
   if (selection && artifact.payload.categories.length === 0 && artifact.payload.bookmarks.length === 0) {
    state.backupError = '请至少选择一个分类后再导出。'

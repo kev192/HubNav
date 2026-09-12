@@ -149,6 +149,12 @@ describe('normalizeImportBookmark', () => {
     expect(output.sort).toBe(0)
   })
 
+  it('preserves the homepage-wide all_sort value', () => {
+    expect(normalizeImportBookmark({ ...base, all_sort: 19 }, now).all_sort).toBe(19)
+    expect(normalizeImportBookmark({ ...base, all_sort: null }, now).all_sort).toBeNull()
+    expect(normalizeImportBookmark({ ...base }, now)).not.toHaveProperty('all_sort')
+  })
+
   it('falls back to now when created_at is falsy', () => {
     const output = normalizeImportBookmark({ ...base, created_at: 0 }, now)
     expect(output.created_at).toBe(now)

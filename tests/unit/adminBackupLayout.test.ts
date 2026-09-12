@@ -28,6 +28,28 @@ describe('admin backup layout', () => {
     expect(backup).not.toContain('<h2>导入 / 导出</h2>')
   })
 
+  it('exports the same full-fidelity data source as cloud backups', () => {
+    const route = readFileSync('worker/routes/admin.ts', 'utf8')
+    const api = readFileSync('src/lib/api.ts', 'utf8')
+    const exportFlow = readFileSync('src/lib/appImportExport.ts', 'utf8')
+
+    expect(route).toContain("adminRoutes.get('/export-data'")
+    expect(route).toContain('listCategories(c.env.DB)')
+    expect(route).toContain('listBookmarks(c.env.DB)')
+    expect(route).toContain('getSettings(c.env.DB)')
+    expect(api).toContain("getExportData: () => request<AdminData>('/admin/export-data'")
+    expect(exportFlow).toContain('await api.admin.getExportData()')
+    expect(exportFlow).not.toContain('await api.admin.getData()')
+  })
+
+  it('aligns the cloud backup heading with export and import headings', () => {
+    const backup = readFileSync('src/components/BackupPanel.svelte', 'utf8')
+    const cloud = readFileSync('src/components/CloudBackupPanel.svelte', 'utf8')
+
+    expect(backup.match(/\.backup-operation-copy h3\s*\{([^}]+)\}/)?.[1] ?? '').toContain('font-size: 15px')
+    expect(cloud.match(/\.cloud-header h3\s*\{([^}]+)\}/)?.[1] ?? '').toContain('font-size: 15px')
+  })
+
   it('refreshes admin data after a cloud backup restore', () => {
     const cloud = readFileSync('src/components/CloudBackupPanel.svelte', 'utf8')
     const backup = readFileSync('src/components/BackupPanel.svelte', 'utf8')

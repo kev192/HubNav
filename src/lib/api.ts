@@ -357,6 +357,7 @@ export const publicApi = {
 
 export const adminApi = {
   getData: () => request<AdminData>('/admin/data', { auth: true, cache: 'no-store', headers: NO_CACHE_HEADERS }),
+  getExportData: () => request<AdminData>('/admin/export-data', { auth: true, cache: 'no-store', headers: NO_CACHE_HEADERS }),
 }
 export const cloudBackupApi = {
   listTasks: () => request<CloudBackupTask[]>('/cloud-backup/tasks', { auth: true, cache: 'no-store', headers: NO_CACHE_HEADERS }),

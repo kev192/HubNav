@@ -11,6 +11,22 @@ describe('admin settings layout', () => {
     expect(settingsRule).not.toContain('margin: 0 auto')
   })
 
+  it('uses consistent admin panel headings without eyebrow labels', () => {
+    const settings = readFileSync('src/components/SettingsPanel.svelte', 'utf8')
+    const categories = readFileSync('src/components/admin/CategoryListPanel.svelte', 'utf8')
+    const bookmarks = readFileSync('src/components/admin/BookmarkListPanel.svelte', 'utf8')
+
+    expect(settings).toContain('<h2>站点设置</h2>')
+    expect(categories).toContain('<h2>分类列表</h2>')
+    expect(bookmarks).toContain('<h2>书签列表</h2>')
+    expect(settings).not.toContain('class="panel-eyebrow"')
+    expect(categories).not.toContain('class="admin-panel-eyebrow"')
+    expect(bookmarks).not.toContain('class="admin-panel-eyebrow"')
+
+    const settingsHeadingRule = settings.match(/h2\s*\{([^}]+)\}/)?.[1] ?? ''
+    expect(settingsHeadingRule).toContain('font-size: 22px')
+  })
+
   it('associates the public mode switch with its label', () => {
     const source = readFileSync('src/components/settings/BasicSettingsSection.svelte', 'utf8')
 
