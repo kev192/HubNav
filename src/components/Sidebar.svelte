@@ -430,6 +430,7 @@
 </script>
 
 {#if isTop}
+  <div class="mobile-top-mask" class:visible={topNavScrolled} aria-hidden="true"></div>
   <aside class="top-navigation" class:wrap={isWrap} class:scrolled={topNavScrolled} class:with-inline-actions={isAuthenticated} bind:this={navigationRoot} data-testid="top-navigation" aria-label="分类导航">
     <button
       type="button"
@@ -756,6 +757,12 @@
 
   .top-navigation.scrolled::before {
     display: block;
+  }
+
+  /* Mobile uses a sibling fixed layer. A fixed pseudo-element inside the
+     navigation is constrained by the navigation's backdrop-filter. */
+  .mobile-top-mask {
+    display: none;
   }
 
   .top-track {
@@ -1240,13 +1247,32 @@
   }
 
   @media (max-width: 799px) {
-    .top-navigation::before {
+    .top-navigation.scrolled::before {
+      display: none;
+    }
+
+    /* The mask is a viewport-wide sibling, not a child of the blurred nav.
+       Its top and height exactly match the mobile navigation row. */
+    .mobile-top-mask {
       position: fixed;
-      top: 0;
-      bottom: auto;
-      height: 3.46rem;
+      top: .65rem;
       left: 0;
       right: 0;
+      height: 2.56rem;
+      z-index: 58;
+      background:
+        linear-gradient(
+          color-mix(in srgb, var(--home-background-mask-color, #000000) calc(var(--home-background-mask, 0) * 100%), transparent),
+          color-mix(in srgb, var(--home-background-mask-color, #000000) calc(var(--home-background-mask, 0) * 100%), transparent)
+        ),
+        var(--home-background, rgb(var(--card-bg-rgb, 255 255 255) / 1));
+      background-attachment: fixed;
+      display: none;
+      pointer-events: none;
+    }
+
+    .mobile-top-mask.visible {
+      display: block;
     }
 
     /* 移动端顶部一行：左侧网络按钮、中间分类栏、右侧操作按钮。
