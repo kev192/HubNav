@@ -339,14 +339,14 @@
     .network-switch {
       left: max(.75rem, env(safe-area-inset-left));
       right: auto;
-      top: 3.68rem;
+      top: 1.18rem;
       gap: 0;
     }
 
     .network-switch .icon-button {
-      width: 1.76rem;
-      height: 1.76rem;
-      font-size: .8rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      font-size: .68rem;
     }
 
     .network-status-dot,
@@ -356,20 +356,20 @@
     }
 
     .floating-actions {
-      top: 3.68rem;
+      top: 1.18rem;
       right: max(.75rem, env(safe-area-inset-right));
-      gap: .35rem;
+      gap: .3rem;
     }
 
     .floating-actions.below-top-navigation {
-      top: 3.68rem;
+      top: 1.18rem;
     }
 
-    /* 只缩放顶部操作行；回到顶部按钮保持原尺寸。 */
+    /* 首行按钮缩小约 15%；回到顶部按钮保持原尺寸。 */
     .floating-actions .icon-button {
-      width: 1.76rem;
-      height: 1.76rem;
-      font-size: .8rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      font-size: .68rem;
     }
 
     .back-to-top-button {

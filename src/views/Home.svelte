@@ -415,6 +415,7 @@ import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCa
     onNavigate={handleNavigate}
     onPersistentExpansionChange={(expanded) => (persistentLeftExpanded = expanded)}
     onTopNavHeightChange={(height) => (topNavHeight = height)}
+    {isAuthenticated}
   />
 
   <div class="content-layout" bind:this={contentAnchor}>
@@ -850,8 +851,8 @@ import type { BookmarkReorganizeReq, NavigationSetting, PublicBookmark, PublicCa
     }
 
     .home-shell.top-navigation-layout {
-      /* 缩放后的移动端分类栏 + 操作行，标题间距保持原来的 0.8。 */
-      padding-top: 6.16rem;
+      /* 移动端分类栏与操作按钮共用首行，给标题保留原有呼吸空间。 */
+      padding-top: 4.1rem;
     }
 
     .scope-section-list {

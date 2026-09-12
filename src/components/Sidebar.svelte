@@ -24,6 +24,7 @@
   export let onNavigate: ((id: string | number) => void) | undefined = undefined
   export let onPersistentExpansionChange: ((expanded: boolean) => void) | undefined = undefined
   export let onTopNavHeightChange: ((height: number) => void) | undefined = undefined
+  export let isAuthenticated = false
 
   const MOBILE_WIDTH = 800
   const DRAG_THRESHOLD_PX = 6
@@ -429,7 +430,7 @@
 </script>
 
 {#if isTop}
-  <aside class="top-navigation" class:wrap={isWrap} class:scrolled={topNavScrolled} bind:this={navigationRoot} data-testid="top-navigation" aria-label="分类导航">
+  <aside class="top-navigation" class:wrap={isWrap} class:scrolled={topNavScrolled} class:with-inline-actions={isAuthenticated} bind:this={navigationRoot} data-testid="top-navigation" aria-label="分类导航">
     <button
       type="button"
       class="scroll-arrow scroll-arrow-left"
@@ -1244,15 +1245,22 @@
       bottom: -0.25rem;
     }
 
-    /* 移动端首行操作按钮与分类栏均按 0.8 缩放，并保留原有垂直间隙；
+    /* 移动端顶部一行：左侧网络按钮、中间分类栏、右侧操作按钮。
        桌面端保持上面的原布局。 */
     .top-navigation {
-      /* 移动端导航在上、操作按钮在下；桌面端保持原布局。 */
       top: .65rem;
-      width: calc(100% - 16px);
+      left: max(.75rem, env(safe-area-inset-left));
+      right: calc(max(.75rem, env(safe-area-inset-right)) + 3.6rem);
+      width: auto;
+      transform: none;
       height: 2.56rem;
       grid-template-columns: minmax(0, 1fr);
       padding: 0.15rem;
+    }
+
+    .top-navigation.with-inline-actions {
+      left: calc(max(.75rem, env(safe-area-inset-left)) + 1.8rem);
+      right: calc(max(.75rem, env(safe-area-inset-right)) + 5.4rem);
     }
 
     .top-track {

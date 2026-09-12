@@ -18,14 +18,16 @@ describe('home responsive layout', () => {
     const mobileSidebar = sidebar.slice(sidebar.indexOf('@media (max-width: 799px)'))
     const mobileHome = home.slice(home.indexOf('@media (max-width: 799px)'))
 
-    // 移动端导航在上，操作按钮在下；两者仍与原首行保持同样的 0.8 缩放。
-    expect(mobileActions).toContain('top: 3.68rem;')
-    expect(mobileActions).toContain('.network-switch .icon-button {\n      width: 1.76rem;')
-    expect(mobileActions).toContain('.floating-actions .icon-button {\n      width: 1.76rem;')
+    // 移动端首行：左侧网络按钮 + 中间分类栏 + 右侧操作按钮。
+    expect(mobileActions).toContain('top: 1.18rem;')
+    expect(mobileActions).toContain('.network-switch .icon-button {\n      width: 1.5rem;')
+    expect(mobileActions).toContain('.floating-actions .icon-button {\n      width: 1.5rem;')
     expect(mobileSidebar).toContain('top: .65rem;')
+    expect(mobileSidebar).toContain('right: calc(max(.75rem, env(safe-area-inset-right)) + 3.6rem);')
+    expect(mobileSidebar).toContain('.top-navigation.with-inline-actions {')
     expect(mobileSidebar).toContain('height: 2.56rem;')
     expect(mobileSidebar).toContain('font-size: 0.96rem;')
-    expect(mobileHome).toContain('padding-top: 6.16rem;')
+    expect(mobileHome).toContain('padding-top: 4.1rem;')
 
     // 移动端顶部分类标题与二级分类标题保持同一字号，同时稍微增加点击区域。
     expect(mobileSidebar).toContain('min-height: 2.04rem;')
